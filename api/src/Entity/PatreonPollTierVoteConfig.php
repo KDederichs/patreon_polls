@@ -8,13 +8,11 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity]
-#[UniqueConstraint(fields: ['option', 'votedBy'])]
-class PatreonPollVote
+class PatreonPollTierVoteConfig 
 {
     #[Id, Column(type: UuidType::NAME)]
     private readonly Uuid $id;
@@ -22,14 +20,12 @@ class PatreonPollVote
     private readonly CarbonImmutable $createdAt;
     #[ManyToOne(targetEntity: PatreonPoll::class)]
     #[JoinColumn(nullable: false)]
-    private PatreonPoll $poll;
-    #[ManyToOne(targetEntity: PatreonPollOption::class)]
+    public PatreonPoll $patreonPoll;
+    #[ManyToOne(targetEntity: PatreonPoll::class)]
     #[JoinColumn(nullable: false)]
-    private PatreonPollOption $option;
-    #[ManyToOne(targetEntity: User::class)]
-    #[JoinColumn(nullable: false)]
-    private User $votedBy;
-
+    public PatreonCampaignTier $campaignTier;
+    #[Column(type: 'smallint')]
+    public int $numberOfVotes = 0;
 
     public function __construct()
     {
@@ -47,38 +43,36 @@ class PatreonPollVote
         return $this->createdAt;
     }
 
-    public function getOption(): PatreonPollOption
+    public function getPatreonPoll(): PatreonPoll
     {
-        return $this->option;
+        return $this->patreonPoll;
     }
 
-    public function setOption(PatreonPollOption $option): PatreonPollVote
+    public function setPatreonPoll(PatreonPoll $patreonPoll): PatreonPollTierVoteConfig
     {
-        $this->option = $option;
+        $this->patreonPoll = $patreonPoll;
         return $this;
     }
 
-    public function getVotedBy(): User
+    public function getCampaignTier(): PatreonCampaignTier
     {
-        return $this->votedBy;
+        return $this->campaignTier;
     }
 
-    public function setVotedBy(User $votedBy): PatreonPollVote
+    public function setCampaignTier(PatreonCampaignTier $campaignTier): PatreonPollTierVoteConfig
     {
-        $this->votedBy = $votedBy;
+        $this->campaignTier = $campaignTier;
         return $this;
     }
 
-    public function getPoll(): PatreonPoll
+    public function getNumberOfVotes(): int
     {
-        return $this->poll;
+        return $this->numberOfVotes;
     }
 
-    public function setPoll(PatreonPoll $poll): PatreonPollVote
+    public function setNumberOfVotes(int $numberOfVotes): PatreonPollTierVoteConfig
     {
-        $this->poll = $poll;
+        $this->numberOfVotes = $numberOfVotes;
         return $this;
     }
-
-
 }

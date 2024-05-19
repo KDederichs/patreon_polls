@@ -2,34 +2,30 @@
 
 namespace App\Entity;
 
+use App\Repository\PatreonCampaignRepository;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity]
-#[UniqueConstraint(fields: ['option', 'votedBy'])]
-class PatreonPollVote
+#[Entity(repositoryClass: PatreonCampaignRepository::class)]
+class PatreonCampaign
 {
     #[Id, Column(type: UuidType::NAME)]
     private readonly Uuid $id;
     #[Column(type: 'datetime_immutable')]
     private readonly CarbonImmutable $createdAt;
-    #[ManyToOne(targetEntity: PatreonPoll::class)]
-    #[JoinColumn(nullable: false)]
-    private PatreonPoll $poll;
-    #[ManyToOne(targetEntity: PatreonPollOption::class)]
-    #[JoinColumn(nullable: false)]
-    private PatreonPollOption $option;
+    #[Column(type: 'text')]
+    private string $campaignName;
     #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(nullable: false)]
-    private User $votedBy;
-
+    private User $campaignOwner;
+    #[Column(type: 'string', length: 64, unique: true)]
+    private string $patreonCampaignId;
 
     public function __construct()
     {
@@ -47,36 +43,36 @@ class PatreonPollVote
         return $this->createdAt;
     }
 
-    public function getOption(): PatreonPollOption
+    public function getCampaignName(): string
     {
-        return $this->option;
+        return $this->campaignName;
     }
 
-    public function setOption(PatreonPollOption $option): PatreonPollVote
+    public function setCampaignName(string $campaignName): PatreonCampaign
     {
-        $this->option = $option;
+        $this->campaignName = $campaignName;
         return $this;
     }
 
-    public function getVotedBy(): User
+    public function getCampaignOwner(): User
     {
-        return $this->votedBy;
+        return $this->campaignOwner;
     }
 
-    public function setVotedBy(User $votedBy): PatreonPollVote
+    public function setCampaignOwner(User $campaignOwner): PatreonCampaign
     {
-        $this->votedBy = $votedBy;
+        $this->campaignOwner = $campaignOwner;
         return $this;
     }
 
-    public function getPoll(): PatreonPoll
+    public function getPatreonCampaignId(): string
     {
-        return $this->poll;
+        return $this->patreonCampaignId;
     }
 
-    public function setPoll(PatreonPoll $poll): PatreonPollVote
+    public function setPatreonCampaignId(string $patreonCampaignId): PatreonCampaign
     {
-        $this->poll = $poll;
+        $this->patreonCampaignId = $patreonCampaignId;
         return $this;
     }
 

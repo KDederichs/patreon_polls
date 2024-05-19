@@ -10,16 +10,23 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            lazy: true
+        oauth:
+            pattern: ^/login|connect/
             oauth:
+                default_target_path: 'create_poll_token'
                 resource_owners:
                     patreon: "/login/check-patreon"
-                login_path:   /login
-                use_forward:  false
+                login_path: /login
+                use_forward: false
                 failure_path: /login
                 oauth_user_provider:
                     service: App\Security\Oauth\PatreonUserProvider
+        main:
+            lazy: true
+            stateless: true
+            access_token:
+                token_handler: App\Security\ApiTokenHandler
+            provider: patron_provider
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 

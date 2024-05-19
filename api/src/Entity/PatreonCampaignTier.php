@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\PatreonCampaignTierRepository;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -11,20 +12,20 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity]
-class PatreonPoll
+#[Entity(repositoryClass: PatreonCampaignTierRepository::class)]
+class PatreonCampaignTier
 {
     #[Id, Column(type: UuidType::NAME)]
     private readonly Uuid $id;
     #[Column(type: 'datetime_immutable')]
     private readonly CarbonImmutable $createdAt;
     #[Column(type: 'text')]
-    private string $pollName;
+    private string $tierName;
     #[ManyToOne(targetEntity: PatreonCampaign::class)]
     #[JoinColumn(nullable: false)]
     private PatreonCampaign $campaign;
-    #[Column(type: 'datetime_immutable', nullable: true)]
-    private ?CarbonImmutable $endsAt = null;
+    #[Column(type: 'string', length: 64, unique: true)]
+    private string $patreonTierId;
 
     public function __construct()
     {
@@ -42,25 +43,14 @@ class PatreonPoll
         return $this->createdAt;
     }
 
-    public function getPollName(): string
+    public function getTierName(): string
     {
-        return $this->pollName;
+        return $this->tierName;
     }
 
-    public function setPollName(string $pollName): PatreonPoll
+    public function setTierName(string $tierName): PatreonCampaignTier
     {
-        $this->pollName = $pollName;
-        return $this;
-    }
-
-    public function getEndsAt(): ?CarbonImmutable
-    {
-        return $this->endsAt;
-    }
-
-    public function setEndsAt(?CarbonImmutable $endsAt): PatreonPoll
-    {
-        $this->endsAt = $endsAt;
+        $this->tierName = $tierName;
         return $this;
     }
 
@@ -69,9 +59,20 @@ class PatreonPoll
         return $this->campaign;
     }
 
-    public function setCampaign(PatreonCampaign $campaign): PatreonPoll
+    public function setCampaign(PatreonCampaign $campaign): PatreonCampaignTier
     {
         $this->campaign = $campaign;
+        return $this;
+    }
+
+    public function getPatreonTierId(): string
+    {
+        return $this->patreonTierId;
+    }
+
+    public function setPatreonTierId(string $patreonTierId): PatreonCampaignTier
+    {
+        $this->patreonTierId = $patreonTierId;
         return $this;
     }
 }

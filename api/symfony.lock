@@ -509,6 +509,9 @@
     "symfony/yaml": {
         "version": "v6.0.2"
     },
+    "symfonycasts/micro-mapper": {
+        "version": "v0.1.4"
+    },
     "twig/twig": {
         "version": "v3.3.7"
     },
