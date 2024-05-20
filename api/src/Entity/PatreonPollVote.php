@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\PatreonPollVoteRepository;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -12,7 +13,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity]
+#[Entity(repositoryClass: PatreonPollVoteRepository::class)]
 #[UniqueConstraint(fields: ['option', 'votedBy'])]
 class PatreonPollVote
 {
@@ -23,7 +24,7 @@ class PatreonPollVote
     #[ManyToOne(targetEntity: PatreonPoll::class)]
     #[JoinColumn(nullable: false)]
     private PatreonPoll $poll;
-    #[ManyToOne(targetEntity: PatreonPollOption::class)]
+    #[ManyToOne(targetEntity: PatreonPollOption::class, inversedBy: 'votes')]
     #[JoinColumn(nullable: false)]
     private PatreonPollOption $option;
     #[ManyToOne(targetEntity: User::class)]

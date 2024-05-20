@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\PatreonPollRepository;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -11,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity]
+#[Entity(repositoryClass: PatreonPollRepository::class)]
 class PatreonPoll
 {
     #[Id, Column(type: UuidType::NAME)]
