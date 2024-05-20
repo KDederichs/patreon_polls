@@ -1,0 +1,22 @@
+<div
+    {{ attributes }}
+>
+    {{ form_start(form, {
+        attr: {
+            'data-action': 'live#action:prevent',
+            'data-live-action-param': 'save'
+        }
+    }) }}
+    {{ form_row(form.patreonCampaign) }}
+    {{ form_row(form.votingTiers) }}
+    {% if form.votingPower is defined %}
+        {{ form_row(form.votingPower) }}
+    {% endif %}
+    {% if form.voteLimit is defined %}
+        {{ form_row(form.voteLimit) }}
+    {% endif %}
+    {{ form_row(form.pollName) }}
+    {{ form_row(form.endDate) }}
+    {{ form_row(form.create) }}
+    {{ form_end(form) }}
+</div>

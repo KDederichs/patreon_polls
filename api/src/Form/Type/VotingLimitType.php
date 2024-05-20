@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Form\Type;
+
+use App\Entity\PatreonCampaignTier;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+class VotingLimitType extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        foreach ($options['patreon_tiers'] ?? [] as $tier) {
+            assert($tier instanceof PatreonCampaignTier);
+            $builder
+                ->add($tier->getId(), IntegerType::class, [
+                    'label' => 'Vote Limit (0 is unlimited): '.$tier->getTierName(),
+                    'required' => true,
+                    'empty_data' => 0
+                ]);
+        }
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver
+            ->setDefaults([
+                'patreon_tiers' => null,
+            ])
+        ;
+    }
+}

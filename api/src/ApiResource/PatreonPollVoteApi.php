@@ -11,7 +11,6 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
-use App\Entity\PatreonPollOption;
 use App\Entity\PatreonPollVote;
 use App\State\EntityToDtoStateProvider;
 use Carbon\CarbonImmutable;

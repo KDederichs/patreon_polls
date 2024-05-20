@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity]
-class PatreonPollTierVoteConfig 
+class PatreonPollTierVoteConfig
 {
     #[Id, Column(type: UuidType::NAME)]
     private readonly Uuid $id;
@@ -21,11 +21,13 @@ class PatreonPollTierVoteConfig
     #[ManyToOne(targetEntity: PatreonPoll::class)]
     #[JoinColumn(nullable: false)]
     public PatreonPoll $patreonPoll;
-    #[ManyToOne(targetEntity: PatreonPoll::class)]
+    #[ManyToOne(targetEntity: PatreonCampaignTier::class)]
     #[JoinColumn(nullable: false)]
     public PatreonCampaignTier $campaignTier;
     #[Column(type: 'smallint')]
     public int $numberOfVotes = 0;
+    #[Column(type: 'smallint')]
+    public int $votingPower = 1;
 
     public function __construct()
     {
@@ -73,6 +75,17 @@ class PatreonPollTierVoteConfig
     public function setNumberOfVotes(int $numberOfVotes): PatreonPollTierVoteConfig
     {
         $this->numberOfVotes = $numberOfVotes;
+        return $this;
+    }
+
+    public function getVotingPower(): int
+    {
+        return $this->votingPower;
+    }
+
+    public function setVotingPower(int $votingPower): PatreonPollTierVoteConfig
+    {
+        $this->votingPower = $votingPower;
         return $this;
     }
 }
