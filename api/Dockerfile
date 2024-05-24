@@ -75,7 +75,7 @@ CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
 # Prod FrankenPHP image
 FROM patreon_poll_base AS patreon_poll_prod
 
-ENV APP_ENV=prod
+ENV APP_ENV=dev
 #ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
@@ -94,9 +94,9 @@ RUN rm -Rf frankenphp/
 
 RUN set -eux; \
 	mkdir -p var/cache var/log; \
-	composer dump-autoload --classmap-authoritative --no-dev; \
-	composer dump-env prod; \
-	composer run-script --no-dev post-install-cmd; \
+	composer dump-autoload --classmap-authoritative; \
+	composer dump-env dev; \
+	composer run-script post-install-cmd; \
 	chmod +x bin/console; sync;
 
 RUN bin/console tailwind:build
