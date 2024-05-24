@@ -4,8 +4,10 @@ namespace App\Controller;
 
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Service\PatreonService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +24,12 @@ class PatreonController extends AbstractController
     ): Response
     {
         $form = $this->createFormBuilder()
-            ->add('I understand, please convert my account', SubmitType::class)
+            ->add('consent', SubmitType::class, [
+                'label' => 'I understand, please convert my account',
+                'attr' => [
+                    'class' => 'rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white'
+                ]
+            ])
             ->getForm();
 
         $form->handleRequest($request);

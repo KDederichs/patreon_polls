@@ -16,9 +16,9 @@ use Symfony\Component\Uid\Uuid;
 class PatreonCampaign
 {
     #[Id, Column(type: UuidType::NAME)]
-    private readonly Uuid $id;
+    private Uuid $id;
     #[Column(type: 'datetime_immutable')]
-    private readonly CarbonImmutable $createdAt;
+    private CarbonImmutable $createdAt;
     #[Column(type: 'text')]
     private string $campaignName;
     #[ManyToOne(targetEntity: User::class)]

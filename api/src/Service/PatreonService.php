@@ -92,9 +92,9 @@ class PatreonService implements LoggerAwareInterface
                     ->setCampaignOwner($user)
                     ->setPatreonCampaignId($campaignData['id']);
                 $this->campaignRepository->persist($campaign);
-                $campaigns[] = $campaign;
-            }
 
+            }
+            $campaigns[] = $campaign;
             $campaign
                 ->setCampaignName($campaignData['attributes']['creation_name']);
 
@@ -215,6 +215,11 @@ class PatreonService implements LoggerAwareInterface
     {
         $user = $campaign->getCampaignOwner();
         $this->refreshAccessToken($user);
+        $uri = $this->router->generate('patreon_webhooks',[], UrlGeneratorInterface::ABSOLUTE_URL);
+        $uri = str_replace('http://','https://', $uri);
+        if (str_contains($uri, 'localhost')) {
+            return;
+        }
         $payload = [
             'data' => [
                 'type' => 'webhook',
@@ -224,7 +229,7 @@ class PatreonService implements LoggerAwareInterface
                         'members:pledge:update',
                         'members:pledge:delete',
                     ],
-                    'uri' => $this->router->generate('patreon_webhooks',[], UrlGeneratorInterface::ABSOLUTE_URL)
+                    'uri' => $uri
                 ],
                 'relationships' => [
                     'campaign' => [
@@ -277,6 +282,11 @@ class PatreonService implements LoggerAwareInterface
             $this->fetchCampaignMembers($campaign);
             $this->enableMemberUpdateWebhook($campaign);
         }
+        $dbUser = $this->userRepository->find($user->getId());
+        $this->userRepository->getEntityManager()->refresh($dbUser);
+        $dbUser->setCreator(true);
+
+        $this->userRepository->save();
     }
 
     public function setLogger(LoggerInterface $logger): void

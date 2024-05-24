@@ -18,9 +18,9 @@ class User implements UserInterface
 {
 
     #[Id, Column(type: UuidType::NAME)]
-    private readonly Uuid $id;
+    private Uuid $id;
     #[Column(type: 'datetime_immutable')]
-    private readonly CarbonImmutable $createdAt;
+    private CarbonImmutable $createdAt;
     #[Column(type: 'string', length: 64, unique: true, nullable: true)]
     private ?string $patreonId = null;
     #[Column(type: 'string', length: 64, nullable: true)]
