@@ -12,3 +12,5 @@ hwi_oauth_login:
     
 patreon_login:
     path: /login/check-patreon
+patreon_creator_login:
+    path: /login/check-patreon-creator

@@ -9,5 +9,13 @@ hwi_oauth:
             access_token_url:    'https://www.patreon.com/api/oauth2/token'
             authorization_url:   'https://www.patreon.com/oauth2/authorize'
             infos_url:           'https://www.patreon.com/api/oauth2/api/current_user'
+            scope:               "identity"
+        patreon_creator:
+            type:                oauth2
+            class:               \HWI\Bundle\OAuthBundle\OAuth\ResourceOwner\OAuth2ResourceOwner
+            client_id:           '%env(PATREON_ID)%'
+            client_secret:       '%env(PATREON_SECRET)%'
+            access_token_url:    'https://www.patreon.com/api/oauth2/token'
+            authorization_url:   'https://www.patreon.com/oauth2/authorize'
+            infos_url:           'https://www.patreon.com/api/oauth2/api/current_user'
             scope:               "identity campaigns campaigns.members w:campaigns.webhook"
-

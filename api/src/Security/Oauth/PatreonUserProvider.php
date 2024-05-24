@@ -42,9 +42,10 @@ class PatreonUserProvider implements OAuthAwareUserProviderInterface, UserProvid
                 ->setPatreonTokenExpiresAt(CarbonImmutable::now()->addSeconds($response->getExpiresIn() ?? 3600))
                 ->setUsername($userName)
             ;
-            $this->userRepository->persist($user);
-            $this->userRepository->save();
         }
+        $user->setCreator($response->getResourceOwner()->getName() === 'patreon_creator');
+        $this->userRepository->persist($user);
+        $this->userRepository->save();
         return $user;
     }
 

@@ -40,4 +40,14 @@ class PatreonController extends AbstractController
 
         return $this->render('convert_creator_account.html.twig', ['form' => $form]);
     }
+
+    #[Route('/patreon/sync', name: 'sync_patreon', methods: ['GET'])]
+    public function syncPatreon(
+        PatreonService $patreonService,
+        #[CurrentUser] User $user,
+    ): Response
+    {
+        $patreonService->syncPatreon($user);
+        return $this->redirectToRoute('poll_index');
+    }
 }

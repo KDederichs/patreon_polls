@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonCampaignRepository;
 use App\Repository\PatreonCampaignTierRepository;
+use App\Repository\PatreonCampaignWebhookRepository;
 use App\Repository\UserRepository;
 use Carbon\CarbonImmutable;
 use Psr\Log\LoggerAwareInterface;
@@ -32,6 +33,7 @@ class PatreonService implements LoggerAwareInterface
         private readonly PatreonCampaignRepository $campaignRepository,
         private readonly PatreonCampaignTierRepository $campaignTierRepository,
         private readonly PatreonCampaignMemberRepository $campaignMemberRepository,
+        private readonly PatreonCampaignWebhookRepository $campaignWebhookRepository,
         private readonly RouterInterface $router,
     ) {
     }
@@ -218,6 +220,10 @@ class PatreonService implements LoggerAwareInterface
     {
         /** @var PatreonCampaign $dbCampaign */
         $dbCampaign = $this->campaignRepository->find($campaign->getId());
+        $webhook = $this->campaignWebhookRepository->findByCampaign($dbCampaign);
+        if ($webhook) {
+            return;
+        }
         $user = $dbCampaign->getCampaignOwner();
         $this->refreshAccessToken($user);
         $uri = $this->router->generate('patreon_webhooks',[], UrlGeneratorInterface::ABSOLUTE_URL);
@@ -276,6 +282,17 @@ class PatreonService implements LoggerAwareInterface
 
         $this->campaignRepository->persist($patreonWebhook);
         $this->campaignRepository->save();
+    }
+
+    public function syncPatreon(User $user): void
+    {
+        /** @var PatreonCampaign[] $campaigns */
+        $campaigns = $this->refreshCampaigns($user);
+
+        foreach ($campaigns as $campaign) {
+            $this->fetchCampaignMembers($campaign);
+            $this->enableMemberUpdateWebhook($campaign);
+        }
     }
 
     public function convertToCreatorAccount(User $user): void
