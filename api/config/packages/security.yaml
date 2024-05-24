@@ -33,6 +33,7 @@ security:
         - { path: ^/connect, roles: PUBLIC_ACCESS }
         - { path: ^/poll, roles: ROLE_USER } // force login
         - { path: ^/ajax, roles: ROLE_USER } // force login
+        - { path: ^/patreon, roles: ROLE_USER } // force login
         - { path: ^/, roles: PUBLIC_ACCESS } // force login
 
 

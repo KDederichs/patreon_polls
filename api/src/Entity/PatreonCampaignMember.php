@@ -4,11 +4,14 @@ namespace App\Entity;
 
 use App\Repository\PatreonCampaignMemberRepository;
 use Carbon\CarbonImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -26,14 +29,14 @@ class PatreonCampaignMember
     #[ManyToOne(targetEntity: PatreonCampaign::class)]
     #[JoinColumn(nullable: false)]
     private PatreonCampaign $campaign;
-    #[ManyToOne(targetEntity: PatreonCampaignTier::class)]
-    #[JoinColumn(nullable: false)]
-    private PatreonCampaignTier $tier;
+    #[OneToMany(targetEntity: MemberEntitledTier::class, mappedBy: 'campaignMember',fetch: 'EAGER')]
+    private Collection $entitledTiers;
 
     public function __construct()
     {
         $this->id = Uuid::v7();
         $this->createdAt = CarbonImmutable::now();
+        $this->entitledTiers = new ArrayCollection();
     }
 
     public function getId(): Uuid
@@ -68,14 +71,27 @@ class PatreonCampaignMember
         return $this;
     }
 
-    public function getTier(): PatreonCampaignTier
+    public function getEntitledTiers(): Collection
     {
-        return $this->tier;
+        return $this->entitledTiers;
     }
 
-    public function setTier(PatreonCampaignTier $tier): PatreonCampaignMember
+    public function setEntitledTiers(Collection $entitledTiers): PatreonCampaignMember
     {
-        $this->tier = $tier;
+        $this->entitledTiers = $entitledTiers;
         return $this;
+    }
+
+    public function getHighestEntitledTier(): ?MemberEntitledTier
+    {
+        return $this->entitledTiers->reduce(
+            function(?MemberEntitledTier $carryOver, MemberEntitledTier $current) {
+                if (null === $carryOver) {
+                    return $current;
+                }
+
+                return $carryOver->getTier()->getAmountInCents() < $current->getTier()->getAmountInCents() ? $current : $carryOver;
+            }
+        );
     }
 }

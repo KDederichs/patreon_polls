@@ -103,7 +103,7 @@ class AjaxController extends AbstractController
         /** @var PatreonCampaignMember $member */
         $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
         /** @var PatreonPollTierVoteConfig $voteConfig */
-        $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getTier(), $poll);
+        $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getHighestEntitledTier()->getTier(), $poll);
 
         $vote = new PatreonPollVote();
         $vote

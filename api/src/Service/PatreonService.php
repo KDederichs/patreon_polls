@@ -2,25 +2,37 @@
 
 namespace App\Service;
 
+use App\Entity\MemberEntitledTier;
 use App\Entity\PatreonCampaign;
+use App\Entity\PatreonCampaignMember;
 use App\Entity\PatreonCampaignTier;
+use App\Entity\PatreonCampaignWebhook;
 use App\Entity\User;
+use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonCampaignRepository;
 use App\Repository\PatreonCampaignTierRepository;
 use App\Repository\UserRepository;
 use Carbon\CarbonImmutable;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class PatreonService
+class PatreonService implements LoggerAwareInterface
 {
+    private ?LoggerInterface $logger = null;
+
     public function __construct(
         private readonly HttpClientInterface $client,
         #[Autowire(env: 'PATREON_ID')] private readonly string $patreonClientId,
         #[Autowire(env: 'PATREON_SECRET')] private readonly string $patreonClientSecret,
-        private UserRepository $userRepository,
-        private PatreonCampaignRepository $campaignRepository,
-        private PatreonCampaignTierRepository $campaignTierRepository,
+        private readonly UserRepository $userRepository,
+        private readonly PatreonCampaignRepository $campaignRepository,
+        private readonly PatreonCampaignTierRepository $campaignTierRepository,
+        private readonly PatreonCampaignMemberRepository $campaignMemberRepository,
+        private readonly RouterInterface $router,
     ) {
     }
 
@@ -51,13 +63,13 @@ class PatreonService
         }
     }
 
-    public function refreshCampaigns(User $user): void
+    public function refreshCampaigns(User $user): array
     {
         $this->refreshAccessToken($user);
         $payload = [
             'include' => 'tiers',
             'fields[campaign]' => 'creation_name',
-            'fields[tier]' => 'title'
+            'fields[tier]' => 'title,amount_cents'
         ];
         $response = $this->client->request(
             'GET',
@@ -71,6 +83,7 @@ class PatreonService
         );
         $responsePayload = json_decode($response->getContent(), true);
         $includes = $responsePayload['included'];
+        $campaigns = [];
         foreach ($responsePayload['data'] as $campaignData) {
             $campaign = $this->campaignRepository->findByPatreonCampaignId($campaignData['id']);
             if (!$campaign) {
@@ -79,6 +92,7 @@ class PatreonService
                     ->setCampaignOwner($user)
                     ->setPatreonCampaignId($campaignData['id']);
                 $this->campaignRepository->persist($campaign);
+                $campaigns[] = $campaign;
             }
 
             $campaign
@@ -102,11 +116,171 @@ class PatreonService
                     }
 
                     if ($include['id'] === $patreonTierId) {
-                        $patreonTier->setTierName($include['attributes']['title']);
+                        $patreonTier
+                            ->setTierName($include['attributes']['title'])
+                            ->setAmountInCents($include['attributes']['amount_cents'])
+                        ;
                     }
                 }
             }
         }
         $this->campaignRepository->save();
+        return $campaigns;
+    }
+
+    public function fetchCampaignMembers(PatreonCampaign $campaign): void
+    {
+        $cursor = null;
+        $tierCache = [];
+        do {
+            $payload = $this->doFetchMembersRequest($campaign, $cursor);
+            $cursor = $payload['meta']['pagination']['cursors']['next'] ?? null;
+
+            $batchIds = [];
+
+            foreach ($payload['data'] as $memberData) {
+                if (($memberData['type'] ?? null) !== 'member') {
+                    continue;
+                }
+                $batchIds[] = $memberData['id'];
+            }
+
+            $exisingIds = $this->campaignMemberRepository->getExistingIds($batchIds);
+            $newMemberIds = array_diff($batchIds, $exisingIds);
+
+            foreach ($payload['data'] as $memberData) {
+                if (($memberData['type'] ?? null) !== 'member') {
+                    continue;
+                }
+                if (in_array($memberData['id'], $newMemberIds, true)) {
+                    $member = new PatreonCampaignMember();
+                    $member
+                        ->setCampaign($campaign)
+                        ->setPatreonUserId($memberData['id']);
+                    $this->campaignMemberRepository->persist($member);
+                } else {
+                    /** @var PatreonCampaignMember $member */
+                    $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($campaign,$memberData['id']);
+                }
+
+                foreach ($member->getEntitledTiers() as $tier) {
+                    $this->campaignMemberRepository->remove($tier);
+                }
+
+                foreach (($memberData['relationships']['currently_entitled_tiers']['data'] ?? []) as $entitled) {
+                    if (!array_key_exists($entitled['id'], $tierCache)) {
+                        $tierCache[$entitled['id']] = $this->campaignTierRepository->findByPatreonTierId($entitled['id']);
+                    }
+
+                    $memberEntitlement = new MemberEntitledTier();
+                    $memberEntitlement
+                        ->setCampaignMember($member)
+                        ->setTier($tierCache[$entitled['id']]);
+                    $this->campaignMemberRepository->persist($memberEntitlement);
+                }
+            }
+            $this->campaignMemberRepository->save();
+            $this->campaignMemberRepository->clear();
+        } while ($cursor !== null);
+    }
+
+    private function doFetchMembersRequest(PatreonCampaign $campaign, string $cursor = null): array
+    {
+        $user = $campaign->getCampaignOwner();
+        $this->refreshAccessToken($user);
+
+        $queryParams = [
+            'include' => 'currently_entitled_tiers'
+        ];
+
+        if ($cursor) {
+            $queryParams['page[cursor]'] = $cursor;
+        }
+
+        $response = $this->client->request(
+            'GET',
+            "https://www.patreon.com/api/oauth2/v2/campaigns/".$campaign->getPatreonCampaignId()."/members?".http_build_query($queryParams),
+            [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Authorization' => $user->getPatreonTokenType().' ' . $user->getPatreonAccessToken(),
+                ]
+            ]
+        );
+
+        return json_decode($response->getContent(), true);
+    }
+
+    public function enableMemberUpdateWebhook(PatreonCampaign $campaign): void
+    {
+        $user = $campaign->getCampaignOwner();
+        $this->refreshAccessToken($user);
+        $payload = [
+            'data' => [
+                'type' => 'webhook',
+                'attributes' => [
+                    'triggers' => [
+                        'members:pledge:create',
+                        'members:pledge:update',
+                        'members:pledge:delete',
+                    ],
+                    'uri' => $this->router->generate('patreon_webhooks',[], UrlGeneratorInterface::ABSOLUTE_URL)
+                ],
+                'relationships' => [
+                    'campaign' => [
+                        'data' => [
+                            'type' => 'campaign',
+                            'id' => $campaign->getPatreonCampaignId()
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        $response = $this->client->request(
+            'POST',
+            "https://www.patreon.com/api/oauth2/v2/webhooks",
+            [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                    'Authorization' => $user->getPatreonTokenType().' ' . $user->getPatreonAccessToken(),
+                ],
+                'json' => $payload
+            ]
+        );
+
+        $decodedResponse = json_decode($response->getContent(), true);
+        $webhookId = $decodedResponse['data']['id'] ?? null;
+
+        if (!$webhookId) {
+            $this->logger?->error('Error creating webhook: '.$response->getContent());
+            return;
+        }
+
+        $patreonWebhook = new PatreonCampaignWebhook();
+        $patreonWebhook
+            ->setPatreonWebhookId($webhookId)
+            ->setCampaign($campaign)
+            ->setSecret($decodedResponse['data']['attributes']['secret'])
+            ->setTriggers($decodedResponse['data']['attributes']['triggers']);
+
+        $this->campaignRepository->persist($patreonWebhook);
+        $this->campaignRepository->save();
+    }
+
+    public function convertToCreatorAccount(User $user): void
+    {
+        /** @var PatreonCampaign[] $campaigns */
+        $campaigns = $this->refreshCampaigns($user);
+
+        foreach ($campaigns as $campaign) {
+            $this->fetchCampaignMembers($campaign);
+            $this->enableMemberUpdateWebhook($campaign);
+        }
+    }
+
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
     }
 }

@@ -26,6 +26,8 @@ class PatreonCampaignTier
     private PatreonCampaign $campaign;
     #[Column(type: 'string', length: 64, unique: true)]
     private string $patreonTierId;
+    #[Column(options: ['default' => 0])]
+    private int $amountInCents = 0;
 
     public function __construct()
     {
@@ -73,6 +75,17 @@ class PatreonCampaignTier
     public function setPatreonTierId(string $patreonTierId): PatreonCampaignTier
     {
         $this->patreonTierId = $patreonTierId;
+        return $this;
+    }
+
+    public function getAmountInCents(): int
+    {
+        return $this->amountInCents;
+    }
+
+    public function setAmountInCents(int $amountInCents): PatreonCampaignTier
+    {
+        $this->amountInCents = $amountInCents;
         return $this;
     }
 }

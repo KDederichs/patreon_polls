@@ -35,6 +35,8 @@ class User implements UserInterface
     private string $username;
     #[Column(type: 'datetime_immutable', nullable: true)]
     private ?CarbonImmutable $patreonTokenExpiresAt = null;
+    #[Column(type: 'boolean', options: ['default' => false])]
+    private bool $creator = false;
 
     public function __construct()
     {
@@ -147,5 +149,16 @@ class User implements UserInterface
     public function __toString(): string
     {
         return $this->username;
+    }
+
+    public function isCreator(): bool
+    {
+        return $this->creator;
+    }
+
+    public function setCreator(bool $creator): User
+    {
+        $this->creator = $creator;
+        return $this;
     }
 }

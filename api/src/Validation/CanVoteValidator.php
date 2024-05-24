@@ -61,9 +61,15 @@ class CanVoteValidator extends ConstraintValidator
                 ->addViolation();
             return;
         }
+        $tierEntitlement = $member->getHighestEntitledTier();
+        if (!$tierEntitlement) {
+            $this->context->buildViolation('You do not have a reward tier.')
+                ->addViolation();
+            return;
+        }
 
         /** @var PatreonPollTierVoteConfig|null $voteConfig */
-        $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getTier(), $poll);
+        $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($tierEntitlement->getTier(), $poll);
 
         if (!$voteConfig) {
             $this->context->buildViolation('Your reward tier can not vote on this poll. Please upgrade to a higher tier.')

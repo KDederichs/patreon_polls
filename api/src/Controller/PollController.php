@@ -43,8 +43,12 @@ class PollController extends AbstractController
     }
 
     #[Route('/poll/create', name: 'poll_create')]
-    public function createPoll(): Response
+    public function createPoll(#[CurrentUser] User $user): Response
     {
+        if (!$user->isCreator()) {
+            return $this->redirectToRoute('convert_to_creator_account');
+        }
+
         return $this->render('create_poll.html.twig');
     }
 

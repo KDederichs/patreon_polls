@@ -21,4 +21,25 @@ class PatreonCampaignMemberRepository   extends AbstractBaseRepository
         ]);
     }
 
+    public function getExistingIds(array $existingIdsToCheck): array
+    {
+        if (empty($existingIdsToCheck)) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('pcm');
+        return array_map(
+            static fn ($elem) => $elem['member_id'],
+            $qb
+                ->select('pcm.patreonUserId as member_id')
+                ->where(
+                    $qb->expr()->in(
+                        'pcm.patreonUserId', ':ids'
+                    )
+                )
+                ->setParameter('ids', $existingIdsToCheck)
+                ->getQuery()
+                ->getArrayResult()
+        );
+    }
 }
