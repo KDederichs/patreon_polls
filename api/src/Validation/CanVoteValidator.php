@@ -51,6 +51,12 @@ class CanVoteValidator extends ConstraintValidator
             return;
         }
 
+        if ($poll->getEndsAt()?->isPast()) {
+            $this->context->buildViolation('Poll has ended')
+                ->addViolation();
+            return;
+        }
+
         /** @var User $user */
         $user = $this->security->getUser();
 
