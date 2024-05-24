@@ -133,7 +133,9 @@ class PatreonService implements LoggerAwareInterface
         $cursor = null;
         $tierCache = [];
         do {
-            $payload = $this->doFetchMembersRequest($campaign, $cursor);
+            /** @var PatreonCampaign $dbCampaign */
+            $dbCampaign = $this->campaignRepository->find($campaign->getId());
+            $payload = $this->doFetchMembersRequest($dbCampaign, $cursor);
             $cursor = $payload['meta']['pagination']['cursors']['next'] ?? null;
 
             $batchIds = [];
@@ -155,12 +157,12 @@ class PatreonService implements LoggerAwareInterface
                 if (in_array($memberData['id'], $newMemberIds, true)) {
                     $member = new PatreonCampaignMember();
                     $member
-                        ->setCampaign($campaign)
+                        ->setCampaign($dbCampaign)
                         ->setPatreonUserId($memberData['id']);
                     $this->campaignMemberRepository->persist($member);
                 } else {
                     /** @var PatreonCampaignMember $member */
-                    $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($campaign,$memberData['id']);
+                    $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($dbCampaign,$memberData['id']);
                 }
 
                 foreach ($member->getEntitledTiers() as $tier) {
@@ -181,6 +183,7 @@ class PatreonService implements LoggerAwareInterface
             }
             $this->campaignMemberRepository->save();
             $this->campaignMemberRepository->clear();
+            $tierCache = [];
         } while ($cursor !== null);
     }
 
@@ -213,7 +216,9 @@ class PatreonService implements LoggerAwareInterface
 
     public function enableMemberUpdateWebhook(PatreonCampaign $campaign): void
     {
-        $user = $campaign->getCampaignOwner();
+        /** @var PatreonCampaign $dbCampaign */
+        $dbCampaign = $this->campaignRepository->find($campaign->getId());
+        $user = $dbCampaign->getCampaignOwner();
         $this->refreshAccessToken($user);
         $uri = $this->router->generate('patreon_webhooks',[], UrlGeneratorInterface::ABSOLUTE_URL);
         $uri = str_replace('http://','https://', $uri);
@@ -235,7 +240,7 @@ class PatreonService implements LoggerAwareInterface
                     'campaign' => [
                         'data' => [
                             'type' => 'campaign',
-                            'id' => $campaign->getPatreonCampaignId()
+                            'id' => $dbCampaign->getPatreonCampaignId()
                         ]
                     ]
                 ]
@@ -265,7 +270,7 @@ class PatreonService implements LoggerAwareInterface
         $patreonWebhook = new PatreonCampaignWebhook();
         $patreonWebhook
             ->setPatreonWebhookId($webhookId)
-            ->setCampaign($campaign)
+            ->setCampaign($dbCampaign)
             ->setSecret($decodedResponse['data']['attributes']['secret'])
             ->setTriggers($decodedResponse['data']['attributes']['triggers']);
 
