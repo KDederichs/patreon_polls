@@ -4,6 +4,7 @@ namespace App\Security\Oauth;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Util\SentryHelper;
 use Carbon\CarbonImmutable;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
@@ -23,6 +24,7 @@ class PatreonUserProvider implements OAuthAwareUserProviderInterface, UserProvid
 
     public function loadUserByOAuthUserResponse(UserResponseInterface $response): UserInterface
     {
+        SentryHelper::addContext('oauthResponse', $response->getData());
         $userData = $response->getData()['data']['attributes'];
         $patreonIdentifier = $response->getData()['data']['id'];
         $user = $this->userRepository->findByPatreonId($patreonIdentifier);
