@@ -29,6 +29,10 @@ export default class extends Controller {
     super.initialize();
   }
 
+  handleError(errorMessage) {
+    alert(errorMessage.replace('pollId: ', ''))
+  }
+
   voted(event) {
     event.preventDefault();
     const isAdd = event.target.dataset.pollVoteId === undefined;
@@ -36,7 +40,8 @@ export default class extends Controller {
       fetch('/ajax/poll/option/vote', {
         method: 'POST',
         headers: {
-          "Content-Type": 'application/json'
+          "Content-Type": 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           'pollId': this.pollIdValue,
@@ -45,6 +50,10 @@ export default class extends Controller {
       })
         .then((data) => data.json())
         .then((response) => {
+          if (response.status > 299) {
+            this.handleError(response.detail)
+            return;
+          }
           event.target.checked = true
           event.target.dataset.pollVoteId = response.voteId
           const labelElement = event.target.labels[0];
@@ -59,7 +68,8 @@ export default class extends Controller {
       fetch('/ajax/poll/option/vote', {
         method: 'DELETE',
         headers: {
-          "Content-Type": 'application/json'
+          "Content-Type": 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           'voteId': event.target.dataset.pollVoteId,
@@ -67,6 +77,10 @@ export default class extends Controller {
       })
         .then((data) => data.json())
         .then((response) => {
+          if (response.status > 299) {
+            this.handleError(response.detail)
+            return;
+          }
           event.target.checked = false
           delete event.target.dataset.pollVoteId
           const labelElement = event.target.labels[0];
@@ -75,7 +89,7 @@ export default class extends Controller {
           labelElement.innerHTML = labelElement.innerHTML.replace(/\(.*\)/, `(${newVoteCount} Votes)`)
         })
         .catch((error) => {
-          console.log(error)
+          console.log({error})
         })
 
     }
@@ -98,7 +112,8 @@ export default class extends Controller {
     fetch('/ajax/poll/option', {
       method: 'POST',
       headers: {
-        "Content-Type": 'application/json'
+        "Content-Type": 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
         'pollId': this.pollIdValue,
@@ -107,6 +122,10 @@ export default class extends Controller {
     })
       .then((data) => data.json())
       .then((response) => {
+        if (response.status > 299) {
+          this.handleError(response.detail)
+          return;
+        }
         if (this.optionContainerTarget.innerHTML === 'The are no options yet.') {
           this.optionContainerTarget.innerHTML = makeOption(response.optionId, newOptionValue, response.voteId)
         } else {
@@ -115,7 +134,7 @@ export default class extends Controller {
         this.newOptionInputTarget.value = ''
       })
       .catch((error) => {
-        console.log(error)
+        console.log({error})
       })
   }
 
