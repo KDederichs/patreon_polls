@@ -1,0 +1,44 @@
+when@prod:
+    sentry:
+        dsn: '%env(SENTRY_DSN)%'
+        options:
+            ignore_exceptions:
+                - Symfony\Component\ErrorHandler\Error\FatalError
+                - Symfony\Component\Debug\Exception\FatalErrorException
+                - Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+                - Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+                - Symfony\Component\HttpKernel\Exception\BadRequestHttpException
+                - ApiPlatform\Symfony\Validator\Exception\ValidationException
+            # Specify a fixed sample rate
+            traces_sample_rate: 0.05
+            # Set a sampling rate for profiling - this is relative to traces_sample_rate
+            profiles_sample_rate: 1.0
+        #        If you are using Monolog, you also need this additional configuration to log the errors correctly:
+        #        https://docs.sentry.io/platforms/php/guides/symfony/#monolog-integration
+        register_error_listener: false
+        register_error_handler: false
+
+    monolog:
+        handlers:
+            sentry:
+                type: fingers_crossed
+                action_level: error
+                handler: sentry_buffer
+                include_stacktraces: true
+                excluded_http_codes: [ 400, 401, 403, 404, 405, 422 ]
+                channels: [ "!event" ]
+            sentry_buffer:
+                type: buffer
+                handler: sentry_handler
+                level: info
+                process_psr_3_messages: true
+            sentry_handler:
+                type: sentry
+                level: !php/const Monolog\Logger::ERROR
+                hub_id: Sentry\State\HubInterface
+
+#    Uncomment these lines to register a log message processor that resolves PSR-3 placeholders
+#    https://docs.sentry.io/platforms/php/guides/symfony/#monolog-integration
+    services:
+        Monolog\Processor\PsrLogMessageProcessor:
+            tags: { name: monolog.processor, handler: sentry }

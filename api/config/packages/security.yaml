@@ -31,8 +31,10 @@ security:
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/connect, roles: PUBLIC_ACCESS }
-        - { path: ^/, roles: PUBLIC_ACCESS } // force login
         - { path: ^/poll, roles: ROLE_USER } // force login
+        - { path: ^/ajax, roles: ROLE_USER } // force login
+        - { path: ^/, roles: PUBLIC_ACCESS } // force login
+
 
 when@test:
     security:
