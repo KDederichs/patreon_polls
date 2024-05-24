@@ -8,12 +8,19 @@ services:
       APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
-
-  pwa:
-    build:
-      context: ./pwa
-      target: prod
-
+    ports:
+      # HTTP
+      - target: 80
+        published: ${HTTP_PORT:-10000}
+        protocol: tcp
+      # HTTPS
+      - target: 443
+        published: ${HTTPS_PORT:-10001}
+        protocol: tcp
+      # HTTP/3
+      - target: 443
+        published: ${HTTP3_PORT:-10001}
+        protocol: udp
   database:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
