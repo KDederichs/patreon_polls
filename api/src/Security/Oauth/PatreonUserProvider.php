@@ -24,7 +24,9 @@ class PatreonUserProvider implements OAuthAwareUserProviderInterface, UserProvid
 
     public function loadUserByOAuthUserResponse(UserResponseInterface $response): UserInterface
     {
-        SentryHelper::addContext('oauthResponse', $response->getData());
+        SentryHelper::addContext('oauthResponse', [
+            'responseData' => $response->getData(),
+        ]);
         $userData = $response->getData()['data']['attributes'];
         $patreonIdentifier = $response->getData()['data']['id'];
         $user = $this->userRepository->findByPatreonId($patreonIdentifier);
