@@ -110,6 +110,9 @@ class PatreonPollOption
 
     public function getVoteCount(): int
     {
-        return $this->votes->count();
+        return $this->votes->reduce(
+            static fn (int $carryOver, PatreonPollVote $vote) => $carryOver + $vote->getVotePower(),
+            0
+        ) ?? 0;
     }
 }

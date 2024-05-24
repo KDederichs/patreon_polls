@@ -30,6 +30,8 @@ class PatreonPollVote
     #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(nullable: false)]
     private User $votedBy;
+    #[Column(type: 'smallint', options: ['default' => 1])]
+    private int $votePower = 1;
 
 
     public function __construct()
@@ -81,5 +83,14 @@ class PatreonPollVote
         return $this;
     }
 
+    public function getVotePower(): int
+    {
+        return $this->votePower;
+    }
 
+    public function setVotePower(int $votePower): PatreonPollVote
+    {
+        $this->votePower = $votePower;
+        return $this;
+    }
 }

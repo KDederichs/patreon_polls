@@ -5,12 +5,16 @@ namespace App\Controller;
 use App\Dto\AddPollOptionVotePayload;
 use App\Dto\CreatePollOptionPayload;
 use App\Dto\RemovePollOptionVotePayload;
+use App\Entity\PatreonCampaignMember;
 use App\Entity\PatreonPoll;
 use App\Entity\PatreonPollOption;
+use App\Entity\PatreonPollTierVoteConfig;
 use App\Entity\PatreonPollVote;
 use App\Entity\User;
+use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonPollOptionRepository;
 use App\Repository\PatreonPollRepository;
+use App\Repository\PatreonPollTierVoteConfigRepository;
 use App\Repository\PatreonPollVoteRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,6 +32,8 @@ class AjaxController extends AbstractController
         private readonly PatreonPollOptionRepository $patreonPollOptionRepository,
         private readonly PatreonPollRepository $patreonPollRepository,
         private readonly PatreonPollVoteRepository $patreonPollVoteRepository,
+        private readonly PatreonCampaignMemberRepository $campaignMemberRepository,
+        private readonly PatreonPollTierVoteConfigRepository $voteConfigRepository
     )
     {
 
@@ -94,12 +100,17 @@ class AjaxController extends AbstractController
         $poll = $this->patreonPollRepository->find(Uuid::fromString($payload->getPollId()));
         /** @var PatreonPollOption $option */
         $option = $this->patreonPollOptionRepository->find(Uuid::fromString($payload->getOptionId()));
+        /** @var PatreonCampaignMember $member */
+        $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
+        /** @var PatreonPollTierVoteConfig $voteConfig */
+        $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getTier(), $poll);
 
         $vote = new PatreonPollVote();
         $vote
             ->setOption($option)
             ->setPoll($poll)
             ->setVotedBy($user)
+            ->setVotePower($voteConfig->getVotingPower())
         ;
         $this->patreonPollOptionRepository->persist($vote);
 

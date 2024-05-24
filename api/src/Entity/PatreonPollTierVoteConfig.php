@@ -2,16 +2,19 @@
 
 namespace App\Entity;
 
+use App\Repository\PatreonPollTierVoteConfigRepository;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity]
+#[Entity(repositoryClass: PatreonPollTierVoteConfigRepository::class)]
+#[UniqueConstraint(fields: ['patreonPoll', 'campaignTier'])]
 class PatreonPollTierVoteConfig
 {
     #[Id, Column(type: UuidType::NAME)]

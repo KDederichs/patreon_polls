@@ -2,7 +2,7 @@
 
 namespace App\Dto;
 
-use Symfony\Component\Validator\Constraints\Length;
+use App\Validation\CanVote;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Uuid;
 
@@ -10,6 +10,7 @@ class AddPollOptionVotePayload
 {
     #[NotBlank]
     #[Uuid(versions: 7)]
+    #[CanVote]
     private ?string $pollId = null;
     #[NotBlank]
     #[Uuid(versions: 7)]
