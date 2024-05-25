@@ -23,6 +23,8 @@ services:
       - target: 443
         published: 10001
         protocol: udp
+    volumes:
+      - session_data:/app/var/sessions
   database:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
