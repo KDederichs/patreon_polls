@@ -32,18 +32,19 @@ class PatreonUserProvider implements OAuthAwareUserProviderInterface, UserProvid
         $user = $this->userRepository->findByPatreonId($patreonIdentifier);
         if (!$user) {
             $user = new User();
-            $userName = $userData['full_name'] ?? 'Unknown User';
             $user
-                ->setPatreonId($patreonIdentifier)
-                ->setPatreonAccessToken($response->getAccessToken())
-                ->setPatreonRefreshToken($response->getRefreshToken())
-                ->setPatreonTokenType($response->getOAuthToken()->getRawToken()['token_type'] ?? 'Bearer')
-                ->setPatreonScope($response->getOAuthToken()->getRawToken()['scope'] ?? null)
-                ->setPatreonTokenExpiresAt(CarbonImmutable::now()->addSeconds($response->getExpiresIn() ?? 3600))
-                ->setUsername($userName)
-            ;
+                ->setPatreonId($patreonIdentifier);
         }
-        $user->setCreator($response->getResourceOwner()->getName() === 'patreon_creator');
+        $userName = $userData['full_name'] ?? 'Unknown User';
+        $user
+            ->setPatreonAccessToken($response->getAccessToken())
+            ->setPatreonRefreshToken($response->getRefreshToken())
+            ->setPatreonTokenType($response->getOAuthToken()->getRawToken()['token_type'] ?? 'Bearer')
+            ->setPatreonScope($response->getOAuthToken()->getRawToken()['scope'] ?? null)
+            ->setPatreonTokenExpiresAt(CarbonImmutable::now()->addSeconds($response->getExpiresIn() ?? 3600))
+            ->setUsername($userName)
+            ->setCreator($response->getResourceOwner()->getName() === 'patreon_creator')
+        ;
         $this->userRepository->persist($user);
         $this->userRepository->save();
         return $user;

@@ -16,9 +16,9 @@ security:
                 resource_owners:
                     patreon: "/login/check-patreon"
                     patreon_creator: "/login/check-patreon-creator"
-                login_path: /login
+                login_path: /
                 use_forward: false
-                failure_path: /login
+                failure_path: /
                 oauth_user_provider:
                     service: App\Security\Oauth\PatreonUserProvider
             # activate different ways to authenticate
