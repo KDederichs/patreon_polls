@@ -132,7 +132,7 @@ export default class extends Controller {
         }
         this.newOptionInputTarget.value = ''
 
-        if (this.maxOptionAddValue >= this.myOptionCountValue +1) {
+        if (this.maxOptionAddValue >= this.myOptionCountValue +1 && this.maxOptionAddValue !== 0) {
           this.addOptionContainerTarget.style.display = 'none'
         }
       })

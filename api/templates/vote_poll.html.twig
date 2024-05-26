@@ -13,15 +13,15 @@
     {{ poll.pollName }}
 {% endblock %}
 {% if voteConfig is not null %}
-    {% set maxVotes = voteConfig.maxOptionAdd %}
+    {% set maxOptionAdd = voteConfig.maxOptionAdd %}
 {% else %}
-    {% set maxVotes = 1 %}
+    {% set maxOptionAdd = 1 %}
 {% endif %}
 
 {% block body %}
     <div data-controller="poll"
          data-poll-poll-id-value="{{ poll.id.toRfc4122 }}"
-         data-poll-max-option-add-value="{{ maxVotes }}"
+         data-poll-max-option-add-value="{{ maxOptionAdd }}"
          data-poll-my-option-count-value="{{ myOptionCount }}"
     >
         <fieldset>
@@ -42,7 +42,7 @@
                 {% endfor %}
             </div>
         </fieldset>
-        {% if myOptionCount < maxVotes %}
+        {% if myOptionCount < maxOptionAdd or maxOptionAdd == 0 %}
             <div class="mt-5 sm:flex sm:items-center" data-poll-target="addOptionContainer">
                 <div class="w-full sm:max-w-xs">
                     <label for="newOption" class="sr-only">New Option</label>
