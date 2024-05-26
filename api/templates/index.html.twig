@@ -19,11 +19,13 @@
                             <a href="{{path('sync_patreon')}}" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sync Patreon Tiers and Members</a>
                             <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Previous results <span aria-hidden="true">→</span></a>
                         {% endif %}
-                        <div class="mt-6 text-lg leading-8 text-gray-600">
-                            You've successfully logged in as: {{ app.user.username }}
-                        </div>
                     {% endif %}
                 </div>
+                {% if app.user %}
+                    <div class="mt-6 text-lg leading-8 text-gray-600">
+                        You've successfully logged in as: {{ app.user.username }}
+                    </div>
+                {% endif %}
                 {% if app.user and not app.user.creator %}
                     <div class="mt-6 text-lg leading-8 text-gray-600">
                         If you'd like to create polls yourself: <a href="{{ path('hwi_oauth_service_redirect', {'service': 'patreon_creator' }) }}" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Login with Patreon as Creator</a>
