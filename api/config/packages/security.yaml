@@ -21,6 +21,8 @@ security:
                 failure_path: /
                 oauth_user_provider:
                     service: App\Security\Oauth\PatreonUserProvider
+            logout:
+                path: logout
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -35,6 +37,8 @@ security:
         - { path: ^/poll, roles: ROLE_USER } // force login
         - { path: ^/ajax, roles: ROLE_USER } // force login
         - { path: ^/patreon, roles: ROLE_USER } // force login
+        - { path: ^/logout, roles: ROLE_USER } // force login
+        - { path: ^/admin, roles: ROLE_ADMIN } // force login
         - { path: ^/, roles: PUBLIC_ACCESS } // force login
 
 

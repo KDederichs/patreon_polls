@@ -9,6 +9,7 @@
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^3",
+        "easycorp/easyadmin-bundle": "^4.10",
         "hwi/oauth-bundle": "^2.2",
         "nelmio/cors-bundle": "^2.2",
         "nesbot/carbon": "^3.3",

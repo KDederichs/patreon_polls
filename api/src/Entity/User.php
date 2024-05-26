@@ -174,4 +174,5 @@ class User implements UserInterface
         $this->admin = $admin;
         return $this;
     }
+
 }

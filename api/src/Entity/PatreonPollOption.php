@@ -115,4 +115,11 @@ class PatreonPollOption
             0
         ) ?? 0;
     }
+
+    public function __toString(): string
+    {
+        return $this->optionName;
+    }
+
+
 }

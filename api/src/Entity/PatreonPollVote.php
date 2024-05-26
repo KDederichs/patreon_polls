@@ -93,4 +93,9 @@ class PatreonPollVote
         $this->votePower = $votePower;
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return sprintf('%s->%s->%s', $this->poll->getPollName(), $this->option->getOptionName(), $this->votedBy->getUsername());
+    }
 }

@@ -94,4 +94,9 @@ class PatreonCampaignMember
             }
         );
     }
+
+    public function __toString(): string
+    {
+        return $this->patreonUserId;
+    }
 }

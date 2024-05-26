@@ -75,4 +75,9 @@ class PatreonPoll
         $this->campaign = $campaign;
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return $this->pollName;
+    }
 }
