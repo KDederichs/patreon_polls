@@ -10,6 +10,8 @@ use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonCampaignRepository;
 use App\Repository\PatreonCampaignTierRepository;
 use App\Repository\PatreonCampaignWebhookRepository;
+use App\Util\SentryHelper;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,11 +29,18 @@ class WebhookController extends AbstractController
         PatreonCampaignWebhookRepository $campaignWebhookRepository,
         PatreonCampaignMemberRepository $campaignMemberRepository,
         PatreonCampaignTierRepository $tierRepository,
+        LoggerInterface $logger
     ): Response
     {
         $requestSignature = $request->headers->get('x-patreon-signature');
         $payload = $request->getContent();
         $decodedPayload = json_decode($payload, true);
+
+        SentryHelper::addContext('webhookData', [
+            'payload' => $decodedPayload,
+            'sigHeader' => $requestSignature,
+        ]);
+
         $campaignId = $decodedPayload['data']['relationships']['campaign']['data']['id'] ?? '';
         /** @var PatreonCampaign|null $campaign */
         $campaign = $campaignRepository->findByPatreonCampaignId($campaignId);
@@ -42,6 +51,7 @@ class WebhookController extends AbstractController
         $webhook = $campaignWebhookRepository->findByCampaign($campaign);
 
         if (!$webhook || $requestSignature !== hash_hmac('md5', $payload, $webhook->getSecret())) {
+            $logger->error('Could not verify webhook signature');
             throw new AccessDeniedHttpException('Could not verify signature');
         }
         $userId = $decodedPayload['data']['relationships']['user']['data']['id'];
