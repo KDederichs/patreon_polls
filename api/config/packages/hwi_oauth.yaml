@@ -8,7 +8,7 @@ hwi_oauth:
             client_secret:       '%env(PATREON_SECRET)%'
             access_token_url:    'https://www.patreon.com/api/oauth2/token'
             authorization_url:   'https://www.patreon.com/oauth2/authorize'
-            infos_url:           'https://www.patreon.com/api/oauth2/v2/identity'
+            infos_url:           '%env(PATREON_IDENTITY_URL)%'
             scope:               "identity"
         patreon_creator:
             type:                oauth2
@@ -17,5 +17,5 @@ hwi_oauth:
             client_secret:       '%env(PATREON_SECRET)%'
             access_token_url:    'https://www.patreon.com/api/oauth2/token'
             authorization_url:   'https://www.patreon.com/oauth2/authorize'
-            infos_url:           'https://www.patreon.com/api/oauth2/v2/identity'
+            infos_url:           '%env(PATREON_IDENTITY_URL)%'
             scope:               "identity campaigns campaigns.members w:campaigns.webhook"
