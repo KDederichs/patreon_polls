@@ -17,14 +17,14 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-class CanVoteValidator extends ConstraintValidator
+class CanAddOptionValidator extends ConstraintValidator
 {
     public function __construct(
         private readonly Security $security,
         private readonly PatreonPollRepository $patreonPollRepository,
-        private readonly PatreonPollVoteRepository $patreonPollVoteRepository,
         private readonly PatreonCampaignMemberRepository $campaignMemberRepository,
         private readonly PatreonPollTierVoteConfigRepository $voteConfigRepository,
+        private readonly PatreonPollOptionRepository $patreonPollOptionRepository,
     )
     {
 
@@ -84,14 +84,10 @@ class CanVoteValidator extends ConstraintValidator
             return;
         }
 
-        if ($voteConfig->getNumberOfVotes() === 0) {
-            return;
-        }
+        $myOptions = $this->patreonPollOptionRepository->findMyOptions($poll, $user);
 
-        $votes = $this->patreonPollVoteRepository->findMyVotes($user, $poll);
-
-        if (count($votes) >= $voteConfig->getNumberOfVotes()) {
-            $this->context->buildViolation('You have already reached the maximum vote count of: '. $voteConfig->getNumberOfVotes())
+        if ($voteConfig->getMaxOptionAdd() !== 0 && count($myOptions) >= $voteConfig->getMaxOptionAdd()) {
+            $this->context->buildViolation(sprintf('You can only add %s options.', $voteConfig->getMaxOptionAdd()))
                 ->addViolation();
         }
     }
