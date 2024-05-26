@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\PatreonPoll;
 use App\Entity\PatreonPollOption;
 use App\Entity\User;
+use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonPollOptionRepository;
+use App\Repository\PatreonPollTierVoteConfigRepository;
 use App\Repository\PatreonPollVoteRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +21,9 @@ class PollController extends AbstractController
 
     public function __construct(
         private readonly PatreonPollOptionRepository $patreonPollOptionRepository,
-        private readonly PatreonPollVoteRepository $patreonPollVoteRepository
+        private readonly PatreonPollVoteRepository $patreonPollVoteRepository,
+        private readonly PatreonPollTierVoteConfigRepository $configRepository,
+        private readonly PatreonCampaignMemberRepository $campaignMemberRepository,
     )
     {
 
@@ -36,11 +40,22 @@ class PollController extends AbstractController
     {
         $options = $this->patreonPollOptionRepository->getOptionsForPoll($poll);
         $myVotes = $this->patreonPollVoteRepository->findMyVotes($user, $poll);
+        $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
+        $tier = $member?->getHighestEntitledTier()?->getTier();
+        $voteConfig = null;
+        if ($tier) {
+            $voteConfig = $this->configRepository->findByCampaignTierAndPoll($tier, $poll);
+        }
+        $myOptions = $this->patreonPollOptionRepository->findMyOptions($poll, $user);
+
 
         return $this->render('vote_poll.html.twig', [
             'poll' => $poll,
             'pollOptions' => $options,
             'myVotes' => $myVotes,
+            'tier' => $tier,
+            'voteConfig' => $voteConfig,
+            'myOptionCount' => count($myOptions)
         ]);
     }
 

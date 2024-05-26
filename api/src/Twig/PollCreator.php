@@ -64,6 +64,10 @@ class PollCreator extends AbstractController
             $tierConfigMap[$tierId]['votePower'] = $value;
         }
 
+        foreach ($data->getMaxOptionAdd() as $tierId => $value) {
+            $tierConfigMap[$tierId]['addMaxOption'] = $value;
+        }
+
         foreach ($tierConfigMap as $tierId => $config) {
             $tierEntity = $this->campaignTierRepository->find(Uuid::fromString($tierId));
             $voteConfig = new PatreonPollTierVoteConfig();
@@ -71,7 +75,8 @@ class PollCreator extends AbstractController
                 ->setCampaignTier($tierEntity)
                 ->setPatreonPoll($poll)
                 ->setNumberOfVotes($config['voteLimit'])
-                ->setVotingPower($config['votePower']);
+                ->setVotingPower($config['votePower'])
+                ->setMaxOptionAdd($config['addMaxOption']);
             $this->campaignTierRepository->persist($voteConfig);
         }
 

@@ -31,6 +31,8 @@ class PatreonPollTierVoteConfig
     public int $numberOfVotes = 0;
     #[Column(type: 'smallint')]
     public int $votingPower = 1;
+    #[Column(type: 'smallint', options: ['default' => 1])]
+    public int $maxOptionAdd = 1;
 
     public function __construct()
     {
@@ -89,6 +91,17 @@ class PatreonPollTierVoteConfig
     public function setVotingPower(int $votingPower): PatreonPollTierVoteConfig
     {
         $this->votingPower = $votingPower;
+        return $this;
+    }
+
+    public function getMaxOptionAdd(): int
+    {
+        return $this->maxOptionAdd;
+    }
+
+    public function setMaxOptionAdd(int $maxOptionAdd): PatreonPollTierVoteConfig
+    {
+        $this->maxOptionAdd = $maxOptionAdd;
         return $this;
     }
 }

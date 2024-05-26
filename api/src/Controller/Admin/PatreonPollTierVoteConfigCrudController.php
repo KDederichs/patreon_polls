@@ -25,6 +25,7 @@ class PatreonPollTierVoteConfigCrudController extends AbstractCrudController
             AssociationField::new('campaignTier'),
             IntegerField::new('numberOfVotes'),
             IntegerField::new('votingPower'),
+            IntegerField::new('maxOptionAdd'),
         ];
     }
 

@@ -79,6 +79,14 @@ class CreateFormType extends AbstractType
                     'patreon_tiers' => $votingTiers,
                 ]);
             })
+            ->addDependent('maxOptionAdd', 'votingTiers', function (DependentField $field, ?ArrayCollection $votingTiers) {
+                if (!$votingTiers || $votingTiers->isEmpty()) {
+                    return;
+                }
+                $field->add(AddMaxOptionType::class, [
+                    'patreon_tiers' => $votingTiers,
+                ]);
+            })
             ->add('pollName', TextType::class, [
                 'label' => 'Poll Name',
                 'required' => true

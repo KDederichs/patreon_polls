@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\PatreonCampaignTier;
 use App\Entity\PatreonPoll;
 use App\Entity\PatreonPollOption;
+use App\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
 
 class PatreonPollOptionRepository extends AbstractBaseRepository
@@ -18,6 +19,14 @@ class PatreonPollOptionRepository extends AbstractBaseRepository
     {
         return $this->findBy([
             'poll' => $poll
+        ]);
+    }
+
+    public function findMyOptions(PatreonPoll $poll, User $user): array
+    {
+        return $this->findBy([
+            'poll' => $poll,
+            'createdBy' => $user,
         ]);
     }
 }

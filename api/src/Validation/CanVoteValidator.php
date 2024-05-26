@@ -7,6 +7,7 @@ use App\Entity\PatreonPoll;
 use App\Entity\PatreonPollTierVoteConfig;
 use App\Entity\User;
 use App\Repository\PatreonCampaignMemberRepository;
+use App\Repository\PatreonPollOptionRepository;
 use App\Repository\PatreonPollRepository;
 use App\Repository\PatreonPollTierVoteConfigRepository;
 use App\Repository\PatreonPollVoteRepository;
@@ -23,7 +24,8 @@ class CanVoteValidator extends ConstraintValidator
         private readonly PatreonPollRepository $patreonPollRepository,
         private readonly PatreonPollVoteRepository $patreonPollVoteRepository,
         private readonly PatreonCampaignMemberRepository $campaignMemberRepository,
-        private readonly PatreonPollTierVoteConfigRepository $voteConfigRepository
+        private readonly PatreonPollTierVoteConfigRepository $voteConfigRepository,
+        private readonly PatreonPollOptionRepository $patreonPollOptionRepository,
     )
     {
 
@@ -82,6 +84,15 @@ class CanVoteValidator extends ConstraintValidator
                 ->addViolation();
             return;
         }
+
+        $myOptions = $this->patreonPollOptionRepository->findMyOptions($poll, $user);
+
+        if ($voteConfig->getMaxOptionAdd() !== 0 && count($myOptions) >= $voteConfig->getMaxOptionAdd()) {
+            $this->context->buildViolation(sprintf('You can only add %s options.', $voteConfig->getMaxOptionAdd()))
+                ->addViolation();
+            return;
+        }
+
 
         if ($voteConfig->getNumberOfVotes() === 0) {
             return;

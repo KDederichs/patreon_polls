@@ -21,8 +21,8 @@ const makeOption = (optionId, optionName, voteId) =>
  * Delete this file or adapt it for your use!
  */
 export default class extends Controller {
-  static targets = [ "optionContainer", "newOptionInput", "option" ]
-  static values = { pollId: String }
+  static targets = [ "optionContainer", "newOptionInput", "option", "addOptionContainer" ]
+  static values = { pollId: String, maxOptionAdd: Number, myOptionCount: Number }
 
 
   initialize() {
@@ -132,6 +132,10 @@ export default class extends Controller {
           this.optionContainerTarget.innerHTML += makeOption(response.optionId, newOptionValue, response.voteId)
         }
         this.newOptionInputTarget.value = ''
+
+        if (this.maxOptionAddValue >= this.myOptionCountValue +1) {
+          this.addOptionContainerTarget.style.display = 'none'
+        }
       })
       .catch((error) => {
         console.log({error})

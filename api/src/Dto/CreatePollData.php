@@ -11,6 +11,7 @@ class CreatePollData
     private array|ArrayCollection|null $votingTiers = null;
     private array|ArrayCollection|null $votingPower = null;
     private array|ArrayCollection|null $voteLimit = null;
+    private array|ArrayCollection|null $maxOptionAdd = null;
     private ?string $pollName = null;
     private ?\DateTimeImmutable $endDate = null;
 
@@ -81,10 +82,14 @@ class CreatePollData
         return $this;
     }
 
+    public function getMaxOptionAdd(): ArrayCollection|array|null
+    {
+        return $this->maxOptionAdd;
+    }
 
-
-
-
-
-
+    public function setMaxOptionAdd(ArrayCollection|array|null $maxOptionAdd): CreatePollData
+    {
+        $this->maxOptionAdd = $maxOptionAdd;
+        return $this;
+    }
 }
