@@ -80,6 +80,12 @@ class AjaxController extends AbstractController
         /** @var PatreonPollVote $vote */
         $vote = $this->patreonPollVoteRepository->find(Uuid::fromString($payload->getVoteId()));
 
+        if (!$vote) {
+            return new JsonResponse([
+                'voteId' => $payload->getVoteId()
+            ]);
+        }
+
         if (!$vote->getVotedBy()->getId()->equals($user->getId())) {
             throw new AccessDeniedHttpException('Not your vote');
         }
