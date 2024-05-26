@@ -3,11 +3,10 @@ import { Controller } from '@hotwired/stimulus';
 const makeOption = (optionId, optionName, voteId) =>
   `                    <div class="relative flex items-start">\n` +
   `                        <div class="flex h-6 items-center">\n` +
-  `                            <input id="${optionId}" aria-describedby="${optionId}-description" name="${optionId}" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" data-action="poll#voted" data-poll-target="option" data-poll-vote-id="${voteId}">\n` +
+  `                            <input id="${optionId}" name="${optionId}" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" data-action="poll#voted" data-poll-target="option" data-poll-vote-id="${voteId}">\n` +
   `                        </div>\n` +
   `                        <div class="ml-3 text-sm leading-6">\n` +
   `                            <label for="${optionId}" class="font-medium text-gray-900">${optionName} (1 Votes)</label>\n` +
-  `                            <p id="${optionId}-description" class="text-gray-500">Get notified when someones posts a comment on a posting.</p>\n` +
   `                        </div>\n` +
   `                    </div>`
 
