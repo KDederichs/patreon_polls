@@ -30,11 +30,11 @@
                 {% for pollOption in pollOptions %}
                     <div class="relative flex items-start">
                         <div class="flex h-6 items-center">
-                            <input id="{{ pollOption.id.toRfc4122 }}" aria-describedby="{{ pollOption.id.toRfc4122 }}-description" name="{{ pollOption.id.toRfc4122 }}" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" {% for myVote in myVotes %}{% if myVote.option.id.equals(pollOption.id) %}data-poll-vote-id="{{ myVote.id.toRfc4122 }}"{% endif %}{% endfor %} data-action="poll#voted" data-poll-target="option">
+                            <input id="{{ pollOption.id.toRfc4122 }}" name="{{ pollOption.id.toRfc4122 }}" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" {% for myVote in myVotes %}{% if myVote.option.id.equals(pollOption.id) %}data-poll-vote-id="{{ myVote.id.toRfc4122 }}"{% endif %}{% endfor %} data-action="poll#voted" data-poll-target="option">
                         </div>
                         <div class="ml-3 text-sm leading-6">
                             <label data-vote-counter="{{ pollOption.voteCount }}" for="{{ pollOption.id.toRfc4122 }}" class="font-medium text-gray-900">{{ pollOption.optionName }} ({{ pollOption.voteCount }} Votes)</label>
-                            <p id="{{ pollOption.id.toRfc4122 }}-description" class="text-gray-500">Get notified when someones posts a comment on a posting.</p>
+{#                            <p id="{{ pollOption.id.toRfc4122 }}-description" class="text-gray-500">Get notified when someones posts a comment on a posting.</p>#}
                         </div>
                     </div>
                 {% else %}
