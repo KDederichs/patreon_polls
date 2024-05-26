@@ -146,7 +146,7 @@ class PatreonService implements LoggerAwareInterface
                 if (($memberData['type'] ?? null) !== 'member') {
                     continue;
                 }
-                $batchIds[] = $memberData['id'];
+                $batchIds[] = $memberData['relationships']['user']['data']['id'];
             }
 
             $exisingIds = $this->campaignMemberRepository->getExistingIds($batchIds);
@@ -156,15 +156,15 @@ class PatreonService implements LoggerAwareInterface
                 if (($memberData['type'] ?? null) !== 'member') {
                     continue;
                 }
-                if (in_array($memberData['id'], $newMemberIds, true)) {
+                if (in_array($memberData['relationships']['user']['data']['id'], $newMemberIds, true)) {
                     $member = new PatreonCampaignMember();
                     $member
                         ->setCampaign($dbCampaign)
-                        ->setPatreonUserId($memberData['id']);
+                        ->setPatreonUserId($memberData['relationships']['user']['data']['id']);
                     $this->campaignMemberRepository->persist($member);
                 } else {
                     /** @var PatreonCampaignMember $member */
-                    $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($dbCampaign,$memberData['id']);
+                    $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($dbCampaign,$memberData['relationships']['user']['data']['id']);
                 }
 
                 foreach ($member->getEntitledTiers() as $tier) {
@@ -195,7 +195,7 @@ class PatreonService implements LoggerAwareInterface
         $this->refreshAccessToken($user);
 
         $queryParams = [
-            'include' => 'currently_entitled_tiers'
+            'include' => 'currently_entitled_tiers,user'
         ];
 
         if ($cursor) {
