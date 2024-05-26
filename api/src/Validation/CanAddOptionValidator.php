@@ -32,8 +32,8 @@ class CanAddOptionValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if (!$constraint instanceof CanVote) {
-            throw new UnexpectedTypeException($constraint, CanVote::class);
+        if (!$constraint instanceof CanAddOption) {
+            throw new UnexpectedTypeException($constraint, CanAddOption::class);
         }
 
         if (empty($value)) {
