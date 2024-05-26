@@ -16,11 +16,13 @@ use App\Repository\PatreonPollOptionRepository;
 use App\Repository\PatreonPollRepository;
 use App\Repository\PatreonPollTierVoteConfigRepository;
 use App\Repository\PatreonPollVoteRepository;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Uid\Uuid;
@@ -111,17 +113,21 @@ class AjaxController extends AbstractController
         /** @var PatreonPollTierVoteConfig $voteConfig */
         $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getHighestEntitledTier()->getTier(), $poll);
 
-        $vote = new PatreonPollVote();
-        $vote
-            ->setOption($option)
-            ->setPoll($poll)
-            ->setVotedBy($user)
-            ->setVotePower($voteConfig->getVotingPower())
-        ;
-        $this->patreonPollOptionRepository->persist($vote);
+        try {
+            $vote = new PatreonPollVote();
+            $vote
+                ->setOption($option)
+                ->setPoll($poll)
+                ->setVotedBy($user)
+                ->setVotePower($voteConfig->getVotingPower())
+            ;
+            $this->patreonPollOptionRepository->persist($vote);
 
-        $this->patreonPollOptionRepository->save();
-        $this->patreonPollOptionRepository->save();
+            $this->patreonPollOptionRepository->save();
+        } catch (UniqueConstraintViolationException) {
+            throw new BadRequestHttpException('You already voted for this option');
+        }
+
         return new JsonResponse([
             'voteId' => $vote->getId()->toRfc4122()
         ]);
