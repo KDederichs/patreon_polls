@@ -37,6 +37,8 @@ class User implements UserInterface
     private ?CarbonImmutable $patreonTokenExpiresAt = null;
     #[Column(type: 'boolean', options: ['default' => false])]
     private bool $creator = false;
+    #[Column(type: 'boolean', options: ['default' => false])]
+    private bool $admin = false;
 
     public function __construct()
     {
@@ -56,7 +58,7 @@ class User implements UserInterface
 
     public function getRoles(): array
     {
-        return ['ROLE_USER'];
+        return $this->admin ? ['ROLE_ADMIN', 'ROLE_USER']:['ROLE_USER'];
     }
 
     public function eraseCredentials(): void
@@ -159,6 +161,17 @@ class User implements UserInterface
     public function setCreator(bool $creator): User
     {
         $this->creator = $creator;
+        return $this;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->admin;
+    }
+
+    public function setAdmin(bool $admin): User
+    {
+        $this->admin = $admin;
         return $this;
     }
 }
