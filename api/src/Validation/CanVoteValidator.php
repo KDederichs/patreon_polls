@@ -64,7 +64,7 @@ class CanVoteValidator extends ConstraintValidator
         /** @var PatreonCampaignMember | null $member */
         $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
         if (!$member) {
-            $this->context->buildViolation('You are not a member of '. $poll->getCampaign()->getCampaignName())
+            $this->context->buildViolation('You are not a member of '. $poll->getCampaign()->getCampaignOwner()->getUsername() . '\'s :"' . $poll->getCampaign()->getCampaignName().'"')
                 ->addViolation();
             return;
         }
