@@ -47,7 +47,13 @@ class AjaxController extends AbstractController
         #[CurrentUser] User $user
     ): Response
     {
+        /** @var PatreonPoll $poll */
         $poll = $this->patreonPollRepository->find(Uuid::fromString($payload->getPollId()));
+        /** @var PatreonCampaignMember $member */
+        $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
+        /** @var PatreonPollTierVoteConfig $voteConfig */
+        $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getHighestEntitledTier()->getTier(), $poll);
+
 
         $newOption = new PatreonPollOption();
         $newOption
@@ -62,6 +68,7 @@ class AjaxController extends AbstractController
             ->setOption($newOption)
             ->setPoll($poll)
             ->setVotedBy($user)
+            ->setVotePower($voteConfig->getVotingPower())
         ;
         $this->patreonPollOptionRepository->persist($vote);
 
