@@ -59,4 +59,9 @@ class MemberEntitledTier
         $this->tier = $tier;
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return sprintf("%s -> %s", $this->campaignMember->getPatreonUserId(), $this->tier->getTierName());
+    }
 }
