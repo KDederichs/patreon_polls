@@ -48,14 +48,14 @@ class PollController extends AbstractController
         }
         $myOptions = $this->patreonPollOptionRepository->findMyOptions($poll, $user);
 
-
         return $this->render('vote_poll.html.twig', [
             'poll' => $poll,
             'pollOptions' => $options,
             'myVotes' => $myVotes,
             'tier' => $tier,
             'voteConfig' => $voteConfig,
-            'myOptionCount' => count($myOptions)
+            'myOptionCount' => count($myOptions),
+            'hasEnded' => $poll->getEndsAt() !== null && $poll->getEndsAt()->isPast()
         ]);
     }
 
