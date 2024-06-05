@@ -58,7 +58,7 @@ export default class extends Controller {
           const labelElement = event.target.labels[0];
           const newVoteCount = parseInt(labelElement.dataset.voteCounter ?? 0) + this.votePowerValue
           labelElement.dataset.voteCounter = `${newVoteCount}`
-          labelElement.innerHTML = labelElement.innerHTML.replace(/\(.*\)/, `(${newVoteCount} Votes)`)
+          labelElement.innerHTML = labelElement.innerHTML.replace(/\(\d* Votes\)/, `(${newVoteCount} Votes)`)
         })
         .catch((error) => {
           console.log(error)
@@ -85,7 +85,7 @@ export default class extends Controller {
           const labelElement = event.target.labels[0];
           const newVoteCount = parseInt(labelElement.dataset.voteCounter ?? 0) - this.votePowerValue
           labelElement.dataset.voteCounter = `${newVoteCount}`
-          labelElement.innerHTML = labelElement.innerHTML.replace(/\(.*\)/, `(${newVoteCount} Votes)`)
+          labelElement.innerHTML = labelElement.innerHTML.replace(/\(\d* Votes\)/, `(${newVoteCount} Votes)`)
         })
         .catch((error) => {
           console.log({error})
