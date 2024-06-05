@@ -17,12 +17,18 @@
 {% else %}
     {% set maxOptionAdd = 1 %}
 {% endif %}
+{% if voteConfig is not null %}
+    {% set votePower = voteConfig.votingPower %}
+{% else %}
+    {% set votePower = 1 %}
+{% endif %}
 
 {% block body %}
     <div data-controller="poll"
          data-poll-poll-id-value="{{ poll.id.toRfc4122 }}"
          data-poll-max-option-add-value="{{ maxOptionAdd }}"
          data-poll-my-option-count-value="{{ myOptionCount }}"
+         data-poll-vote-power-value="{{ votePower }}"
     >
         <fieldset>
             <legend class="sr-only">{{ poll.pollName }}</legend>

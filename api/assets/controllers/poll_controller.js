@@ -1,12 +1,12 @@
 import { Controller } from '@hotwired/stimulus';
 
-const makeOption = (optionId, optionName, voteId) =>
+const makeOption = (optionId, optionName, voteId, votePower) =>
   `                    <div class="relative flex items-start">\n` +
   `                        <div class="flex h-6 items-center">\n` +
   `                            <input id="${optionId}" name="${optionId}" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" data-action="poll#voted" data-poll-target="option" data-poll-vote-id="${voteId}">\n` +
   `                        </div>\n` +
   `                        <div class="ml-3 text-sm leading-6">\n` +
-  `                            <label for="${optionId}" class="font-medium text-gray-900">${optionName} (1 Votes)</label>\n` +
+  `                            <label for="${optionId}" class="font-medium text-gray-900">${optionName} (${votePower} Votes)</label>\n` +
   `                        </div>\n` +
   `                    </div>`
 
@@ -21,7 +21,7 @@ const makeOption = (optionId, optionName, voteId) =>
  */
 export default class extends Controller {
   static targets = [ "optionContainer", "newOptionInput", "option", "addOptionContainer" ]
-  static values = { pollId: String, maxOptionAdd: Number, myOptionCount: Number }
+  static values = { pollId: String, maxOptionAdd: Number, myOptionCount: Number, votePower: Number }
 
 
   initialize() {
@@ -56,7 +56,7 @@ export default class extends Controller {
           event.target.checked = true
           event.target.dataset.pollVoteId = response.voteId
           const labelElement = event.target.labels[0];
-          const newVoteCount = parseInt(labelElement.dataset.voteCounter ?? 0) + 1
+          const newVoteCount = parseInt(labelElement.dataset.voteCounter ?? 0) + this.votePowerValue
           labelElement.dataset.voteCounter = `${newVoteCount}`
           labelElement.innerHTML = labelElement.innerHTML.replace(/\(.*\)/, `(${newVoteCount} Votes)`)
         })
@@ -83,7 +83,7 @@ export default class extends Controller {
           event.target.checked = false
           delete event.target.dataset.pollVoteId
           const labelElement = event.target.labels[0];
-          const newVoteCount = parseInt(labelElement.dataset.voteCounter ?? 0) - 1
+          const newVoteCount = parseInt(labelElement.dataset.voteCounter ?? 0) - this.votePowerValue
           labelElement.dataset.voteCounter = `${newVoteCount}`
           labelElement.innerHTML = labelElement.innerHTML.replace(/\(.*\)/, `(${newVoteCount} Votes)`)
         })
@@ -126,9 +126,9 @@ export default class extends Controller {
           return;
         }
         if (this.optionContainerTarget.innerHTML === 'The are no options yet.') {
-          this.optionContainerTarget.innerHTML = makeOption(response.optionId, newOptionValue, response.voteId)
+          this.optionContainerTarget.innerHTML = makeOption(response.optionId, newOptionValue, response.voteId, this.votePowerValue)
         } else {
-          this.optionContainerTarget.innerHTML += makeOption(response.optionId, newOptionValue, response.voteId)
+          this.optionContainerTarget.innerHTML += makeOption(response.optionId, newOptionValue, response.voteId, this.votePowerValue)
         }
         this.newOptionInputTarget.value = ''
 
