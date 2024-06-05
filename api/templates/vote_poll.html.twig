@@ -60,8 +60,8 @@
             </div>
         {% endif %}
     </div>
-    <hr/>
-    <div class="mt-10 flex flex-col">
+    <hr class="mt-5"/>
+    <div class="mt-5 flex flex-col">
         {% if poll.endsAt is not null %}<span>Poll ends at: {{ poll.endsAt | date('d.m.Y - h:i:s') }} (UTC)</span>{% endif %}
         <span>This poll has {{ voteCount }} total votes.</span>
     </div>
