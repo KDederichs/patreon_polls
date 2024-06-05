@@ -62,7 +62,7 @@
     </div>
     <hr class="mt-5"/>
     <div class="mt-5 flex flex-col">
-        {% if poll.endsAt is not null %}<span>Poll ends at: {{ poll.endsAt | date('d.m.Y - h:i:s') }} (UTC)</span>{% endif %}
+        {% if poll.endsAt is not null %}<span>Poll ends at: {{ poll.endsAt | date('d.m.Y - H:i:s') }} (UTC)</span>{% endif %}
         <span>This poll has {{ voteCount }} total votes.</span>
     </div>
     {% if app.user == poll.campaign.campaignOwner %}
