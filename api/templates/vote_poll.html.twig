@@ -7,7 +7,7 @@
     {% endfor %}
 {% endmacro %}
 {% block title_header %}
-    {{ poll.pollName }}
+    {{ poll.pollName }} {% if hasEnded %} (Poll closed){% endif %}
 {% endblock %}
 {% block title %}
     {{ poll.pollName }} {% if hasEnded %} (Poll closed){% endif %}
