@@ -61,6 +61,10 @@ class CanVoteValidator extends ConstraintValidator
         /** @var User $user */
         $user = $this->security->getUser();
 
+        if ($poll->getCampaign()->getCampaignOwner()->getId()->equals($user->getId())) {
+            return;
+        }
+
         /** @var PatreonCampaignMember | null $member */
         $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
         if (!$member) {
