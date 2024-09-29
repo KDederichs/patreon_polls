@@ -2,13 +2,11 @@
 
 namespace App\Service;
 
-use App\Entity\MemberEntitledTier;
 use App\Entity\PatreonCampaign;
-use App\Entity\PatreonCampaignMember;
 use App\Entity\PatreonCampaignTier;
 use App\Entity\PatreonCampaignWebhook;
 use App\Entity\User;
-use App\Repository\PatreonCampaignMemberRepository;
+use App\Message\FetchCampaignMembersMessage;
 use App\Repository\PatreonCampaignRepository;
 use App\Repository\PatreonCampaignTierRepository;
 use App\Repository\PatreonCampaignWebhookRepository;
@@ -17,6 +15,7 @@ use Carbon\CarbonImmutable;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -32,9 +31,9 @@ class PatreonService implements LoggerAwareInterface
         private readonly UserRepository $userRepository,
         private readonly PatreonCampaignRepository $campaignRepository,
         private readonly PatreonCampaignTierRepository $campaignTierRepository,
-        private readonly PatreonCampaignMemberRepository $campaignMemberRepository,
         private readonly PatreonCampaignWebhookRepository $campaignWebhookRepository,
         private readonly RouterInterface $router,
+        private readonly MessageBusInterface $bus,
     ) {
     }
 
@@ -132,64 +131,10 @@ class PatreonService implements LoggerAwareInterface
 
     public function fetchCampaignMembers(PatreonCampaign $campaign): void
     {
-        $cursor = null;
-        $tierCache = [];
-        do {
-            /** @var PatreonCampaign $dbCampaign */
-            $dbCampaign = $this->campaignRepository->find($campaign->getId());
-            $payload = $this->doFetchMembersRequest($dbCampaign, $cursor);
-            $cursor = $payload['meta']['pagination']['cursors']['next'] ?? null;
-
-            $batchIds = [];
-
-            foreach ($payload['data'] as $memberData) {
-                if (($memberData['type'] ?? null) !== 'member') {
-                    continue;
-                }
-                $batchIds[] = $memberData['relationships']['user']['data']['id'];
-            }
-
-            $exisingIds = $this->campaignMemberRepository->getExistingIds($batchIds);
-            $newMemberIds = array_diff($batchIds, $exisingIds);
-
-            foreach ($payload['data'] as $memberData) {
-                if (($memberData['type'] ?? null) !== 'member') {
-                    continue;
-                }
-                if (in_array($memberData['relationships']['user']['data']['id'], $newMemberIds, true)) {
-                    $member = new PatreonCampaignMember();
-                    $member
-                        ->setCampaign($dbCampaign)
-                        ->setPatreonUserId($memberData['relationships']['user']['data']['id']);
-                    $this->campaignMemberRepository->persist($member);
-                } else {
-                    /** @var PatreonCampaignMember $member */
-                    $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($dbCampaign,$memberData['relationships']['user']['data']['id']);
-                }
-
-                foreach ($member->getEntitledTiers() as $tier) {
-                    $this->campaignMemberRepository->remove($tier);
-                }
-
-                foreach (($memberData['relationships']['currently_entitled_tiers']['data'] ?? []) as $entitled) {
-                    if (!array_key_exists($entitled['id'], $tierCache)) {
-                        $tierCache[$entitled['id']] = $this->campaignTierRepository->findByPatreonTierId($entitled['id']);
-                    }
-
-                    $memberEntitlement = new MemberEntitledTier();
-                    $memberEntitlement
-                        ->setCampaignMember($member)
-                        ->setTier($tierCache[$entitled['id']]);
-                    $this->campaignMemberRepository->persist($memberEntitlement);
-                }
-            }
-            $this->campaignMemberRepository->save();
-            $this->campaignMemberRepository->clear();
-            $tierCache = [];
-        } while ($cursor !== null);
+        $this->bus->dispatch(new FetchCampaignMembersMessage($campaign->getId()));
     }
 
-    private function doFetchMembersRequest(PatreonCampaign $campaign, string $cursor = null): array
+    public function doFetchMembersRequest(PatreonCampaign $campaign, string $cursor = null): array
     {
         $user = $campaign->getCampaignOwner();
         $this->refreshAccessToken($user);

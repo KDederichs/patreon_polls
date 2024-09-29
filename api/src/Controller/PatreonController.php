@@ -48,6 +48,7 @@ class PatreonController extends AbstractController
     ): Response
     {
         $patreonService->syncPatreon($user);
+        $this->addFlash('success', 'Syncing has started. Please wait a minute or so till the import is finished.');
         return $this->redirectToRoute('poll_index');
     }
 }
