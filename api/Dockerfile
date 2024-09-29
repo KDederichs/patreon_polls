@@ -24,6 +24,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 	file \
 	gettext \
 	git \
+	supervisor \
+	htop \
 	&& rm -rf /var/lib/apt/lists/*
 
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
@@ -49,6 +51,7 @@ RUN set -eux; \
 COPY --link frankenphp/conf.d/app.ini $PHP_INI_DIR/conf.d/
 COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile
+COPY --link frankenphp/messanger/messanger-worker.conf /etc/supervisor/conf.d/messanger-worker.conf
 
 ENTRYPOINT ["docker-entrypoint"]
 

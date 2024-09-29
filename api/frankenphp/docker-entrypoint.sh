@@ -35,6 +35,11 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var
+
+	supervisord -c /etc/supervisor/supervisord.conf
+	supervisorctl reread
+	supervisorctl update
+	supervisorctl start messenger-consume:*
 fi
 
 exec docker-php-entrypoint "$@"
