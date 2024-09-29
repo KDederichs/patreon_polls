@@ -34,7 +34,7 @@
         <fieldset>
             <legend class="sr-only">{{ poll.pollName }}</legend>
             <div class="space-y-5" data-poll-target="optionContainer">
-                {% for pollOption in pollOptions %}
+                {% for pollOption in pollOptions | sort((a, b) => b.voteCount <=> a.voteCount) %}
                     {% set voteCount = voteCount + pollOption.voteCount %}
                     <div class="relative flex items-start">
                         <div class="flex h-6 items-center">
