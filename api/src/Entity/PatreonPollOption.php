@@ -33,7 +33,7 @@ class PatreonPollOption
     private User $createdBy;
     #[OneToOne(targetEntity: MediaObject::class, orphanRemoval: true)]
     private ?MediaObject $mediaObject = null;
-    #[OneToMany(targetEntity: PatreonPollVote::class, mappedBy: 'option',fetch: 'EAGER')]
+    #[OneToMany(targetEntity: PatreonPollVote::class, mappedBy: 'option', cascade: ['remove'], fetch: 'EAGER')]
     private Collection $votes;
 
     public function __construct()
