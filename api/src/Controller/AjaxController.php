@@ -51,8 +51,12 @@ class AjaxController extends AbstractController
         $poll = $this->patreonPollRepository->find(Uuid::fromString($payload->getPollId()));
         /** @var PatreonCampaignMember $member */
         $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
-        /** @var PatreonPollTierVoteConfig $voteConfig */
-        $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getHighestEntitledTier()->getTier(), $poll);
+        $voteConfig = null;
+        if ($member) {
+            /** @var PatreonPollTierVoteConfig $voteConfig */
+            $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getHighestEntitledTier()->getTier(), $poll);
+        }
+
 
 
         $newOption = new PatreonPollOption();
@@ -68,7 +72,7 @@ class AjaxController extends AbstractController
             ->setOption($newOption)
             ->setPoll($poll)
             ->setVotedBy($user)
-            ->setVotePower($voteConfig->getVotingPower())
+            ->setVotePower($voteConfig?->getVotingPower() ?? 1)
         ;
         $this->patreonPollOptionRepository->persist($vote);
 
@@ -117,8 +121,11 @@ class AjaxController extends AbstractController
         $option = $this->patreonPollOptionRepository->find(Uuid::fromString($payload->getOptionId()));
         /** @var PatreonCampaignMember $member */
         $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
-        /** @var PatreonPollTierVoteConfig $voteConfig */
-        $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getHighestEntitledTier()->getTier(), $poll);
+        $voteConfig = null;
+        if ($member) {
+            /** @var PatreonPollTierVoteConfig $voteConfig */
+            $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getHighestEntitledTier()->getTier(), $poll);
+        }
 
         try {
             $vote = new PatreonPollVote();
@@ -126,7 +133,7 @@ class AjaxController extends AbstractController
                 ->setOption($option)
                 ->setPoll($poll)
                 ->setVotedBy($user)
-                ->setVotePower($voteConfig->getVotingPower())
+                ->setVotePower($voteConfig?->getVotingPower() ?? 1)
             ;
             $this->patreonPollOptionRepository->persist($vote);
 
