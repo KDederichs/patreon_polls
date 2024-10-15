@@ -3,8 +3,8 @@
 namespace App\Twig;
 
 use App\Dto\CreatePollData;
-use App\Entity\PatreonPoll;
-use App\Entity\PatreonPollTierVoteConfig;
+use App\Entity\Poll;
+use App\Entity\PollVoteConfig;
 use App\Form\Type\CreateFormType;
 use App\Repository\PatreonCampaignTierRepository;
 use Carbon\Carbon;
@@ -48,7 +48,7 @@ class PollCreator extends AbstractController
 
         /** @var CreatePollData $data */
         $data = $this->getForm()->getData();
-        $poll = new PatreonPoll();
+        $poll = new Poll();
         $poll
             ->setCampaign($data->getPatreonCampaign())
             ->setPollName($data->getPollName())
@@ -70,7 +70,7 @@ class PollCreator extends AbstractController
 
         foreach ($tierConfigMap as $tierId => $config) {
             $tierEntity = $this->campaignTierRepository->find(Uuid::fromString($tierId));
-            $voteConfig = new PatreonPollTierVoteConfig();
+            $voteConfig = new PollVoteConfig();
             $voteConfig
                 ->setCampaignTier($tierEntity)
                 ->setPatreonPoll($poll)

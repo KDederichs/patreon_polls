@@ -10,6 +10,7 @@ use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonCampaignRepository;
 use App\Repository\PatreonCampaignTierRepository;
 use App\Repository\PatreonCampaignWebhookRepository;
+use App\Repository\PatreonUserRepository;
 use App\Util\SentryHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,6 +30,7 @@ class WebhookController extends AbstractController
         PatreonCampaignWebhookRepository $campaignWebhookRepository,
         PatreonCampaignMemberRepository $campaignMemberRepository,
         PatreonCampaignTierRepository $tierRepository,
+        PatreonUserRepository $patreonUserRepository,
         LoggerInterface $logger
     ): Response
     {
@@ -63,6 +65,9 @@ class WebhookController extends AbstractController
                 ->setCampaign($campaign)
                 ->setPatreonUserId($userId);
             $campaignMemberRepository->persist($member);
+        }
+        if (!$member->getPatreonUser()) {
+            $member->setPatreonUser($patreonUserRepository->findByPatreonId($member->getPatreonUserId()));
         }
         foreach ($member->getEntitledTiers() as $tier) {
             $campaignMemberRepository->remove($tier);

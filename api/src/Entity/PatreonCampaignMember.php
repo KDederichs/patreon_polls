@@ -24,13 +24,16 @@ class PatreonCampaignMember
     private Uuid $id;
     #[Column(type: 'datetime_immutable')]
     private CarbonImmutable $createdAt;
-    #[Column(type: 'string', length: 64)]
+    #[Column(name: 'patreon_user_id_string', type: 'string', length: 64)]
     private string $patreonUserId;
     #[ManyToOne(targetEntity: PatreonCampaign::class)]
     #[JoinColumn(nullable: false)]
     private PatreonCampaign $campaign;
     #[OneToMany(targetEntity: MemberEntitledTier::class, mappedBy: 'campaignMember',fetch: 'EAGER')]
     private Collection $entitledTiers;
+    #[ManyToOne(targetEntity: PatreonUser::class)]
+    #[JoinColumn(referencedColumnName: '')]
+    private ?PatreonUser $patreonUser = null;
 
     public function __construct()
     {
@@ -98,5 +101,16 @@ class PatreonCampaignMember
     public function __toString(): string
     {
         return $this->patreonUserId;
+    }
+
+    public function getPatreonUser(): ?PatreonUser
+    {
+        return $this->patreonUser;
+    }
+
+    public function setPatreonUser(?PatreonUser $patreonUser): PatreonCampaignMember
+    {
+        $this->patreonUser = $patreonUser;
+        return $this;
     }
 }

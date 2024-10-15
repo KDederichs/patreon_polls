@@ -2,7 +2,7 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\PatreonPollVote;
+use App\Entity\PollVote;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
@@ -14,7 +14,7 @@ class PatreonPollVoteCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
-        return PatreonPollVote::class;
+        return PollVote::class;
     }
 
 

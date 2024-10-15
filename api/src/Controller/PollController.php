@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\PatreonPoll;
-use App\Entity\PatreonPollOption;
+use App\Entity\Poll;
+use App\Entity\PollOption;
 use App\Entity\User;
 use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonPollOptionRepository;
@@ -36,7 +36,7 @@ class PollController extends AbstractController
     }
 
     #[Route('/poll/{poll}/vote', name: 'poll_vote')]
-    public function votePoll(PatreonPoll $poll, #[CurrentUser] User $user): Response
+    public function votePoll(Poll $poll, #[CurrentUser] User $user): Response
     {
         $options = $this->patreonPollOptionRepository->getOptionsForPoll($poll);
         $myVotes = $this->patreonPollVoteRepository->findMyVotes($user, $poll);
@@ -66,7 +66,7 @@ class PollController extends AbstractController
     }
 
     #[Route('/poll/{poll}/download-marbles', name: 'poll_marbles_download')]
-    public function downloadMarblesCsv(PatreonPoll $poll, #[CurrentUser] User $user): Response
+    public function downloadMarblesCsv(Poll $poll, #[CurrentUser] User $user): Response
     {
         if (!$poll->getCampaign()->getCampaignOwner()->getId()->equals($user->getId())) {
             throw new AccessDeniedHttpException();
@@ -74,7 +74,7 @@ class PollController extends AbstractController
 
         $options = $this->patreonPollOptionRepository->getOptionsForPoll($poll);
         $csvVotes = [];
-        /** @var PatreonPollOption $option */
+        /** @var PollOption $option */
         foreach ($options as $option) {
             for ($i = 0; $i < $option->getVoteCount(); $i++) {
                 $csvVotes[] = $option->getOptionName();

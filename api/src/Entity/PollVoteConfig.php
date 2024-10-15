@@ -15,15 +15,15 @@ use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonPollTierVoteConfigRepository::class)]
 #[UniqueConstraint(fields: ['patreonPoll', 'campaignTier'])]
-class PatreonPollTierVoteConfig
+class PollVoteConfig
 {
     #[Id, Column(type: UuidType::NAME)]
     private Uuid $id;
     #[Column(type: 'datetime_immutable')]
     private CarbonImmutable $createdAt;
-    #[ManyToOne(targetEntity: PatreonPoll::class)]
+    #[ManyToOne(targetEntity: Poll::class)]
     #[JoinColumn(nullable: false)]
-    public PatreonPoll $patreonPoll;
+    public Poll $patreonPoll;
     #[ManyToOne(targetEntity: PatreonCampaignTier::class)]
     #[JoinColumn(nullable: false)]
     public PatreonCampaignTier $campaignTier;
@@ -50,12 +50,12 @@ class PatreonPollTierVoteConfig
         return $this->createdAt;
     }
 
-    public function getPatreonPoll(): PatreonPoll
+    public function getPatreonPoll(): Poll
     {
         return $this->patreonPoll;
     }
 
-    public function setPatreonPoll(PatreonPoll $patreonPoll): PatreonPollTierVoteConfig
+    public function setPatreonPoll(Poll $patreonPoll): PollVoteConfig
     {
         $this->patreonPoll = $patreonPoll;
         return $this;
@@ -66,7 +66,7 @@ class PatreonPollTierVoteConfig
         return $this->campaignTier;
     }
 
-    public function setCampaignTier(PatreonCampaignTier $campaignTier): PatreonPollTierVoteConfig
+    public function setCampaignTier(PatreonCampaignTier $campaignTier): PollVoteConfig
     {
         $this->campaignTier = $campaignTier;
         return $this;
@@ -77,7 +77,7 @@ class PatreonPollTierVoteConfig
         return $this->numberOfVotes;
     }
 
-    public function setNumberOfVotes(int $numberOfVotes): PatreonPollTierVoteConfig
+    public function setNumberOfVotes(int $numberOfVotes): PollVoteConfig
     {
         $this->numberOfVotes = $numberOfVotes;
         return $this;
@@ -88,7 +88,7 @@ class PatreonPollTierVoteConfig
         return $this->votingPower;
     }
 
-    public function setVotingPower(int $votingPower): PatreonPollTierVoteConfig
+    public function setVotingPower(int $votingPower): PollVoteConfig
     {
         $this->votingPower = $votingPower;
         return $this;
@@ -99,7 +99,7 @@ class PatreonPollTierVoteConfig
         return $this->maxOptionAdd;
     }
 
-    public function setMaxOptionAdd(int $maxOptionAdd): PatreonPollTierVoteConfig
+    public function setMaxOptionAdd(int $maxOptionAdd): PollVoteConfig
     {
         $this->maxOptionAdd = $maxOptionAdd;
         return $this;

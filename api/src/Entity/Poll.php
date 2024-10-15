@@ -13,7 +13,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonPollRepository::class)]
-class PatreonPoll
+class Poll
 {
     #[Id, Column(type: UuidType::NAME)]
     private Uuid $id;
@@ -48,7 +48,7 @@ class PatreonPoll
         return $this->pollName;
     }
 
-    public function setPollName(string $pollName): PatreonPoll
+    public function setPollName(string $pollName): Poll
     {
         $this->pollName = $pollName;
         return $this;
@@ -59,7 +59,7 @@ class PatreonPoll
         return $this->endsAt;
     }
 
-    public function setEndsAt(?CarbonImmutable $endsAt): PatreonPoll
+    public function setEndsAt(?CarbonImmutable $endsAt): Poll
     {
         $this->endsAt = $endsAt;
         return $this;
@@ -70,7 +70,7 @@ class PatreonPoll
         return $this->campaign;
     }
 
-    public function setCampaign(PatreonCampaign $campaign): PatreonPoll
+    public function setCampaign(PatreonCampaign $campaign): Poll
     {
         $this->campaign = $campaign;
         return $this;

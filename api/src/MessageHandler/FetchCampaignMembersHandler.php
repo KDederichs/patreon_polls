@@ -9,6 +9,7 @@ use App\Message\FetchCampaignMembersMessage;
 use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonCampaignRepository;
 use App\Repository\PatreonCampaignTierRepository;
+use App\Repository\PatreonUserRepository;
 use App\Service\PatreonService;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
@@ -24,6 +25,7 @@ class FetchCampaignMembersHandler implements LoggerAwareInterface
         private readonly PatreonCampaignMemberRepository $campaignMemberRepository,
         private readonly PatreonCampaignTierRepository $campaignTierRepository,
         private readonly PatreonService $patreonService,
+        private readonly PatreonUserRepository $patreonUserRepository,
     )
     {
 
@@ -86,6 +88,11 @@ class FetchCampaignMembersHandler implements LoggerAwareInterface
                         ->setCampaignMember($member)
                         ->setTier($tierCache[$entitled['id']]);
                     $this->campaignMemberRepository->persist($memberEntitlement);
+                }
+
+                if (!$member->getPatreonUser()) {
+                    $patreonUser = $this->patreonUserRepository->findByPatreonId($member->getPatreonUserId());
+                    $member->setPatreonUser($patreonUser);
                 }
             }
             $this->campaignMemberRepository->save();

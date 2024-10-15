@@ -6,10 +6,10 @@ use App\Dto\AddPollOptionVotePayload;
 use App\Dto\CreatePollOptionPayload;
 use App\Dto\RemovePollOptionVotePayload;
 use App\Entity\PatreonCampaignMember;
-use App\Entity\PatreonPoll;
-use App\Entity\PatreonPollOption;
-use App\Entity\PatreonPollTierVoteConfig;
-use App\Entity\PatreonPollVote;
+use App\Entity\Poll;
+use App\Entity\PollOption;
+use App\Entity\PollVoteConfig;
+use App\Entity\PollVote;
 use App\Entity\User;
 use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonPollOptionRepository;
@@ -47,19 +47,19 @@ class AjaxController extends AbstractController
         #[CurrentUser] User $user
     ): Response
     {
-        /** @var PatreonPoll $poll */
+        /** @var Poll $poll */
         $poll = $this->patreonPollRepository->find(Uuid::fromString($payload->getPollId()));
         /** @var PatreonCampaignMember $member */
         $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
         $voteConfig = null;
         if ($member) {
-            /** @var PatreonPollTierVoteConfig $voteConfig */
+            /** @var PollVoteConfig $voteConfig */
             $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getHighestEntitledTier()->getTier(), $poll);
         }
 
 
 
-        $newOption = new PatreonPollOption();
+        $newOption = new PollOption();
         $newOption
             ->setPoll($poll)
             ->setCreatedBy($user)
@@ -67,7 +67,7 @@ class AjaxController extends AbstractController
 
         $this->patreonPollOptionRepository->persist($newOption);
 
-        $vote = new PatreonPollVote();
+        $vote = new PollVote();
         $vote
             ->setOption($newOption)
             ->setPoll($poll)
@@ -90,7 +90,7 @@ class AjaxController extends AbstractController
         #[CurrentUser] User $user
     ): Response
     {
-        /** @var PatreonPollVote $vote */
+        /** @var PollVote $vote */
         $vote = $this->patreonPollVoteRepository->find(Uuid::fromString($payload->getVoteId()));
 
         if (!$vote) {
@@ -115,20 +115,20 @@ class AjaxController extends AbstractController
         #[CurrentUser] User $user
     ): Response
     {
-        /** @var PatreonPoll $poll */
+        /** @var Poll $poll */
         $poll = $this->patreonPollRepository->find(Uuid::fromString($payload->getPollId()));
-        /** @var PatreonPollOption $option */
+        /** @var PollOption $option */
         $option = $this->patreonPollOptionRepository->find(Uuid::fromString($payload->getOptionId()));
         /** @var PatreonCampaignMember $member */
         $member = $this->campaignMemberRepository->findByCampaignAndPatreonUserId($poll->getCampaign(), $user->getPatreonId());
         $voteConfig = null;
         if ($member) {
-            /** @var PatreonPollTierVoteConfig $voteConfig */
+            /** @var PollVoteConfig $voteConfig */
             $voteConfig = $this->voteConfigRepository->findByCampaignTierAndPoll($member->getHighestEntitledTier()->getTier(), $poll);
         }
 
         try {
-            $vote = new PatreonPollVote();
+            $vote = new PollVote();
             $vote
                 ->setOption($option)
                 ->setPoll($poll)

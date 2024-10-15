@@ -17,15 +17,15 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonPollOptionRepository::class)]
-class PatreonPollOption
+class PollOption
 {
     #[Id, Column(type: UuidType::NAME)]
     private Uuid $id;
     #[Column(type: 'datetime_immutable')]
     private CarbonImmutable $createdAt;
-    #[ManyToOne(targetEntity: PatreonPoll::class)]
+    #[ManyToOne(targetEntity: Poll::class)]
     #[JoinColumn(nullable: false)]
-    private PatreonPoll $poll;
+    private Poll $poll;
     #[Column(type: 'text')]
     private string $optionName;
     #[ManyToOne(targetEntity: User::class)]
@@ -33,7 +33,7 @@ class PatreonPollOption
     private User $createdBy;
     #[OneToOne(targetEntity: MediaObject::class, orphanRemoval: true)]
     private ?MediaObject $mediaObject = null;
-    #[OneToMany(targetEntity: PatreonPollVote::class, mappedBy: 'option', cascade: ['remove'], fetch: 'EAGER')]
+    #[OneToMany(targetEntity: PollVote::class, mappedBy: 'option', cascade: ['remove'], fetch: 'EAGER')]
     private Collection $votes;
 
     public function __construct()
@@ -53,12 +53,12 @@ class PatreonPollOption
         return $this->createdAt;
     }
 
-    public function getPoll(): PatreonPoll
+    public function getPoll(): Poll
     {
         return $this->poll;
     }
 
-    public function setPoll(PatreonPoll $poll): PatreonPollOption
+    public function setPoll(Poll $poll): PollOption
     {
         $this->poll = $poll;
         return $this;
@@ -69,7 +69,7 @@ class PatreonPollOption
         return $this->optionName;
     }
 
-    public function setOptionName(string $optionName): PatreonPollOption
+    public function setOptionName(string $optionName): PollOption
     {
         $this->optionName = $optionName;
         return $this;
@@ -80,7 +80,7 @@ class PatreonPollOption
         return $this->createdBy;
     }
 
-    public function setCreatedBy(User $createdBy): PatreonPollOption
+    public function setCreatedBy(User $createdBy): PollOption
     {
         $this->createdBy = $createdBy;
         return $this;
@@ -91,7 +91,7 @@ class PatreonPollOption
         return $this->mediaObject;
     }
 
-    public function setMediaObject(?MediaObject $mediaObject): PatreonPollOption
+    public function setMediaObject(?MediaObject $mediaObject): PollOption
     {
         $this->mediaObject = $mediaObject;
         return $this;
@@ -102,7 +102,7 @@ class PatreonPollOption
         return $this->votes;
     }
 
-    public function setVotes(Collection $votes): PatreonPollOption
+    public function setVotes(Collection $votes): PollOption
     {
         $this->votes = $votes;
         return $this;
@@ -111,7 +111,7 @@ class PatreonPollOption
     public function getVoteCount(): int
     {
         return $this->votes->reduce(
-            static fn (int $carryOver, PatreonPollVote $vote) => $carryOver + $vote->getVotePower(),
+            static fn (int $carryOver, PollVote $vote) => $carryOver + $vote->getVotePower(),
             0
         ) ?? 0;
     }

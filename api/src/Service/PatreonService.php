@@ -5,12 +5,12 @@ namespace App\Service;
 use App\Entity\PatreonCampaign;
 use App\Entity\PatreonCampaignTier;
 use App\Entity\PatreonCampaignWebhook;
-use App\Entity\User;
+use App\Entity\PatreonUser;
 use App\Message\FetchCampaignMembersMessage;
 use App\Repository\PatreonCampaignRepository;
 use App\Repository\PatreonCampaignTierRepository;
 use App\Repository\PatreonCampaignWebhookRepository;
-use App\Repository\UserRepository;
+use App\Repository\PatreonUserRepository;
 use Carbon\CarbonImmutable;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
@@ -28,19 +28,19 @@ class PatreonService implements LoggerAwareInterface
         private readonly HttpClientInterface $client,
         #[Autowire(env: 'PATREON_ID')] private readonly string $patreonClientId,
         #[Autowire(env: 'PATREON_SECRET')] private readonly string $patreonClientSecret,
-        private readonly UserRepository $userRepository,
         private readonly PatreonCampaignRepository $campaignRepository,
         private readonly PatreonCampaignTierRepository $campaignTierRepository,
         private readonly PatreonCampaignWebhookRepository $campaignWebhookRepository,
         private readonly RouterInterface $router,
         private readonly MessageBusInterface $bus,
+        private readonly PatreonUserRepository $patreonUserRepository,
     ) {
     }
 
-    public function refreshAccessToken(User $user): void
+    public function refreshAccessToken(PatreonUser $patreonUser): void
     {
-        if ($user->getPatreonTokenExpiresAt()?->isPast()) {
-            $refreshToken = $user->getPatreonRefreshToken();
+        if ($patreonUser->getPatreonTokenExpiresAt()?->isPast()) {
+            $refreshToken = $patreonUser->getPatreonRefreshToken();
             $clientId = $this->patreonClientId;
             $clientSecret = $this->patreonClientSecret;
             $response = $this->client->request(
@@ -54,19 +54,19 @@ class PatreonService implements LoggerAwareInterface
             );
             $content = $response->getContent();
             $payload = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-            $user
+            $patreonUser
                 ->setPatreonScope($payload['scope'])
                 ->setPatreonRefreshToken($payload['refresh_token'])
                 ->setPatreonTokenExpiresAt(CarbonImmutable::now()->addSeconds($payload['expires_in']))
                 ->setPatreonAccessToken($payload['access_token'])
                 ->setPatreonTokenType($payload['token_type']);
-            $this->userRepository->save();
+            $this->patreonUserRepository->save();
         }
     }
 
-    public function refreshCampaigns(User $user): array
+    public function refreshCampaigns(PatreonUser $patreonUser): array
     {
-        $this->refreshAccessToken($user);
+        $this->refreshAccessToken($patreonUser);
         $payload = [
             'include' => 'tiers',
             'fields[campaign]' => 'creation_name',
@@ -78,7 +78,7 @@ class PatreonService implements LoggerAwareInterface
             [
                 'headers' => [
                     'Accept' => 'application/json',
-                    'Authorization' => $user->getPatreonTokenType().' ' . $user->getPatreonAccessToken(),
+                    'Authorization' => $patreonUser->getPatreonTokenType().' ' . $patreonUser->getPatreonAccessToken(),
                 ]
             ]
         );
@@ -90,7 +90,7 @@ class PatreonService implements LoggerAwareInterface
             if (!$campaign) {
                 $campaign = new PatreonCampaign();
                 $campaign
-                    ->setCampaignOwner($user)
+                    ->setOwner($patreonUser)
                     ->setPatreonCampaignId($campaignData['id']);
                 $this->campaignRepository->persist($campaign);
 
@@ -136,7 +136,7 @@ class PatreonService implements LoggerAwareInterface
 
     public function doFetchMembersRequest(PatreonCampaign $campaign, string $cursor = null): array
     {
-        $user = $campaign->getCampaignOwner();
+        $user = $campaign->getOwner();
         $this->refreshAccessToken($user);
 
         $queryParams = [
@@ -169,7 +169,7 @@ class PatreonService implements LoggerAwareInterface
         if ($webhook) {
             return;
         }
-        $user = $dbCampaign->getCampaignOwner();
+        $user = $dbCampaign->getOwner();
         $this->refreshAccessToken($user);
         $uri = $this->router->generate('patreon_webhooks',[], UrlGeneratorInterface::ABSOLUTE_URL);
         $uri = str_replace('http://','https://', $uri);
@@ -229,7 +229,7 @@ class PatreonService implements LoggerAwareInterface
         $this->campaignRepository->save();
     }
 
-    public function syncPatreon(User $user): void
+    public function syncPatreon(PatreonUser $user): void
     {
         /** @var PatreonCampaign[] $campaigns */
         $campaigns = $this->refreshCampaigns($user);
@@ -240,7 +240,7 @@ class PatreonService implements LoggerAwareInterface
         }
     }
 
-    public function convertToCreatorAccount(User $user): void
+    public function convertToCreatorAccount(PatreonUser $user): void
     {
         /** @var PatreonCampaign[] $campaigns */
         $campaigns = $this->refreshCampaigns($user);
@@ -249,11 +249,12 @@ class PatreonService implements LoggerAwareInterface
             $this->fetchCampaignMembers($campaign);
             $this->enableMemberUpdateWebhook($campaign);
         }
-        $dbUser = $this->userRepository->find($user->getId());
-        $this->userRepository->getEntityManager()->refresh($dbUser);
+        /** @var PatreonUser $dbUser */
+        $dbUser = $this->patreonUserRepository->find($user->getId());
+        $this->patreonUserRepository->getEntityManager()->refresh($dbUser);
         $dbUser->setCreator(true);
 
-        $this->userRepository->save();
+        $this->patreonUserRepository->save();
     }
 
     public function setLogger(LoggerInterface $logger): void

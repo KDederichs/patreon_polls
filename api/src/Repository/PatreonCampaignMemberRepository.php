@@ -21,6 +21,22 @@ class PatreonCampaignMemberRepository   extends AbstractBaseRepository
         ]);
     }
 
+    /**
+     * @param string $patreonUserId
+     * @return PatreonCampaignMember[]
+     */
+    public function findUnconnectedMembershipsForId(string $patreonUserId): array
+    {
+        $qb = $this->createQueryBuilder('pcm');
+        return $qb
+            ->select('pcm')
+            ->where('pcm.patreonUserId = :patreonUserId')
+            ->andWhere('pcm.patreonUser IS NULL')
+            ->setParameter('patreonUserId', $patreonUserId)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function getExistingIds(array $existingIdsToCheck): array
     {
         if (empty($existingIdsToCheck)) {

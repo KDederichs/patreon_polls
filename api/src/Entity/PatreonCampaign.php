@@ -26,6 +26,8 @@ class PatreonCampaign
     private User $campaignOwner;
     #[Column(type: 'string', length: 64, unique: true)]
     private string $patreonCampaignId;
+    #[ManyToOne(targetEntity: PatreonUser::class)]
+    private ?PatreonUser $owner = null;
 
     public function __construct()
     {
@@ -79,6 +81,17 @@ class PatreonCampaign
     public function __toString(): string
     {
         return $this->campaignName;
+    }
+
+    public function getOwner(): ?PatreonUser
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?PatreonUser $owner): PatreonCampaign
+    {
+        $this->owner = $owner;
+        return $this;
     }
 
 

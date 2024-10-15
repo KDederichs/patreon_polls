@@ -23,20 +23,8 @@ class User implements UserInterface
     private CarbonImmutable $createdAt;
     #[Column(type: 'string', length: 64, unique: true, nullable: true)]
     private ?string $patreonId = null;
-    #[Column(type: 'string', length: 64, nullable: true)]
-    private ?string $patreonAccessToken = null;
-    #[Column(type: 'string', length: 64, nullable: true)]
-    private ?string $patreonRefreshToken = null;
-    #[Column(type: 'text', nullable: true)]
-    private ?string $patreonScope = null;
-    #[Column(type: 'text', nullable: true)]
-    private ?string $patreonTokenType = null;
     #[Column(type: 'text')]
     private string $username;
-    #[Column(type: 'datetime_immutable', nullable: true)]
-    private ?CarbonImmutable $patreonTokenExpiresAt = null;
-    #[Column(type: 'boolean', options: ['default' => false])]
-    private bool $creator = false;
     #[Column(type: 'boolean', options: ['default' => false])]
     private bool $admin = false;
 
@@ -82,61 +70,6 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getPatreonAccessToken(): ?string
-    {
-        return $this->patreonAccessToken;
-    }
-
-    public function setPatreonAccessToken(?string $patreonAccessToken): User
-    {
-        $this->patreonAccessToken = $patreonAccessToken;
-        return $this;
-    }
-
-    public function getPatreonRefreshToken(): ?string
-    {
-        return $this->patreonRefreshToken;
-    }
-
-    public function setPatreonRefreshToken(?string $patreonRefreshToken): User
-    {
-        $this->patreonRefreshToken = $patreonRefreshToken;
-        return $this;
-    }
-
-    public function getPatreonScope(): ?string
-    {
-        return $this->patreonScope;
-    }
-
-    public function setPatreonScope(?string $patreonScope): User
-    {
-        $this->patreonScope = $patreonScope;
-        return $this;
-    }
-
-    public function getPatreonTokenType(): ?string
-    {
-        return $this->patreonTokenType;
-    }
-
-    public function setPatreonTokenType(?string $patreonTokenType): User
-    {
-        $this->patreonTokenType = $patreonTokenType;
-        return $this;
-    }
-
-    public function getPatreonTokenExpiresAt(): ?CarbonImmutable
-    {
-        return $this->patreonTokenExpiresAt;
-    }
-
-    public function setPatreonTokenExpiresAt(?CarbonImmutable $patreonTokenExpiresAt): User
-    {
-        $this->patreonTokenExpiresAt = $patreonTokenExpiresAt;
-        return $this;
-    }
-
     public function getUsername(): string
     {
         return $this->username;
@@ -151,17 +84,6 @@ class User implements UserInterface
     public function __toString(): string
     {
         return $this->username;
-    }
-
-    public function isCreator(): bool
-    {
-        return $this->creator;
-    }
-
-    public function setCreator(bool $creator): User
-    {
-        $this->creator = $creator;
-        return $this;
     }
 
     public function isAdmin(): bool

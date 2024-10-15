@@ -15,18 +15,18 @@ use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonPollVoteRepository::class)]
 #[UniqueConstraint(fields: ['option', 'votedBy'])]
-class PatreonPollVote
+class PollVote
 {
     #[Id, Column(type: UuidType::NAME)]
     private Uuid $id;
     #[Column(type: 'datetime_immutable')]
     private CarbonImmutable $createdAt;
-    #[ManyToOne(targetEntity: PatreonPoll::class)]
+    #[ManyToOne(targetEntity: Poll::class)]
     #[JoinColumn(nullable: false)]
-    private PatreonPoll $poll;
-    #[ManyToOne(targetEntity: PatreonPollOption::class, inversedBy: 'votes')]
+    private Poll $poll;
+    #[ManyToOne(targetEntity: PollOption::class, inversedBy: 'votes')]
     #[JoinColumn(nullable: false)]
-    private PatreonPollOption $option;
+    private PollOption $option;
     #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(nullable: false)]
     private User $votedBy;
@@ -50,12 +50,12 @@ class PatreonPollVote
         return $this->createdAt;
     }
 
-    public function getOption(): PatreonPollOption
+    public function getOption(): PollOption
     {
         return $this->option;
     }
 
-    public function setOption(PatreonPollOption $option): PatreonPollVote
+    public function setOption(PollOption $option): PollVote
     {
         $this->option = $option;
         return $this;
@@ -66,18 +66,18 @@ class PatreonPollVote
         return $this->votedBy;
     }
 
-    public function setVotedBy(User $votedBy): PatreonPollVote
+    public function setVotedBy(User $votedBy): PollVote
     {
         $this->votedBy = $votedBy;
         return $this;
     }
 
-    public function getPoll(): PatreonPoll
+    public function getPoll(): Poll
     {
         return $this->poll;
     }
 
-    public function setPoll(PatreonPoll $poll): PatreonPollVote
+    public function setPoll(Poll $poll): PollVote
     {
         $this->poll = $poll;
         return $this;
@@ -88,7 +88,7 @@ class PatreonPollVote
         return $this->votePower;
     }
 
-    public function setVotePower(int $votePower): PatreonPollVote
+    public function setVotePower(int $votePower): PollVote
     {
         $this->votePower = $votePower;
         return $this;

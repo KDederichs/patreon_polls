@@ -5,18 +5,18 @@ namespace App\Repository;
 use App\Entity\PatreonCampaign;
 use App\Entity\PatreonCampaignMember;
 use App\Entity\PatreonCampaignTier;
-use App\Entity\PatreonPoll;
-use App\Entity\PatreonPollTierVoteConfig;
+use App\Entity\Poll;
+use App\Entity\PollVoteConfig;
 use Doctrine\Persistence\ManagerRegistry;
 
 class PatreonPollTierVoteConfigRepository   extends AbstractBaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, PatreonPollTierVoteConfig::class);
+        parent::__construct($registry, PollVoteConfig::class);
     }
 
-    public function findByCampaignTierAndPoll(PatreonCampaignTier $campaignTier, PatreonPoll $patreonPoll): ?PatreonPollTierVoteConfig
+    public function findByCampaignTierAndPoll(PatreonCampaignTier $campaignTier, Poll $patreonPoll): ?PollVoteConfig
     {
         return $this->findOneBy([
             'campaignTier' => $campaignTier,
