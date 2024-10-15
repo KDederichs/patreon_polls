@@ -25,6 +25,10 @@ services:
         protocol: udp
     volumes:
       - session_data:/app/var/sessions
+  pwa:
+    build:
+      context: ./pwa
+      target: prod
   database:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
