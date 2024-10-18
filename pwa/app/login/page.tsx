@@ -15,8 +15,10 @@ export default function LoginPage() {
         <p className="pb-2 text-xl font-medium">Log In</p>
         <div className="flex flex-col gap-2">
           <Button
+            as={Link}
             startContent={<Icon icon="ph:patreon-logo" width={24} />}
             variant="bordered"
+            href={'/oauth/connect/patreon'}
           >
             Login with Patreon
           </Button>

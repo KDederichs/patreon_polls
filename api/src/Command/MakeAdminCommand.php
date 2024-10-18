@@ -32,7 +32,7 @@ class MakeAdminCommand extends Command
             return self::FAILURE;
         }
 
-        $user = $this->userRepository->findByPatreonId($patreonId);
+        $user = $this->userRepository->findByResourceOwnerId($patreonId);
         if (!$user) {
             $output->writeln('User not found');
             return self::FAILURE;

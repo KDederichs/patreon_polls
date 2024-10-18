@@ -16,7 +16,7 @@ class PatreonUserRepository extends AbstractBaseRepository
     public function findByPatreonId(string $patreonId): ?PatreonUser
     {
         return $this->findOneBy([
-            'patreonId' => $patreonId
+            'resourceId' => $patreonId
         ]);
     }
 }

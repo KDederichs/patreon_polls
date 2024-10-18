@@ -4,23 +4,33 @@ security:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        patron_provider: 
-            id: App\Security\Oauth\PatreonUserProvider
+        users: 
+            entity:
+                class: App\Entity\User
+                property: 'id'
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            lazy: true
+        login:
+            pattern: ^/(oauth|login)
             oauth:
+                check_path: /login/check
+                success_handler: App\Security\Http\AuthenticationSuccessHandler
+                failure_handler: App\Security\Http\AuthenticationFailureHandler
                 resource_owners:
-                    patreon: "/login/check-patreon"
-                    patreon_creator: "/login/check-patreon-creator"
+                    patreon: "/oauth/check-patreon"
+                    patreon_creator: "/oauth/check-patreon-creator"
                 login_path: /
                 use_forward: false
                 failure_path: /
                 oauth_user_provider:
-                    service: App\Security\Oauth\PatreonUserProvider
+                    service: App\Security\Oauth\OauthUserProvider
+        main:
+            lazy: true
+            access_token:
+                token_handler: App\Security\ApiTokenHandler
+            stateless: true
             logout:
                 path: logout
             # activate different ways to authenticate
@@ -32,14 +42,9 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/connect, roles: PUBLIC_ACCESS }
-        - { path: ^/poll, roles: ROLE_USER } // force login
-        - { path: ^/ajax, roles: ROLE_USER } // force login
-        - { path: ^/patreon, roles: ROLE_USER } // force login
-        - { path: ^/logout, roles: ROLE_USER } // force login
+        - { path: ^/oauth, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN } // force login
-        - { path: ^/, roles: PUBLIC_ACCESS } // force login
+        - { path: ^/, roles: ROLE_USER } // force login
 
 
 when@test:

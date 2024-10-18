@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import 'react-toastify/dist/ReactToastify.min.css';
 import { Metadata, Viewport } from "next";
 import { Link } from "@nextui-org/link";
 import clsx from "clsx";
@@ -8,6 +9,9 @@ import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
+import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
+import { ToastContainer } from 'react-toastify'
+
 
 export const metadata: Metadata = {
   title: {
@@ -59,6 +63,8 @@ export default function RootLayout({
               </Link>
             </footer>
           </div>
+          <ReactQueryDevtools initialIsOpen={false} />
+          <ToastContainer />
         </Providers>
       </body>
     </html>

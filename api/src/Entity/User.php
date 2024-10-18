@@ -23,8 +23,8 @@ class User implements UserInterface
     private CarbonImmutable $createdAt;
     #[Column(type: 'string', length: 64, unique: true, nullable: true)]
     private ?string $patreonId = null;
-    #[Column(type: 'text')]
-    private string $username;
+    #[Column(type: 'text', nullable: true)]
+    private ?string $username = null;
     #[Column(type: 'boolean', options: ['default' => false])]
     private bool $admin = false;
 
@@ -70,12 +70,12 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getUsername(): string
+    public function getUsername(): ?string
     {
         return $this->username;
     }
 
-    public function setUsername(string $username): User
+    public function setUsername(?string $username): User
     {
         $this->username = $username;
         return $this;

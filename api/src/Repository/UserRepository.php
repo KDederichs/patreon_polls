@@ -11,8 +11,8 @@ class UserRepository  extends AbstractBaseRepository
     {
         parent::__construct($registry, User::class);
     }
-    public function findByPatreonId(string $patreonId): ?User
+    public function findByResourceOwnerId(string $resourceOwner, string $id): ?User
     {
-        return $this->findOneBy(['patreonId' => $patreonId]);
+        return $this->findOneBy([lcfirst($resourceOwner).'Id' => $id]);
     }
 }
