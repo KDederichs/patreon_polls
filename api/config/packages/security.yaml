@@ -14,8 +14,8 @@ security:
             security: false
         login:
             pattern: ^/(oauth|login)
+            stateless: false
             oauth:
-                check_path: /login/check
                 success_handler: App\Security\Http\AuthenticationSuccessHandler
                 failure_handler: App\Security\Http\AuthenticationFailureHandler
                 resource_owners:
@@ -26,6 +26,8 @@ security:
                 failure_path: /
                 oauth_user_provider:
                     service: App\Security\Oauth\OauthUserProvider
+        admin:
+            pattern: ^/admin
         main:
             lazy: true
             access_token:
@@ -42,6 +44,7 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        - { path: ^/_profiler, roles: PUBLIC_ACCESS }
         - { path: ^/oauth, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN } // force login
         - { path: ^/, roles: ROLE_USER } // force login

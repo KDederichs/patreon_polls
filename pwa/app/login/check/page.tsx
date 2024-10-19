@@ -1,8 +1,8 @@
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import {Spinner} from "@nextui-org/spinner";
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogin } from '@/hooks/mutation/User/useLogin'
 import { toast } from 'react-toastify'
 
@@ -11,15 +11,20 @@ export default function LoginCheckPage() {
   const searchParams = useSearchParams()
   const code = searchParams.get('code')
   const provider = searchParams.get('provider')
+  const [authSuccess, setAuthSuccess] = useState<boolean|undefined>(undefined)
+  const router = useRouter()
 
   const getToken = useLogin({
     provider,
     onSuccess: (tokenResponse) => {
       window.localStorage.setItem('token', tokenResponse.token)
-      toast.success(tokenResponse.token)
+      setAuthSuccess(true)
+      router.push('/user/polls')
     },
     onError: (error) => {
-      toast.error(error.response?.data.description ?? 'An error has occurred.')
+      console.log(error.response)
+      toast.error(error.response?.data.detail ?? 'An error has occurred.')
+      setAuthSuccess(false)
     }
   })
 
@@ -31,15 +36,30 @@ export default function LoginCheckPage() {
         })
       }
     }
-  },[code, getToken])
+  },[code])
 
   return (
     <div className="flex h-full w-full items-center justify-center">
       <div className="flex w-full max-w-md flex-col gap-4 rounded-large bg-content1 px-8 pb-10 pt-6 shadow-small">
-        <p className="pb-2 text-xl font-medium">Please wait while we authenticate you...</p>
-        <div className="flex flex-col w-full justify-center">
-          <Spinner size="lg" />
-        </div>
+        {authSuccess === undefined ? (
+          <>
+            <p className="pb-2 text-xl font-medium">Please wait while we authenticate you...</p>
+            <div className="flex flex-col w-full justify-center">
+              <Spinner size="lg" />
+            </div>
+          </>
+        ) : null}
+        {authSuccess === true ? (
+          <>
+            <p className="pb-2 text-xl font-medium">Authentication successful, you should be redirected now.</p>
+          </>
+        ) : null
+          }
+        {authSuccess === false ? (
+          <>
+            <p className="pb-2 text-xl font-medium">Error during authentication, please try again.</p>
+          </>
+        ) :  null}
       </div>
     </div>
   )

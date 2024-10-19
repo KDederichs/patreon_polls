@@ -1,7 +1,7 @@
 export interface ApiError<T> {
   '@context': string,
   '@type': string,
-  description: string
+  detail: string
   title: string
   violations?: Array<ApiViolation<T>>
 }
