@@ -5,6 +5,7 @@ import {Spinner} from "@nextui-org/spinner";
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogin } from '@/hooks/mutation/User/useLogin'
 import { toast } from 'react-toastify'
+import { setToken } from '@/state/userState'
 
 export default function LoginCheckPage() {
 
@@ -17,7 +18,7 @@ export default function LoginCheckPage() {
   const getToken = useLogin({
     provider,
     onSuccess: (tokenResponse) => {
-      window.localStorage.setItem('token', tokenResponse.token)
+      setToken(tokenResponse.token)
       setAuthSuccess(true)
       router.push('/user/polls')
     },

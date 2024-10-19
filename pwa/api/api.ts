@@ -1,6 +1,7 @@
 import axios from "axios";
 import {LoginInput} from "@/types/mutations/User/LoginInput";
 import {AuthTokenResponse} from "@/types/AuthTokenResponse";
+import { getToken } from '@/state/userState'
 
 const publicAxiosInstance = axios.create({
   headers: {
@@ -18,7 +19,7 @@ const privateAxiosInstance = axios.create({
 // Request interceptor for API calls
 privateAxiosInstance.interceptors.request.use(
   async (config) => {
-    const accessToken = window.localStorage.getItem('token')
+    const accessToken = getToken()
     if (null !== accessToken) {
       config.headers['Authorization'] = `Bearer ${accessToken}`
     }
