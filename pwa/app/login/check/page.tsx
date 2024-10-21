@@ -5,7 +5,7 @@ import {Spinner} from "@nextui-org/spinner";
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogin } from '@/hooks/mutation/User/useLogin'
 import { toast } from 'react-toastify'
-import { setToken } from '@/state/userState'
+import { setIsPatreonCreator, setIsSubscribeStarCreator, setToken } from '@/state/userState'
 
 export default function LoginCheckPage() {
 
@@ -19,6 +19,8 @@ export default function LoginCheckPage() {
     provider,
     onSuccess: (tokenResponse) => {
       setToken(tokenResponse.token)
+      setIsPatreonCreator(tokenResponse.isPatreonCreator)
+      setIsSubscribeStarCreator(tokenResponse.isSubscribestarCreator)
       setAuthSuccess(true)
       router.push('/user/polls')
     },

@@ -4,6 +4,7 @@ namespace App\Security\Http;
 
 use App\Entity\User;
 use App\Repository\ApiTokenRepository;
+use App\Repository\PatreonUserRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +15,8 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
 {
 
     public function __construct(
-        private readonly ApiTokenRepository $apiTokenRepository
+        private readonly ApiTokenRepository $apiTokenRepository,
+        private readonly PatreonUserRepository $patreonUserRepository,
     )
     {
 
@@ -29,6 +31,8 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
 
         return new JsonResponse([
             'token' => $apiToken->getToken(),
+            'isSubscribestarCreator' => false,
+            'isPatreonCreator' => $this->patreonUserRepository->userIsCreator($user),
         ]);
     }
 }

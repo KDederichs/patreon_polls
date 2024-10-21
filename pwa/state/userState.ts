@@ -46,3 +46,5 @@ export const userStore = create<UserState>()(
 
 export const getToken = () => userStore((state) => state.token)
 export const setToken = (token:string|null) => userStore.getState().setToken(token)
+export const setIsPatreonCreator = (isCreator: boolean) => userStore.getState().setPatreonCreatorStatus(isCreator)
+export const setIsSubscribeStarCreator = (isCreator: boolean) => userStore.getState().setSubscribestarCreatorStatus(isCreator)
