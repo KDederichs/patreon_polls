@@ -5,7 +5,13 @@ import {Spinner} from "@nextui-org/spinner";
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogin } from '@/hooks/mutation/User/useLogin'
 import { toast } from 'react-toastify'
-import { setIsPatreonCreator, setIsSubscribeStarCreator, setToken } from '@/state/userState'
+import {
+  setIsPatreonCreator,
+  setIsSubscribeStarCreator,
+  setPatreonUsername,
+  setSubscribestarUsername,
+  setToken,
+} from '@/state/userState'
 
 export default function LoginCheckPage() {
 
@@ -21,11 +27,12 @@ export default function LoginCheckPage() {
       setToken(tokenResponse.token)
       setIsPatreonCreator(tokenResponse.isPatreonCreator)
       setIsSubscribeStarCreator(tokenResponse.isSubscribestarCreator)
+      setPatreonUsername(tokenResponse.patreonUsername ?? null)
+      setSubscribestarUsername(tokenResponse.subscribestarUsername ?? null)
       setAuthSuccess(true)
       router.push('/user/polls')
     },
     onError: (error) => {
-      console.log(error.response)
       toast.error(error.response?.data.detail ?? 'An error has occurred.')
       setAuthSuccess(false)
     }

@@ -11,6 +11,6 @@ hwi_oauth_login:
     prefix:   /oauth
     
 patreon_login:
-    path: /oauth/check-patreon
+    path: /oauth/patreon
 patreon_creator_login:
-    path: /oauth/check-patreon-creator
+    path: /creator/oauth/patreon

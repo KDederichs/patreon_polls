@@ -5,7 +5,7 @@ namespace App\Event;
 use App\Entity\OauthResource;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class OauthResourceConnectedEvent extends Event
+class PostOauthResourceConnectedEvent extends Event
 {
     public function __construct(
         private readonly OauthResource $oauthResource

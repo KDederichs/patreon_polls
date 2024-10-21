@@ -35,6 +35,8 @@ abstract class OauthResource
     #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(nullable: false)]
     private User $user;
+    #[Column(type: 'text', nullable: true)]
+    private ?string $username = null;
 
     public function __construct()
     {
@@ -139,4 +141,17 @@ abstract class OauthResource
         $this->user = $user;
         return $this;
     }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(?string $username): OauthResource
+    {
+        $this->username = $username;
+        return $this;
+    }
+
+
 }

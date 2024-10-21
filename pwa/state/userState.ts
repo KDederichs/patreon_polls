@@ -7,35 +7,28 @@ import { devtools, persist } from 'zustand/middleware'// required for devtools t
 
 interface UserState {
   token: string | null
+  patreonUsername: string | null,
+  subscribestarUsername: string | null,
   isPatreonCreator: boolean
   isSubscribestarCreator: boolean
-  setToken: (token: string| null) => void
-  setPatreonCreatorStatus: (status: boolean) => void
-  setSubscribestarCreatorStatus: (status: boolean) => void
+  updateState: (props: Partial<UserState>) => void;
 }
 
 export const userStore = create<UserState>()(
   persist(
     immer(
-      (set)=> ({
+      (set,get)=> ({
           token: null,
           isPatreonCreator: false,
           isSubscribestarCreator: false,
-          setToken: (newToken) => set(
-            (state) => {
-              state.token = newToken
-            }
-          ),
-          setPatreonCreatorStatus: (newState) => set(
-            (state) => {
-              state.isPatreonCreator = newState
-            }
-          ),
-          setSubscribestarCreatorStatus: (newState) => set(
-            (state) => {
-              state.isSubscribestarCreator = newState
-            }
-          )
+          subscribestarUsername: null,
+          patreonUsername: null,
+          updateState: (props) => {
+            set({
+              ...get(),
+              ...props
+            })
+          }
         })
     ),
     {
@@ -45,6 +38,13 @@ export const userStore = create<UserState>()(
 )
 
 export const getToken = () => userStore((state) => state.token)
-export const setToken = (token:string|null) => userStore.getState().setToken(token)
-export const setIsPatreonCreator = (isCreator: boolean) => userStore.getState().setPatreonCreatorStatus(isCreator)
-export const setIsSubscribeStarCreator = (isCreator: boolean) => userStore.getState().setSubscribestarCreatorStatus(isCreator)
+export const isPatreonCreator = () => userStore.getState().isPatreonCreator
+export const isSubscribestartCreator = () => userStore.getState().isSubscribestarCreator
+export const getPatreonUsername = () => userStore.getState().patreonUsername
+export const getSubscribestarUsername = () => userStore.getState().subscribestarUsername
+export const userStoreHasHydrated = () => userStore.persist.hasHydrated()
+export const setToken = (token:string|null) => userStore.getState().updateState({ token })
+export const setIsPatreonCreator = (isCreator: boolean) => userStore.getState().updateState({isPatreonCreator : isCreator})
+export const setIsSubscribeStarCreator = (isCreator: boolean) => userStore.getState().updateState({ isPatreonCreator: isCreator })
+export const setPatreonUsername = (username: string|null) => userStore.getState().updateState({ patreonUsername: username })
+export const setSubscribestarUsername = (username: string|null) => userStore.getState().updateState({ subscribestarUsername: username })

@@ -31,7 +31,9 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
 
         return new JsonResponse([
             'token' => $apiToken->getToken(),
+            'subscribestarUsername' => null,
             'isSubscribestarCreator' => false,
+            'patreonUsername' => $this->patreonUserRepository->findByPatreonId($user->getPatreonId())?->getUsername(),
             'isPatreonCreator' => $this->patreonUserRepository->userIsCreator($user),
         ]);
     }

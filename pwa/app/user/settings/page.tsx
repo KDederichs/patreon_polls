@@ -29,9 +29,9 @@ export default function SettingsPage() {
           panel: "w-full p-0 pt-4",
         }}
       >
-        <Tab key="account" title="Account">
-          <AccountSetting/>
-        </Tab>
+        {/*<Tab key="account" title="Account">*/}
+        {/*  <AccountSetting/>*/}
+        {/*</Tab>*/}
         <Tab key="connections" title="Connections">
           <ConnectionSettings/>
         </Tab>

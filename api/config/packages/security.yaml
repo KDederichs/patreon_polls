@@ -13,14 +13,32 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         login:
-            pattern: ^/(oauth|login)
+            pattern: ^/oauth
             stateless: false
+            access_token:
+                token_handler: App\Security\ApiTokenHandler
             oauth:
+                check_path: /oauth
                 success_handler: App\Security\Http\AuthenticationSuccessHandler
                 failure_handler: App\Security\Http\AuthenticationFailureHandler
                 resource_owners:
-                    patreon: "/oauth/check-patreon"
-                    patreon_creator: "/oauth/check-patreon-creator"
+                    patreon: "/oauth/patreon"
+                login_path: /
+                use_forward: false
+                failure_path: /
+                oauth_user_provider:
+                    service: App\Security\Oauth\OauthUserProvider
+        creator_connect:
+            pattern: ^/creator/oauth
+            stateless: false
+            access_token:
+                token_handler: App\Security\ApiTokenHandler
+            oauth:
+                check_path: /creator/oauth
+                success_handler: App\Security\Http\CreatorConnectSuccessHandler
+                failure_handler: App\Security\Http\CreatorConnectFailureHandler
+                resource_owners:
+                    patreon_creator: "/creator/oauth/patreon"
                 login_path: /
                 use_forward: false
                 failure_path: /

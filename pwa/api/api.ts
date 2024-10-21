@@ -2,6 +2,7 @@ import axios from "axios";
 import {LoginInput} from "@/types/mutations/User/LoginInput";
 import {AuthTokenResponse} from "@/types/AuthTokenResponse";
 import { getToken } from '@/state/userState'
+import { CreatorConversionResponse } from '@/types/mutations/User/CreatorConversionResponse'
 
 const publicAxiosInstance = axios.create({
   headers: {
@@ -34,6 +35,30 @@ export const loginPatreon = async ({
                                      code,
                                    }: LoginInput): Promise<AuthTokenResponse> => {
   return publicAxiosInstance
-    .get<AuthTokenResponse>(`/oauth/check-patreon?code=${code}&state=None`)
+    .get<AuthTokenResponse>(`/oauth/patreon?code=${code}&state=None`)
+    .then((response) => response.data)
+}
+
+export const convertPatreonCreator = async ({
+                                     code,
+                                   }: LoginInput): Promise<CreatorConversionResponse> => {
+  return privateAxiosInstance
+    .get<CreatorConversionResponse>(`/creator/oauth/patreon?code=${code}&state=None`, {
+      headers: {
+        Accept: 'application/json'
+      }
+    })
+    .then((response) => response.data)
+}
+
+export const connectPatreon = async ({
+                                              code,
+                                            }: LoginInput): Promise<AuthTokenResponse> => {
+  return privateAxiosInstance
+    .get<AuthTokenResponse>(`/oauth/patreon?code=${code}&state=None`, {
+      headers: {
+        Accept: 'application/json'
+      }
+    })
     .then((response) => response.data)
 }

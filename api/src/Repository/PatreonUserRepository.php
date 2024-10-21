@@ -2,22 +2,24 @@
 
 namespace App\Repository;
 
+use App\Entity\OauthResource;
 use App\Entity\PatreonCampaignWebhook;
 use App\Entity\PatreonUser;
 use App\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
 
-class PatreonUserRepository extends AbstractBaseRepository
+class PatreonUserRepository extends AbstractBaseRepository implements ResourceOwnedInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, PatreonUser::class);
     }
 
-    public function findByPatreonId(string $patreonId): ?PatreonUser
+    public function findByPatreonId(string $patreonId, bool $creator = false): ?PatreonUser
     {
         return $this->findOneBy([
-            'resourceId' => $patreonId
+            'resourceId' => $patreonId,
+            'creator' => $creator
         ]);
     }
 
@@ -32,5 +34,10 @@ class PatreonUserRepository extends AbstractBaseRepository
             ->setParameter('user', $user)
             ->getQuery()
             ->getSingleScalarResult() > 0;
+    }
+
+    public function getOAuthResource(string $resourceId, bool $creator): ?OauthResource
+    {
+        return $this->findByPatreonId($resourceId, $creator);
     }
 }

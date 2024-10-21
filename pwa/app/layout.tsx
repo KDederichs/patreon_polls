@@ -11,6 +11,7 @@ import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 import { ToastContainer } from 'react-toastify'
+import React from 'react'
 
 
 export const metadata: Metadata = {
