@@ -83,7 +83,7 @@ class PatreonService implements LoggerAwareInterface
             ]
         );
         $responsePayload = json_decode($response->getContent(), true);
-        $includes = $responsePayload['included'];
+        $includes = $responsePayload['included'] ?? [];
         $campaigns = [];
         foreach ($responsePayload['data'] as $campaignData) {
             $campaign = $this->campaignRepository->findByPatreonCampaignId($campaignData['id']);
