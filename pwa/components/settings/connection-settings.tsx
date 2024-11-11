@@ -49,6 +49,7 @@ export default function ConnectionSettings(props: CardProps) {
             {!isPatreonConnected ? <Button
               color={'success'}
               as={Link}
+              target="_blank"
               isLoading={isLoading}
               href={'/connect/patreon?mode=user'}
               radius="full"

@@ -52,7 +52,6 @@ class PatreonService implements LoggerAwareInterface
 
     public function refreshCampaigns(PatreonUser $patreonUser): array
     {
-        $this->refreshAccessToken($patreonUser);
         $payload = [
             'include' => 'tiers',
             'fields[campaign]' => 'creation_name',
@@ -76,6 +75,7 @@ class PatreonService implements LoggerAwareInterface
             if (!$campaign) {
                 $campaign = new PatreonCampaign();
                 $campaign
+                    ->setCampaignOwner($patreonUser->getUser())
                     ->setOwner($patreonUser)
                     ->setPatreonCampaignId($campaignData['id']);
                 $this->campaignRepository->persist($campaign);

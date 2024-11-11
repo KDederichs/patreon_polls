@@ -10,11 +10,15 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\MappedSuperclass;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[MappedSuperclass]
+#[UniqueConstraint(
+    fields: ['resourceId', 'creator']
+)]
 abstract class OauthResource implements UserOwnedInterface
 {
     #[Id, Column(type: UuidType::NAME)]
@@ -23,7 +27,7 @@ abstract class OauthResource implements UserOwnedInterface
     #[Column(type: 'datetime_immutable')]
     #[Groups(['oauth:read'])]
     private CarbonImmutable $createdAt;
-    #[Column(type: 'string', length: 64, unique: true)]
+    #[Column(type: 'string', length: 64)]
     private string $resourceId;
     #[Column(type: 'string', length: 64, nullable: true)]
     private ?string $accessToken = null;
