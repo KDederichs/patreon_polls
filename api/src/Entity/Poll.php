@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PatreonPollRepository;
+use App\Security\UserOwnedInterface;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -13,7 +14,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonPollRepository::class)]
-class Poll
+class Poll implements UserOwnedInterface
 {
     #[Id, Column(type: UuidType::NAME)]
     private Uuid $id;
@@ -26,6 +27,8 @@ class Poll
     private PatreonCampaign $campaign;
     #[Column(type: 'datetime_immutable', nullable: true)]
     private ?CarbonImmutable $endsAt = null;
+    #[ManyToOne(targetEntity: User::class)]
+    private User $createdBy;
 
     public function __construct()
     {
@@ -79,5 +82,26 @@ class Poll
     public function __toString(): string
     {
         return $this->pollName;
+    }
+
+    public function getCreatedBy(): User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(User $createdBy): Poll
+    {
+        $this->createdBy = $createdBy;
+        return $this;
+    }
+
+    public function getUser(): User
+    {
+        return $this->getCreatedBy();
+    }
+
+    public static function getUserField(): string
+    {
+        return 'createdBy';
     }
 }

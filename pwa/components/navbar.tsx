@@ -27,7 +27,7 @@ import {
   Logo,
 } from "@/components/icons";
 import { useIsAuthenticated } from '@/hooks/mutation/User/useIsAuthenticated'
-import { getToken } from '@/state/userState'
+import { getToken } from '@/state/authState'
 
 export const Navbar = () => {
 
@@ -48,6 +48,7 @@ export const Navbar = () => {
             .map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
+                suppressHydrationWarning
                 className={clsx(
                   linkStyles({ color: "foreground" }),
                   "data-[active=true]:text-primary data-[active=true]:font-medium",
@@ -91,6 +92,7 @@ export const Navbar = () => {
               <Link
                 href={item.href}
                 size="lg"
+                suppressHydrationWarning
               >
                 {item.label}
               </Link>

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PatreonPollVoteRepository;
+use App\Security\UserOwnedInterface;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -15,7 +16,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonPollVoteRepository::class)]
 #[UniqueConstraint(fields: ['option', 'votedBy'])]
-class PollVote
+class PollVote implements UserOwnedInterface
 {
     #[Id, Column(type: UuidType::NAME)]
     private Uuid $id;
@@ -97,5 +98,15 @@ class PollVote
     public function __toString(): string
     {
         return sprintf('%s->%s->%s', $this->poll->getPollName(), $this->option->getOptionName(), $this->votedBy->getUsername());
+    }
+
+    public function getUser(): User
+    {
+        return $this->getVotedBy();
+    }
+
+    public static function getUserField(): string
+    {
+        return 'votedBy';
     }
 }

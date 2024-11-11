@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PatreonPollOptionRepository;
+use App\Security\UserOwnedInterface;
 use Carbon\CarbonImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -17,7 +18,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonPollOptionRepository::class)]
-class PollOption
+class PollOption implements UserOwnedInterface
 {
     #[Id, Column(type: UuidType::NAME)]
     private Uuid $id;
@@ -121,5 +122,13 @@ class PollOption
         return $this->optionName;
     }
 
+    public function getUser(): User
+    {
+        return $this->getCreatedBy();
+    }
 
+    public static function getUserField(): string
+    {
+        return 'createdBy';
+    }
 }

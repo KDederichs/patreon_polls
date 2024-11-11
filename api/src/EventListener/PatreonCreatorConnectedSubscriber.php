@@ -19,7 +19,7 @@ class PatreonCreatorConnectedSubscriber implements EventSubscriberInterface
     }
 
 
-    public function onPreConnect(PostOauthResourceConnectedEvent $event): void
+    public function onPreConnect(PreOauthResourceConnectedEvent $event): void
     {
         $oauthResource = $event->getOauthResource();
 

@@ -48,7 +48,7 @@ log {
 	@pwa expression `(
 			header({'Accept': '*text/html*'})
 			&& !path(
-				'/docs*', '/graphql*', '/bundles*', '/contexts*', '/_profiler*', '/_wdt*', '/admin*', '/oauth*',
+				'/docs*', '/graphql*', '/assets/bundles*', '/contexts*', '/_profiler*', '/_wdt*', '/admin*', '/login/patreon', '/login/subscribestar', '/connect/patreon',
 				'*.json*', '*.html', '*.csv', '*.yml', '*.yaml', '*.xml'
 			)
 		)

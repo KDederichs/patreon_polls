@@ -11,10 +11,10 @@ use App\Repository\PatreonCampaignRepository;
 use App\Repository\PatreonCampaignTierRepository;
 use App\Repository\PatreonCampaignWebhookRepository;
 use App\Repository\PatreonUserRepository;
+use App\Service\Oauth\PatreonOAuthService;
 use Carbon\CarbonImmutable;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -25,41 +25,27 @@ class PatreonService implements LoggerAwareInterface
     private ?LoggerInterface $logger = null;
 
     public function __construct(
-        private readonly HttpClientInterface $client,
-        #[Autowire(env: 'PATREON_ID')] private readonly string $patreonClientId,
-        #[Autowire(env: 'PATREON_SECRET')] private readonly string $patreonClientSecret,
-        private readonly PatreonCampaignRepository $campaignRepository,
-        private readonly PatreonCampaignTierRepository $campaignTierRepository,
+        private readonly HttpClientInterface              $client,
+        private readonly PatreonCampaignRepository        $campaignRepository,
+        private readonly PatreonCampaignTierRepository    $campaignTierRepository,
         private readonly PatreonCampaignWebhookRepository $campaignWebhookRepository,
-        private readonly RouterInterface $router,
-        private readonly MessageBusInterface $bus,
-        private readonly PatreonUserRepository $patreonUserRepository,
+        private readonly RouterInterface                  $router,
+        private readonly MessageBusInterface              $bus,
+        private readonly PatreonUserRepository            $patreonUserRepository,
+        private readonly PatreonOAuthService              $patreonOAuth,
     ) {
     }
 
     public function refreshAccessToken(PatreonUser $patreonUser): void
     {
-        if ($patreonUser->getAccessTokenExpiresAt()?->isPast()) {
-            $refreshToken = $patreonUser->getRefreshToken();
-            $clientId = $this->patreonClientId;
-            $clientSecret = $this->patreonClientSecret;
-            $response = $this->client->request(
-                'POST',
-                "www.patreon.com/api/oauth2/token?grant_type=refresh_token&refresh_token=$refreshToken=&client_id=$clientId&client_secret=$clientSecret",
-                [
-                    'headers' => [
-                        'Content-Type' => 'application/x-www-form-urlencoded',
-                    ]
-                ]
-            );
-            $content = $response->getContent();
-            $payload = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+        if ($patreonUser->getAccessTokenExpiresAt()?->subDays(2)->isPast()) {
+            $oauthToken = $this->patreonOAuth->refreshAccessToken($patreonUser->getRefreshToken());
             $patreonUser
-                ->setScope($payload['scope'])
-                ->setRefreshToken($payload['refresh_token'])
-                ->setAccessTokenExpiresAt(CarbonImmutable::now()->addSeconds($payload['expires_in']))
-                ->setAccessToken($payload['access_token'])
-                ->setTokenType($payload['token_type']);
+                ->setScope($oauthToken->getScope())
+                ->setRefreshToken($oauthToken->getRefreshToken())
+                ->setAccessTokenExpiresAt(CarbonImmutable::now()->addSeconds($oauthToken->getExpiresIn()))
+                ->setAccessToken($oauthToken->getAccessToken())
+                ->setTokenType($oauthToken->getTokenType());
             $this->patreonUserRepository->save();
         }
     }

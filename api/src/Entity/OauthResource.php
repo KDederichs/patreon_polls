@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
+use App\Security\UserOwnedInterface;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Id;
@@ -9,14 +11,17 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[MappedSuperclass]
-abstract class OauthResource
+abstract class OauthResource implements UserOwnedInterface
 {
     #[Id, Column(type: UuidType::NAME)]
+    #[Groups(['oauth:read'])]
     private Uuid $id;
     #[Column(type: 'datetime_immutable')]
+    #[Groups(['oauth:read'])]
     private CarbonImmutable $createdAt;
     #[Column(type: 'string', length: 64, unique: true)]
     private string $resourceId;
@@ -31,11 +36,13 @@ abstract class OauthResource
     #[Column(type: 'datetime_immutable', nullable: true)]
     private ?CarbonImmutable $accessTokenExpiresAt = null;
     #[Column(type: 'boolean', options: ['default' => false])]
+    #[Groups(['oauth:read'])]
     private bool $creator = false;
     #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(nullable: false)]
     private User $user;
     #[Column(type: 'text', nullable: true)]
+    #[Groups(['oauth:read'])]
     private ?string $username = null;
 
     public function __construct()
@@ -153,5 +160,8 @@ abstract class OauthResource
         return $this;
     }
 
-
+    public static function getUserField(): string
+    {
+        return 'user';
+    }
 }

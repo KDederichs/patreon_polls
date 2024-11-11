@@ -26,7 +26,7 @@ const dummyPolls: ListPoll[] = [
 
 export default function PollsPage() {
   return (
-    <section className="flex max-w-4xl flex-col items-center py-24">
+    <section className="flex flex-col items-center py-24">
       <div className="flex max-w-xl flex-col text-center">
         <h1 className="text-4xl font-medium tracking-tight">Your polls</h1>
         <Spacer y={4}/>

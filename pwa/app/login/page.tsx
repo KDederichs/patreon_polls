@@ -18,7 +18,7 @@ export default function LoginPage() {
             as={Link}
             startContent={<Icon icon="ph:patreon-logo" width={24} />}
             variant="bordered"
-            href={'/oauth/connect/patreon'}
+            href={'/login/patreon'}
           >
             Login with Patreon
           </Button>

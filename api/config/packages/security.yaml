@@ -12,38 +12,6 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        login:
-            pattern: ^/oauth
-            stateless: false
-            access_token:
-                token_handler: App\Security\ApiTokenHandler
-            oauth:
-                check_path: /oauth
-                success_handler: App\Security\Http\AuthenticationSuccessHandler
-                failure_handler: App\Security\Http\AuthenticationFailureHandler
-                resource_owners:
-                    patreon: "/oauth/patreon"
-                login_path: /
-                use_forward: false
-                failure_path: /
-                oauth_user_provider:
-                    service: App\Security\Oauth\OauthUserProvider
-        creator_connect:
-            pattern: ^/creator/oauth
-            stateless: false
-            access_token:
-                token_handler: App\Security\ApiTokenHandler
-            oauth:
-                check_path: /creator/oauth
-                success_handler: App\Security\Http\CreatorConnectSuccessHandler
-                failure_handler: App\Security\Http\CreatorConnectFailureHandler
-                resource_owners:
-                    patreon_creator: "/creator/oauth/patreon"
-                login_path: /
-                use_forward: false
-                failure_path: /
-                oauth_user_provider:
-                    service: App\Security\Oauth\OauthUserProvider
         admin:
             pattern: ^/admin
         main:
@@ -63,7 +31,9 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/_profiler, roles: PUBLIC_ACCESS }
-        - { path: ^/oauth, roles: PUBLIC_ACCESS }
+        - { path: ^/docs, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/oauth/connect, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN } // force login
         - { path: ^/, roles: ROLE_USER } // force login
 
