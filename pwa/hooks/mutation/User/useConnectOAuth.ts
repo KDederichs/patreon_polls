@@ -2,7 +2,7 @@ import { AuthTokenResponse } from '@/types/AuthTokenResponse'
 import { AxiosError } from 'axios'
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { ResultHandlerInterface } from '@/hooks/mutation/ResultHandlerInterface'
-import { connectPatreon, oauthConnect } from '@/api/api'
+import { oauthConnect } from '@/api/api'
 import { ApiError } from '@/types/ApiError'
 import { OauthInput } from '@/types/mutations/OauthInput'
 

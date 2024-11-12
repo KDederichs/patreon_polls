@@ -19,8 +19,6 @@ security:
             access_token:
                 token_handler: App\Security\ApiTokenHandler
             stateless: true
-            logout:
-                path: logout
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -31,7 +29,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/_profiler, roles: PUBLIC_ACCESS }
-        - { path: ^/docs, roles: PUBLIC_ACCESS }
+        - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/oauth/connect, roles: PUBLIC_ACCESS }
         - { path: ^/connect/patreon, roles: PUBLIC_ACCESS }

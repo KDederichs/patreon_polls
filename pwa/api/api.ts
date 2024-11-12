@@ -1,8 +1,6 @@
 import axios from "axios";
-import {LoginInput} from "@/types/mutations/User/LoginInput";
 import {AuthTokenResponse} from "@/types/AuthTokenResponse";
 import { getToken } from '@/state/authState'
-import { CreatorConversionResponse } from '@/types/mutations/User/CreatorConversionResponse'
 import { ListResponse } from '@/types/ListResponse'
 import { OauthInput } from '@/types/mutations/OauthInput'
 
@@ -35,6 +33,10 @@ privateAxiosInstance.interceptors.request.use(
   },
 )
 
+export const logout = async (): Promise<void> => {
+  return privateAxiosInstance.delete('/api/logout').then();
+}
+
 
 export const oauthConnect = async ({
   code, state
@@ -48,32 +50,6 @@ export const oauthConnect = async ({
   })
     .then((response) => response.data)
 }
-
-
-export const convertPatreonCreator = async ({
-                                     code,
-                                   }: LoginInput): Promise<CreatorConversionResponse> => {
-  return privateAxiosInstance
-    .get<CreatorConversionResponse>(`/creator/oauth/patreon?code=${code}&state=None`, {
-      headers: {
-        Accept: 'application/json'
-      }
-    })
-    .then((response) => response.data)
-}
-
-export const connectPatreon = async ({
-                                              code,
-                                            }: LoginInput): Promise<AuthTokenResponse> => {
-  return privateAxiosInstance
-    .get<AuthTokenResponse>(`/oauth/patreon?code=${code}&state=None`, {
-      headers: {
-        Accept: 'application/json'
-      }
-    })
-    .then((response) => response.data)
-}
-
 
 export const getEntityByIri = async <T>(
   iri: string,

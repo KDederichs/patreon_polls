@@ -5,8 +5,8 @@ import { PatreonUser } from '@/types/entity/PatreonUser'
 
 export const useListPatreonUsers = (): UseQueryResult<ListResponse<PatreonUser>> => {
   return useQuery<ListResponse<PatreonUser>>({
-    queryKey: ['/patreon_users'],
-    queryFn: () => getHydraList<PatreonUser>('/patreon_users'),
+    queryKey: ['/api/patreon_users'],
+    queryFn: () => getHydraList<PatreonUser>('/api/patreon_users'),
     placeholderData: keepPreviousData,
     staleTime: 3600 * 1000
   })

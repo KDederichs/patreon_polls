@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect } from 'react'
-import { getToken, userStoreHasHydrated } from '@/state/authState'
+import { getToken, useAuthStore, userStoreHasHydrated } from '@/state/authState'
 import { useRouter } from 'next/navigation'
 import { useGetCurrentUser } from '@/hooks/query/User/useGetCurrentUser'
 
@@ -11,7 +11,7 @@ export default function SettingsLayout({
   children: React.ReactNode;
 }) {
 
-  const isAuthenticated = getToken() !== null
+  const isAuthenticated = useAuthStore((state) => state.token !== null)
   const isHydrated = userStoreHasHydrated()
   const router = useRouter()
 

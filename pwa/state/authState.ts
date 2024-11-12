@@ -11,7 +11,7 @@ interface AuthState {
   updateState: (props: Partial<AuthState>) => void;
 }
 
-export const userStore = create<AuthState>()(
+export const useAuthStore = create<AuthState>()(
   persist(
     immer(
       (set,get)=> ({
@@ -31,8 +31,8 @@ export const userStore = create<AuthState>()(
   )
 )
 
-export const getToken = () => userStore.getState().token
-export const getUserIri = () => userStore.getState().userIri
-export const userStoreHasHydrated = () => userStore.persist?.hasHydrated()
-export const setToken = (token:string|null) => userStore.getState().updateState({ token })
-export const setUserIri = (iri: string|null) => userStore.getState().updateState({ userIri: iri })
+export const getToken = () => useAuthStore.getState().token
+export const getUserIri = () => useAuthStore.getState().userIri
+export const userStoreHasHydrated = () => useAuthStore.persist?.hasHydrated()
+export const setToken = (token:string|null) => useAuthStore.getState().updateState({ token })
+export const setUserIri = (iri: string|null) => useAuthStore.getState().updateState({ userIri: iri })
