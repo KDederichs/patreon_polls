@@ -29,7 +29,7 @@ export default function LoginCheckPage() {
         setAuthSuccess(true)
         router.push('/user/polls')
       } else {
-        refetchPatreonUsers()
+        void refetchPatreonUsers()
       }
     },
     onError: (error) => {
@@ -73,11 +73,9 @@ export default function LoginCheckPage() {
           }
         {authSuccess === false ? (
           <>
-            {mode === 'login' ? (
-              <p className="pb-2 text-xl font-medium">Error during authentication, please try again.</p>) : null}
-            {mode === 'connect' ? (<p className="pb-2 text-xl font-medium">
-              Error connecting your account, please try again.
-            </p>) : null}
+            <p className="pb-2 text-xl font-medium">
+              There has been an error, please try again.
+            </p>
           </>
         ) : null}
       </div>
