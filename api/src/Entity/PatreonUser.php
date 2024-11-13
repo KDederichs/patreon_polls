@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Symfony\Action\NotFoundAction;
 use App\Repository\PatreonUserRepository;
 use Doctrine\ORM\Mapping\Entity;
 
@@ -15,7 +16,7 @@ use Doctrine\ORM\Mapping\Entity;
         ]
     ]
 )]
-#[Get]
+#[Get(controller: NotFoundAction::class, openapi: false)]
 #[GetCollection]
 #[Entity(repositoryClass: PatreonUserRepository::class)]
 class PatreonUser extends OauthResource

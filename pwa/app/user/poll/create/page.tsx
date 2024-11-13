@@ -1,17 +1,45 @@
 "use client"
-import React from "react";
-import {Card, CardBody, CardHeader, Checkbox, Divider, Spacer, cn, DatePicker} from "@nextui-org/react";
+import React, { useState } from 'react'
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Checkbox,
+  Divider,
+  Spacer,
+  cn,
+  DatePicker,
+  Select,
+  SelectItem,
+} from '@nextui-org/react'
 import {Input} from "@nextui-org/input";
 import {getLocalTimeZone, now} from "@internationalized/date";
 import {Button} from "@nextui-org/button";
+import { useListPatreonUsers } from '@/hooks/query/PatreonUser/useListPatreonUsers'
+import { useListPatreonCampaigns } from '@/hooks/query/PatreonCampaign/useListPatreonCampaigns'
+import { useListPatreonCampaignTiers } from '@/hooks/query/PatreonCampaignTier/useListPatreonCampaignTiers'
+import TierSelector from '@/components/polls/tier-selector'
+import { useSyncPatreonCampaigns } from '@/hooks/mutation/PatreonCampaign/useSyncPatreonCampaigns'
+import { PatreonCampaignTier } from '@/types/entity/PatreonCampaignTier'
 
 export default function PollCreatePage() {
 
+  const { data: patreonData } = useListPatreonUsers()
+  const patreonSyncMutator = useSyncPatreonCampaigns()
+
+  const isPatreonCreator = patreonData?.member?.find((ptrUser) => ptrUser.creator) !== undefined
+
+
   const [isPatreonSelected, setIsPatreonSelected] = React.useState(false);
   const [isSubscribeStarSelected, setIsSubscribeStarSelected] = React.useState(false);
+  const [selectedPatreonCampaign, setSelectedPatreonCampaign] = React.useState<string>("")
+  const {data: patreonCampaigns, isLoading: patreonCampaignsLoading } = useListPatreonCampaigns({enabled: isPatreonCreator})
+  const [selectedTiers, setSelectedTiers] = useState<PatreonCampaignTier[]>([])
+
+
   return (
-    <section className="flex max-w-4xl flex-col items-center py-24">
-      <div className="flex max-w-xl flex-col text-center">
+    <section className="flex flex-col items-center py-24">
+      <div className="flex flex-col text-center">
         <h1 className="text-4xl font-medium tracking-tight">Create a new Poll</h1>
         <Spacer y={4}/>
         <h2 className="text-large text-default-500">
@@ -25,145 +53,86 @@ export default function PollCreatePage() {
       <div className="mt-12 grid w-full grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-2">
        <Card >
           <CardHeader>
-            <Checkbox isSelected={isPatreonSelected} onValueChange={setIsPatreonSelected}>
+            <Checkbox isSelected={isPatreonSelected} onValueChange={setIsPatreonSelected} disabled={!isPatreonCreator}>
               Patreon Subscribers
             </Checkbox>
           </CardHeader>
          {isPatreonSelected ? (
            <>
            <Divider/>
-             <CardBody >
-               <h2 className="text-large">
-                 Which tiers can vote?
-               </h2>
-               <Checkbox
-                 aria-label={'Tier 1'}
-                 classNames={{
-                   base: cn(
-                     "inline-flex w-full max-w-md bg-content1",
-                     "hover:bg-content2 items-center justify-start",
-                     "cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent",
-                     "data-[selected=true]:border-primary",
-                     "mt-1 mb-1"
-                   ),
-                   label: "w-full",
-                 }}
-               >
-                 <div className="w-full flex justify-between gap-2">
-                    Tier 1
+             <CardBody>
+               <div className="m-2">
+                 <h2 className="text-large">
+                   For which Campaign are you creating the poll?
+                 </h2>
+                 <Select
+                   items={patreonCampaigns ?? []}
+                   label="Patreon campaign"
+                   disabled={(patreonCampaigns ?? []).length === 0}
+                   selectedKeys={[selectedPatreonCampaign]}
+                   placeholder={(patreonCampaigns ?? []).length === 0 ? 'It looks like you have no patreon campaigns' : 'Please select your patreon campaign'}
+                   isLoading={patreonCampaignsLoading}
+                   onChange={(e) => {
+                     setSelectedPatreonCampaign(e.target.value)
+                   }}
+                 >
+                   {
+                     (campaign) => <SelectItem key={campaign.id}>{campaign.campaignName}</SelectItem>
+                   }
+                 </Select>
+
+                 {
+                   ((patreonCampaigns ?? []).length === 0 && !patreonCampaignsLoading) ?
+                     <Button
+                       className="mt-5 mb-2"
+                       variant="ghost"
+                       color={"success"}
+                       isLoading={patreonSyncMutator.isPending}
+                       onClick={() => {
+                         patreonSyncMutator.mutate()
+                       }}
+                     >
+                     Sync Patreon
+                   </Button> : null
+                 }
+
+                 <TierSelector campaignId={selectedPatreonCampaign} onTierSelectUpdate={setSelectedTiers} />
+               </div>
+               <Divider />
+               {selectedTiers.map((selectedTier) => (
+                 <div key={selectedTier.id}>
+                   <Spacer y={4} />
+                   <Card>
+                     <CardHeader>
+                       <h3 className="text-medium">
+                         {selectedTier.tierName}
+                       </h3>
+                     </CardHeader>
+                     <CardBody>
+                       <div className="grid gap-5 grid-cols-2">
+                         <Checkbox>
+                           Can add options
+                         </Checkbox>
+                         <Input type={'number'} label="How many?" />
+                       </div>
+                       <div className="grid gap-5 grid-cols-2 mt-2">
+                         <Checkbox>
+                           Limited votes
+                         </Checkbox>
+                         <Input type={'number'} label="How many?" />
+                       </div>
+                       <Input type={'number'} label="Voting power" className="mt-2" />
+                     </CardBody>
+                   </Card>
                  </div>
-               </Checkbox>
-               <Checkbox
-                 aria-label={'Tier 2'}
-                 classNames={{
-                   base: cn(
-                     "inline-flex w-full max-w-md bg-content1",
-                     "hover:bg-content2 items-center justify-start",
-                     "cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent",
-                     "data-[selected=true]:border-primary",
-                     "mt-1 mb-1"
-                   ),
-                   label: "w-full",
-                 }}
-               >
-                 <div className="w-full flex justify-between gap-2">
-                   Tier 2
-                 </div>
-               </Checkbox>
-               <Checkbox
-                 aria-label={'Tier 3'}
-                 classNames={{
-                   base: cn(
-                     "inline-flex w-full max-w-md bg-content1",
-                     "hover:bg-content2 items-center justify-start",
-                     "cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent",
-                     "data-[selected=true]:border-primary",
-                     "mt-1 mb-1"
-                   ),
-                   label: "w-full",
-                 }}
-               >
-                 <div className="w-full flex justify-between gap-2">
-                   Tier 3
-                 </div>
-               </Checkbox>
-               <Divider/>
-               <Spacer y={4}/>
-               <Card>
-                 <CardHeader>
-                   <h3 className="text-medium">
-                     Tier 1 Settings
-                   </h3>
-                 </CardHeader>
-                 <CardBody>
-                   <div className='grid gap-5 grid-cols-2'>
-                     <Checkbox>
-                       Can add options
-                     </Checkbox>
-                     <Input type={'number'} label="How many?"/>
-                   </div>
-                   <div className='grid gap-5 grid-cols-2 mt-2'>
-                     <Checkbox>
-                       Limited votes
-                     </Checkbox>
-                     <Input type={'number'} label="How many?"/>
-                   </div>
-                   <Input type={'number'} label="Voting power" className='mt-2' />
-                 </CardBody>
-               </Card>
-               <Spacer y={4}/>
-               <Card>
-                 <CardHeader>
-                   <h3 className="text-medium">
-                     Tier 2 Settings
-                   </h3>
-                 </CardHeader>
-                 <CardBody>
-                   <div className='grid gap-5 grid-cols-2'>
-                     <Checkbox>
-                       Can add options
-                     </Checkbox>
-                     <Input type={'number'} label="How many?"/>
-                   </div>
-                   <div className='grid gap-5 grid-cols-2 mt-2'>
-                     <Checkbox>
-                       Limited votes
-                     </Checkbox>
-                     <Input type={'number'} label="How many?"/>
-                   </div>
-                   <Input type={'number'} label="Voting power" className='mt-2' />
-                 </CardBody>
-               </Card>
-               <Spacer y={4}/>
-               <Card>
-                 <CardHeader>
-                   <h3 className="text-medium">
-                     Tier 3 Settings
-                   </h3>
-                 </CardHeader>
-                 <CardBody>
-                   <div className='grid gap-5 grid-cols-2'>
-                     <Checkbox>
-                       Can add options
-                     </Checkbox>
-                     <Input type={'number'} label="How many?"/>
-                   </div>
-                   <div className='grid gap-5 grid-cols-2 mt-2'>
-                     <Checkbox>
-                       Limited votes
-                     </Checkbox>
-                     <Input type={'number'} label="How many?"/>
-                   </div>
-                   <Input type={'number'} label="Voting power" className='mt-2' />
-                 </CardBody>
-               </Card>
+               ))}
              </CardBody>
            </>
            )
            : null
          }
        </Card>
-        <Card >
+        <Card>
           <CardHeader>
             <Checkbox isSelected={isSubscribeStarSelected} onValueChange={setIsSubscribeStarSelected}>
               SubscribeStar Subscribers

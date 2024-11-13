@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use App\Repository\PatreonCampaignTierRepository;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
@@ -10,18 +13,40 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonCampaignTierRepository::class)]
+#[ApiResource(
+    uriTemplate: '/patreon_campaigns/{id}/tiers',
+    operations: [new GetCollection(
+        paginationEnabled: false,
+        normalizationContext: [
+            'groups' => [
+                'patreon_campaign_tier:read'
+            ]
+        ]
+    )],
+    uriVariables: [
+        'id' => new Link(
+            toProperty: 'campaign',
+            fromClass: PatreonCampaign::class,
+            security: "campaign.getCampaignOwner() == user"
+        )
+    ]
+)]
 class PatreonCampaignTier
 {
     #[Id, Column(type: UuidType::NAME)]
+    #[Groups(['patreon_campaign_tier:read'])]
     private Uuid $id;
     #[Column(type: 'datetime_immutable')]
+    #[Groups(['patreon_campaign_tier:read'])]
     private CarbonImmutable $createdAt;
     #[Column(type: 'text')]
+    #[Groups(['patreon_campaign_tier:read'])]
     private string $tierName;
-    #[ManyToOne(targetEntity: PatreonCampaign::class)]
+    #[ManyToOne(targetEntity: PatreonCampaign::class, inversedBy: 'campaignTiers')]
     #[JoinColumn(nullable: false)]
     private PatreonCampaign $campaign;
     #[Column(type: 'string', length: 64, unique: true)]

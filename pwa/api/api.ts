@@ -51,6 +51,12 @@ export const oauthConnect = async ({
     .then((response) => response.data)
 }
 
+export const syncPatreon = async (): Promise<void> => {
+  return privateAxiosInstance
+    .post<void>('/api/patreon_campaigns/sync')
+    .then((response) => response.data)
+}
+
 export const getEntityByIri = async <T>(
   iri: string,
 ): Promise<T> => {
