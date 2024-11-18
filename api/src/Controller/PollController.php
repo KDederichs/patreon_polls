@@ -68,9 +68,9 @@ class PollController extends AbstractController
     #[Route('/poll/{poll}/download-marbles', name: 'poll_marbles_download')]
     public function downloadMarblesCsv(PatreonPoll $poll, #[CurrentUser] User $user): Response
     {
-        if (!$poll->getCampaign()->getCampaignOwner()->getId()->equals($user->getId())) {
-            throw new AccessDeniedHttpException();
-        }
+        //if (!$poll->getCampaign()->getCampaignOwner()->getId()->equals($user->getId())) {
+        //    throw new AccessDeniedHttpException();
+        //}
 
         $options = $this->patreonPollOptionRepository->getOptionsForPoll($poll);
         $csvVotes = [];
