@@ -21,6 +21,7 @@ import { useListPatreonCampaignTiers } from '@/hooks/query/PatreonCampaignTier/u
 import TierSelector from '@/components/polls/tier-selector'
 import { useSyncPatreonCampaigns } from '@/hooks/mutation/PatreonCampaign/useSyncPatreonCampaigns'
 import { PatreonCampaignTier } from '@/types/entity/PatreonCampaignTier'
+import TierVoteConfig from '@/components/polls/tier-vote-config'
 
 export default function PollCreatePage() {
 
@@ -99,33 +100,7 @@ export default function PollCreatePage() {
                  <TierSelector campaignId={selectedPatreonCampaign} onTierSelectUpdate={setSelectedTiers} />
                </div>
                <Divider />
-               {selectedTiers.map((selectedTier) => (
-                 <div key={selectedTier.id}>
-                   <Spacer y={4} />
-                   <Card>
-                     <CardHeader>
-                       <h3 className="text-medium">
-                         {selectedTier.tierName}
-                       </h3>
-                     </CardHeader>
-                     <CardBody>
-                       <div className="grid gap-5 grid-cols-2">
-                         <Checkbox>
-                           Can add options
-                         </Checkbox>
-                         <Input type={'number'} label="How many?" />
-                       </div>
-                       <div className="grid gap-5 grid-cols-2 mt-2">
-                         <Checkbox>
-                           Limited votes
-                         </Checkbox>
-                         <Input type={'number'} label="How many?" />
-                       </div>
-                       <Input type={'number'} label="Voting power" className="mt-2" />
-                     </CardBody>
-                   </Card>
-                 </div>
-               ))}
+               <TierVoteConfig selectedTiers={selectedTiers}/>
              </CardBody>
            </>
            )
