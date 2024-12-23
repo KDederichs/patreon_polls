@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\PatreonPollVoteRepository;
+use App\Repository\PollVoteRepository;
 use App\Security\UserOwnedInterface;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity(repositoryClass: PatreonPollVoteRepository::class)]
+#[Entity(repositoryClass: PollVoteRepository::class)]
 #[UniqueConstraint(fields: ['option', 'votedBy'])]
 class PollVote implements UserOwnedInterface
 {

@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\PatreonPollRepository;
+use App\Repository\PollRepository;
 use App\Security\UserOwnedInterface;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity(repositoryClass: PatreonPollRepository::class)]
+#[Entity(repositoryClass: PollRepository::class)]
 class Poll implements UserOwnedInterface
 {
     #[Id, Column(type: UuidType::NAME)]
@@ -22,9 +22,6 @@ class Poll implements UserOwnedInterface
     private CarbonImmutable $createdAt;
     #[Column(type: 'text')]
     private string $pollName;
-    #[ManyToOne(targetEntity: PatreonCampaign::class)]
-    #[JoinColumn(nullable: false)]
-    private PatreonCampaign $campaign;
     #[Column(type: 'datetime_immutable', nullable: true)]
     private ?CarbonImmutable $endsAt = null;
     #[ManyToOne(targetEntity: User::class)]
@@ -65,17 +62,6 @@ class Poll implements UserOwnedInterface
     public function setEndsAt(?CarbonImmutable $endsAt): Poll
     {
         $this->endsAt = $endsAt;
-        return $this;
-    }
-
-    public function getCampaign(): PatreonCampaign
-    {
-        return $this->campaign;
-    }
-
-    public function setCampaign(PatreonCampaign $campaign): Poll
-    {
-        $this->campaign = $campaign;
         return $this;
     }
 

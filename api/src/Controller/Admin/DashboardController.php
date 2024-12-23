@@ -9,7 +9,7 @@ use App\Entity\PatreonCampaignTier;
 use App\Entity\PatreonCampaignWebhook;
 use App\Entity\Poll;
 use App\Entity\PollOption;
-use App\Entity\PollVoteConfig;
+use App\Entity\PatreonPollVoteConfig;
 use App\Entity\PollVote;
 use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -46,7 +46,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Polls', 'fa fa-square-poll-vertical', Poll::class);
         yield MenuItem::linkToCrud('Option', 'fa fa-filter', PollOption::class);
         yield MenuItem::linkToCrud('Votes', 'fa fa-check-to-slot', PollVote::class);
-        yield MenuItem::linkToCrud('Vote Config', 'fa fa-flask', PollVoteConfig::class);
+        yield MenuItem::linkToCrud('Vote Config', 'fa fa-flask', PatreonPollVoteConfig::class);
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
     }
 }

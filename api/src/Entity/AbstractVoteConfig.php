@@ -2,20 +2,17 @@
 
 namespace App\Entity;
 
-use App\Repository\PatreonPollTierVoteConfigRepository;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\UniqueConstraint;
+use Doctrine\ORM\Mapping\MappedSuperclass;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity(repositoryClass: PatreonPollTierVoteConfigRepository::class)]
-#[UniqueConstraint(fields: ['patreonPoll', 'campaignTier'])]
-class PollVoteConfig
+#[MappedSuperclass]
+abstract class AbstractVoteConfig
 {
     #[Id, Column(type: UuidType::NAME)]
     private Uuid $id;
@@ -23,16 +20,17 @@ class PollVoteConfig
     private CarbonImmutable $createdAt;
     #[ManyToOne(targetEntity: Poll::class)]
     #[JoinColumn(nullable: false)]
-    public Poll $patreonPoll;
-    #[ManyToOne(targetEntity: PatreonCampaignTier::class)]
-    #[JoinColumn(nullable: false)]
-    public PatreonCampaignTier $campaignTier;
+    private Poll $poll;
     #[Column(type: 'smallint')]
-    public int $numberOfVotes = 0;
+    private int $numberOfVotes = 0;
     #[Column(type: 'smallint')]
-    public int $votingPower = 1;
+    private int $votingPower = 1;
     #[Column(type: 'smallint', options: ['default' => 1])]
-    public int $maxOptionAdd = 1;
+    private int $maxOptionAdd = 1;
+    #[Column(options: ['default' => false])]
+    private bool $addOptions = false;
+    #[Column(options: ['default' => false])]
+    private bool $limitedVotes = false;
 
     public function __construct()
     {
@@ -50,25 +48,14 @@ class PollVoteConfig
         return $this->createdAt;
     }
 
-    public function getPatreonPoll(): Poll
+    public function getPoll(): Poll
     {
-        return $this->patreonPoll;
+        return $this->poll;
     }
 
-    public function setPatreonPoll(Poll $patreonPoll): PollVoteConfig
+    public function setPoll(Poll $poll): AbstractVoteConfig
     {
-        $this->patreonPoll = $patreonPoll;
-        return $this;
-    }
-
-    public function getCampaignTier(): PatreonCampaignTier
-    {
-        return $this->campaignTier;
-    }
-
-    public function setCampaignTier(PatreonCampaignTier $campaignTier): PollVoteConfig
-    {
-        $this->campaignTier = $campaignTier;
+        $this->poll = $poll;
         return $this;
     }
 
@@ -77,7 +64,7 @@ class PollVoteConfig
         return $this->numberOfVotes;
     }
 
-    public function setNumberOfVotes(int $numberOfVotes): PollVoteConfig
+    public function setNumberOfVotes(int $numberOfVotes): AbstractVoteConfig
     {
         $this->numberOfVotes = $numberOfVotes;
         return $this;
@@ -88,7 +75,7 @@ class PollVoteConfig
         return $this->votingPower;
     }
 
-    public function setVotingPower(int $votingPower): PollVoteConfig
+    public function setVotingPower(int $votingPower): AbstractVoteConfig
     {
         $this->votingPower = $votingPower;
         return $this;
@@ -99,9 +86,31 @@ class PollVoteConfig
         return $this->maxOptionAdd;
     }
 
-    public function setMaxOptionAdd(int $maxOptionAdd): PollVoteConfig
+    public function setMaxOptionAdd(int $maxOptionAdd): AbstractVoteConfig
     {
         $this->maxOptionAdd = $maxOptionAdd;
+        return $this;
+    }
+
+    public function isAddOptions(): bool
+    {
+        return $this->addOptions;
+    }
+
+    public function setAddOptions(bool $addOptions): AbstractVoteConfig
+    {
+        $this->addOptions = $addOptions;
+        return $this;
+    }
+
+    public function isLimitedVotes(): bool
+    {
+        return $this->limitedVotes;
+    }
+
+    public function setLimitedVotes(bool $limitedVotes): AbstractVoteConfig
+    {
+        $this->limitedVotes = $limitedVotes;
         return $this;
     }
 }

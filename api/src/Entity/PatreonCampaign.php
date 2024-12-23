@@ -57,7 +57,7 @@ class PatreonCampaign implements UserOwnedInterface
     private User $campaignOwner;
     #[Column(type: 'string', length: 64, unique: true)]
     private string $patreonCampaignId;
-    #[ManyToOne(targetEntity: PatreonUser::class)]
+    #[ManyToOne(targetEntity: PatreonUser::class, fetch: 'EAGER')]
     private ?PatreonUser $owner = null;
     /**
      * @var Collection<PatreonCampaignTier>

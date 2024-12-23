@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\PatreonPollOptionRepository;
+use App\Repository\PollOptionRepository;
 use App\Security\UserOwnedInterface;
 use Carbon\CarbonImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -17,7 +17,7 @@ use Doctrine\ORM\Mapping\OneToOne;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity(repositoryClass: PatreonPollOptionRepository::class)]
+#[Entity(repositoryClass: PollOptionRepository::class)]
 class PollOption implements UserOwnedInterface
 {
     #[Id, Column(type: UuidType::NAME)]

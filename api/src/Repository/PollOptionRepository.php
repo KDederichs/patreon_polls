@@ -8,7 +8,7 @@ use App\Entity\PollOption;
 use App\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
 
-class PatreonPollOptionRepository extends AbstractBaseRepository
+class PollOptionRepository extends AbstractBaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

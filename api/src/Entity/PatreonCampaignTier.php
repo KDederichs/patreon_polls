@@ -46,7 +46,7 @@ class PatreonCampaignTier
     #[Column(type: 'text')]
     #[Groups(['patreon_campaign_tier:read'])]
     private string $tierName;
-    #[ManyToOne(targetEntity: PatreonCampaign::class, inversedBy: 'campaignTiers')]
+    #[ManyToOne(targetEntity: PatreonCampaign::class, inversedBy: 'campaignTiers', fetch: 'EAGER')]
     #[JoinColumn(nullable: false)]
     private PatreonCampaign $campaign;
     #[Column(type: 'string', length: 64, unique: true)]
