@@ -1,5 +1,4 @@
 import "@/styles/globals.css";
-import 'react-toastify/dist/ReactToastify.min.css';
 import { Metadata, Viewport } from "next";
 import { Link } from "@nextui-org/link";
 import clsx from "clsx";
