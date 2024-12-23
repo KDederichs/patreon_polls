@@ -21,12 +21,12 @@ abstract class AbstractVoteConfig
     #[ManyToOne(targetEntity: Poll::class)]
     #[JoinColumn(nullable: false)]
     private Poll $poll;
-    #[Column(type: 'smallint')]
-    private int $numberOfVotes = 0;
-    #[Column(type: 'smallint')]
+    #[Column(type: 'integer', nullable: true)]
+    private ?int $numberOfVotes = null;
+    #[Column(type: 'integer')]
     private int $votingPower = 1;
-    #[Column(type: 'smallint', options: ['default' => 1])]
-    private int $maxOptionAdd = 1;
+    #[Column(type: 'integer', nullable: true)]
+    private ?int $maxOptionAdd = null;
     #[Column(options: ['default' => false])]
     private bool $addOptions = false;
     #[Column(options: ['default' => false])]
@@ -59,12 +59,12 @@ abstract class AbstractVoteConfig
         return $this;
     }
 
-    public function getNumberOfVotes(): int
+    public function getNumberOfVotes(): ?int
     {
         return $this->numberOfVotes;
     }
 
-    public function setNumberOfVotes(int $numberOfVotes): AbstractVoteConfig
+    public function setNumberOfVotes(?int $numberOfVotes): AbstractVoteConfig
     {
         $this->numberOfVotes = $numberOfVotes;
         return $this;
@@ -81,12 +81,12 @@ abstract class AbstractVoteConfig
         return $this;
     }
 
-    public function getMaxOptionAdd(): int
+    public function getMaxOptionAdd(): ?int
     {
         return $this->maxOptionAdd;
     }
 
-    public function setMaxOptionAdd(int $maxOptionAdd): AbstractVoteConfig
+    public function setMaxOptionAdd(?int $maxOptionAdd): AbstractVoteConfig
     {
         $this->maxOptionAdd = $maxOptionAdd;
         return $this;
@@ -113,4 +113,6 @@ abstract class AbstractVoteConfig
         $this->limitedVotes = $limitedVotes;
         return $this;
     }
+
+    abstract function setCampaignTier(AbstractCampaignTier $abstractCampaignTier): self;
 }

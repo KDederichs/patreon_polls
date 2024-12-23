@@ -2,27 +2,50 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use App\Dto\CreatePollInput;
 use App\Repository\PollRepository;
-use App\Security\UserOwnedInterface;
+use App\State\Processor\CreatePollProcessor;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
-use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PollRepository::class)]
-class Poll implements UserOwnedInterface
+#[ApiResource(
+    normalizationContext: [
+        'groups' => [
+            'poll:read'
+        ]
+    ]
+)]
+#[Get]
+#[GetCollection]
+#[Post(
+    securityPostDenormalize: 'is_granted("create", object)',
+    input: CreatePollInput::class,
+    processor: CreatePollProcessor::class
+)]
+class Poll
 {
     #[Id, Column(type: UuidType::NAME)]
+    #[Groups(['poll:read'])]
     private Uuid $id;
     #[Column(type: 'datetime_immutable')]
+    #[Groups(['poll:read'])]
     private CarbonImmutable $createdAt;
     #[Column(type: 'text')]
+    #[Groups(['poll:read'])]
     private string $pollName;
     #[Column(type: 'datetime_immutable', nullable: true)]
+    #[Groups(['poll:read'])]
     private ?CarbonImmutable $endsAt = null;
     #[ManyToOne(targetEntity: User::class)]
     private User $createdBy;
@@ -59,9 +82,9 @@ class Poll implements UserOwnedInterface
         return $this->endsAt;
     }
 
-    public function setEndsAt(?CarbonImmutable $endsAt): Poll
+    public function setEndsAt(?\DateTimeImmutable $endsAt): Poll
     {
-        $this->endsAt = $endsAt;
+        $this->endsAt = CarbonImmutable::instance($endsAt);
         return $this;
     }
 
@@ -84,10 +107,5 @@ class Poll implements UserOwnedInterface
     public function getUser(): User
     {
         return $this->getCreatedBy();
-    }
-
-    public static function getUserField(): string
-    {
-        return 'createdBy';
     }
 }

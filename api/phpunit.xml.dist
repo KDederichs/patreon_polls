@@ -36,5 +36,6 @@
 
     <extensions>
         <extension class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
+        <extension class="Zenstruck\Browser\Test\BrowserExtension" />
     </extensions>
 </phpunit>

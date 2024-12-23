@@ -27,9 +27,9 @@ class PatreonPollVoteConfig extends AbstractVoteConfig
         return $this->campaignTier;
     }
 
-    public function setCampaignTier(PatreonCampaignTier $campaignTier): PatreonPollVoteConfig
+    public function setCampaignTier(AbstractCampaignTier $abstractCampaignTier): PatreonPollVoteConfig
     {
-        $this->campaignTier = $campaignTier;
+        $this->campaignTier = $abstractCampaignTier;
         return $this;
     }
 }
