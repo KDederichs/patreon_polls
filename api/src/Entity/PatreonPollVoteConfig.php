@@ -14,7 +14,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonPollTierVoteConfigRepository::class)]
-#[UniqueConstraint(fields: ['patreonPoll', 'campaignTier'])]
+#[UniqueConstraint(fields: ['poll', 'campaignTier'])]
 class PatreonPollVoteConfig extends AbstractVoteConfig
 {
     #[ManyToOne(targetEntity: PatreonCampaignTier::class, fetch: 'EAGER')]

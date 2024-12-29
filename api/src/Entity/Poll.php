@@ -29,6 +29,9 @@ use Symfony\Component\Uid\Uuid;
 #[Get]
 #[GetCollection]
 #[Post(
+    denormalizationContext: [
+        'disable_type_enforcement' => true
+    ],
     securityPostDenormalize: 'is_granted("create", object)',
     input: CreatePollInput::class,
     processor: CreatePollProcessor::class

@@ -28,6 +28,8 @@ export default function TierVoteConfig({
       votingPower: '1',
       canAddOptions: false,
       hasLimitedVotes: false,
+      numberOfVotes: '1',
+      numberOfOptions: '1',
     },
   )
 
@@ -62,7 +64,7 @@ export default function TierVoteConfig({
                 type={'number'}
                 label="How many?"
                 value={state.numberOfOptions}
-                defaultValue={'1'}
+                min={'1'}
                 onValueChange={(newValue) =>
                   setState({
                     ...state,
@@ -89,7 +91,7 @@ export default function TierVoteConfig({
                 type={'number'}
                 label="How many?"
                 value={state.numberOfVotes}
-                defaultValue={'1'}
+                min={'1'}
                 onValueChange={(newValue) =>
                   setState({
                     ...state,
@@ -104,7 +106,7 @@ export default function TierVoteConfig({
             label="Voting power"
             className="mt-2"
             value={state.votingPower}
-            defaultValue={'1'}
+            min={'1'}
             onValueChange={(newValue) =>
               setState({
                 ...state,

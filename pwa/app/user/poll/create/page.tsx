@@ -13,7 +13,7 @@ import {
   SelectItem,
 } from '@nextui-org/react'
 import { Input } from '@nextui-org/input'
-import { getLocalTimeZone, now } from '@internationalized/date'
+import { getLocalTimeZone, now, ZonedDateTime } from '@internationalized/date'
 import { Button } from '@nextui-org/button'
 import { useListPatreonUsers } from '@/hooks/query/PatreonUser/useListPatreonUsers'
 import { useListPatreonCampaigns } from '@/hooks/query/PatreonCampaign/useListPatreonCampaigns'
@@ -22,6 +22,8 @@ import TierSelector from '@/components/polls/tier-selector'
 import { useSyncPatreonCampaigns } from '@/hooks/mutation/PatreonCampaign/useSyncPatreonCampaigns'
 import { PatreonCampaignTier } from '@/types/entity/PatreonCampaignTier'
 import TierVoteConfig, { VoteConfig } from '@/components/polls/tier-vote-config'
+import { useCreatePoll } from '@/hooks/mutation/Poll/useCreatePoll'
+import { useRouter } from 'next/navigation'
 
 export default function PollCreatePage() {
   const { data: patreonData } = useListPatreonUsers()
@@ -41,6 +43,21 @@ export default function PollCreatePage() {
   const [voteConfig, setVoteConfig] = useState<{ [key: string]: VoteConfig }>(
     {},
   )
+  const [pollName, setPollName] = useState<string>('')
+  const [pollEndsDate, setPollEndDate] = useState<ZonedDateTime | null>(
+    now(getLocalTimeZone()),
+  )
+  const [canUploadPictures, setCanUploadPictures] = useState<boolean>(false)
+  const router = useRouter()
+
+  const pollCreator = useCreatePoll({
+    onSuccess: (poll) => {
+      router.push(`/user/poll/${poll.id}`)
+    },
+    onError: (error) => {
+      console.log(error)
+    },
+  })
 
   const onVoteConfigChange = (tierIri: string, config: VoteConfig) => {
     const newVoteConfig = { ...voteConfig }
@@ -295,17 +312,31 @@ export default function PollCreatePage() {
           <h2 className="text-large">Other settings</h2>
         </CardHeader>
         <CardBody>
-          <div className="flex w-full max-w-xl flex-row gap-4">
+          <div className="flex w-full flex-row gap-4">
+            <Input
+              type={'text'}
+              autoComplete="off"
+              label="Poll Name"
+              value={pollName}
+              onValueChange={setPollName}
+            />
             <DatePicker
               label="When should this poll end?"
               variant="bordered"
               hideTimeZone
               showMonthAndYearPickers
-              defaultValue={now(getLocalTimeZone())}
+              value={pollEndsDate}
+              isRequired={true}
+              onChange={setPollEndDate}
             />
           </div>
           <Spacer y={4} />
-          <Checkbox>Users can upload pictures for their choices</Checkbox>
+          <Checkbox
+            checked={canUploadPictures}
+            onValueChange={setCanUploadPictures}
+          >
+            Users can upload pictures for their choices
+          </Checkbox>
         </CardBody>
       </Card>
       <Spacer y={5} />
@@ -313,6 +344,16 @@ export default function PollCreatePage() {
         className="w-full"
         variant={'ghost'}
         color={'success'}
+        isDisabled={Object.keys(voteConfig).length === 0 || '' === pollName}
+        isLoading={pollCreator.isPending}
+        onPress={() =>
+          pollCreator.mutate({
+            pollName,
+            endDate: pollEndsDate!.toDate(),
+            allowPictures: canUploadPictures,
+            voteConfig,
+          })
+        }
       >
         Create Poll
       </Button>
