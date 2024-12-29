@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { Usable, use } from 'react'
 
 import {
   Card,
@@ -8,6 +8,7 @@ import {
   Image,
   CardBody,
   Checkbox,
+  Skeleton,
 } from '@nextui-org/react'
 import { Progress } from '@nextui-org/progress'
 import clsx from 'clsx'
@@ -15,6 +16,14 @@ import { useDropzone } from 'react-dropzone'
 import { Input } from '@nextui-org/input'
 import { Button } from '@nextui-org/button'
 import { Icon } from '@iconify/react'
+import { useGetPollInfo } from '@/hooks/query/Poll/useGetPollInfo'
+import { useRouter } from 'next/router'
+import { useDateFormatter } from '@react-aria/i18n'
+import {
+  getLocalTimeZone,
+  now,
+  parseAbsoluteToLocal,
+} from '@internationalized/date'
 
 const PollOptionCard = () => {
   const [isSelected, setIsSelected] = React.useState(false)
@@ -66,16 +75,34 @@ const PollOptionCard = () => {
   )
 }
 
-export default function PollVotePage() {
+export default function PollVotePage({
+  params,
+}: {
+  params: Usable<{ id: string }>
+}) {
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone()
+  const paramsResolved = React.use(params)
+  const { data: pollData, isLoading: isPollLoading } = useGetPollInfo({
+    pollId: paramsResolved.id,
+  })
+  let formatter = useDateFormatter({ dateStyle: 'full', timeStyle: 'long' })
+
+  const pollEndTime = pollData?.endsAt
+    ? parseAbsoluteToLocal(pollData.endsAt)
+    : now(getLocalTimeZone())
+
   return (
     <section className="flex flex-col items-center py-24">
       <div className="flex flex-col text-center">
-        <h1 className="text-4xl font-medium tracking-tight">POLL NAME</h1>
-        <Spacer y={4} />
-        <h2 className="text-large text-default-500">
-          Open till: 01.01.2001 - 00:00
-        </h2>
+        <Skeleton isLoaded={!isPollLoading}>
+          <h1 className="text-4xl font-medium tracking-tight">
+            {pollData?.pollName}
+          </h1>
+          <Spacer y={4} />
+          <h2 className="text-large text-default-500">
+            {formatter.format(pollEndTime.toDate())}
+          </h2>
+        </Skeleton>
         <Spacer y={4} />
       </div>
       <div className="mt-12 grid w-full grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -89,39 +116,41 @@ export default function PollVotePage() {
           radius="lg"
           className="h-[280px] border-none"
         >
-          <CardBody className="overflow-visible">
-            <div
-              {...getRootProps()}
-              className="flex-column flex h-full items-center justify-center rounded border-2 border-dotted"
-            >
-              <input {...getInputProps()} />
-              <div className="grid-cols- grid">
-                <div className="flex w-full justify-center p-2">
-                  <Icon
-                    icon={'mdi-light:image'}
-                    style={{ fontSize: '36px' }}
-                  />
-                </div>
-                <p className="text-xs">Optional character image (no NSFW)</p>
-              </div>
-            </div>
-          </CardBody>
-          <CardFooter>
-            <div className="grid w-full grid-cols-1 gap-5">
-              <Input
-                type={'text'}
-                autoComplete={'off'}
-                autoCorrect={'off'}
-                label={'Character name'}
-              />
-              <Button
-                color={'success'}
-                variant={'solid'}
+          <Skeleton isLoaded={!isPollLoading}>
+            <CardBody className="overflow-visible">
+              <div
+                {...getRootProps()}
+                className="flex-column flex h-full items-center justify-center rounded border-2 border-dotted"
               >
-                Add
-              </Button>
-            </div>
-          </CardFooter>
+                <input {...getInputProps()} />
+                <div className="grid-cols- grid">
+                  <div className="flex w-full justify-center p-2">
+                    <Icon
+                      icon={'mdi-light:image'}
+                      style={{ fontSize: '36px' }}
+                    />
+                  </div>
+                  <p className="text-xs">Optional character image (no NSFW)</p>
+                </div>
+              </div>
+            </CardBody>
+            <CardFooter>
+              <div className="grid w-full grid-cols-1 gap-5">
+                <Input
+                  type={'text'}
+                  autoComplete={'off'}
+                  autoCorrect={'off'}
+                  label={'Character name'}
+                />
+                <Button
+                  color={'success'}
+                  variant={'solid'}
+                >
+                  Add
+                </Button>
+              </div>
+            </CardFooter>
+          </Skeleton>
         </Card>
       </div>
     </section>
