@@ -2,6 +2,10 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Symfony\Action\NotFoundAction;
 use App\Repository\UserRepository;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
@@ -14,6 +18,11 @@ use Symfony\Component\Uid\Uuid;
 
 #[Table(name: 'users')]
 #[Entity(repositoryClass: UserRepository::class)]
+#[ApiResource]
+#[Get(
+    security: "this.getId().equals(user.getId())"
+)]
+#[GetCollection(controller: NotFoundAction::class, openapi: false)]
 class User implements UserInterface
 {
 
