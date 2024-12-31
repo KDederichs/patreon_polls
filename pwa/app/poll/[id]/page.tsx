@@ -24,9 +24,11 @@ import {
   now,
   parseAbsoluteToLocal,
 } from '@internationalized/date'
+import { useAuthStore } from '@/state/authState'
 
 const PollOptionCard = () => {
   const [isSelected, setIsSelected] = React.useState(false)
+  const isAuthenticated = useAuthStore((state) => state.token !== null)
 
   return (
     <Card
@@ -34,6 +36,7 @@ const PollOptionCard = () => {
       isFooterBlurred
       className="border-none"
       isPressable
+      isDisabled={!isAuthenticated}
       onPress={() => {
         setIsSelected((selected) => !selected)
       }}
@@ -86,6 +89,7 @@ export default function PollVotePage({
     pollId: paramsResolved.id,
   })
   let formatter = useDateFormatter({ dateStyle: 'full', timeStyle: 'long' })
+  const isAuthenticated = useAuthStore((state) => state.token !== null)
 
   const pollEndTime = pollData?.endsAt
     ? parseAbsoluteToLocal(pollData.endsAt)
@@ -122,7 +126,10 @@ export default function PollVotePage({
                 {...getRootProps()}
                 className="flex-column flex h-full items-center justify-center rounded border-2 border-dotted"
               >
-                <input {...getInputProps()} />
+                <input
+                  {...getInputProps()}
+                  disabled={!isAuthenticated}
+                />
                 <div className="grid-cols- grid">
                   <div className="flex w-full justify-center p-2">
                     <Icon
@@ -145,6 +152,7 @@ export default function PollVotePage({
                 <Button
                   color={'success'}
                   variant={'solid'}
+                  isDisabled={!isAuthenticated}
                 >
                   Add
                 </Button>

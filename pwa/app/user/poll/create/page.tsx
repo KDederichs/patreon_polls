@@ -52,7 +52,7 @@ export default function PollCreatePage() {
 
   const pollCreator = useCreatePoll({
     onSuccess: (poll) => {
-      router.push(`/user/poll/${poll.id}`)
+      router.push(`/poll/${poll.id}`)
     },
     onError: (error) => {
       console.log(error)
