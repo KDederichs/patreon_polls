@@ -42,7 +42,7 @@ final class PollToApiMapper extends AbstractObjectToApiMapper
         return $dto
             ->setId($entity->getId())
             ->setCreatedAt($entity->getCreatedAt())
-            ->setEndsAt($entity->getEndsAt())
+            ->setEndsAt($entity->getEndsAt()?->toDateTimeImmutable())
             ->setAllowPictures($entity->isAllowPictures())
             ->setPollName($entity->getPollName())
         ;

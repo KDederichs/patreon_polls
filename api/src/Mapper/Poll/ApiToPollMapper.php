@@ -7,6 +7,7 @@ use App\Entity\Poll;
 use App\Entity\User;
 use App\Mapper\AbstractApiToObjectMapper;
 use App\Repository\PollRepository;
+use Carbon\CarbonImmutable;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfonycasts\MicroMapper\AsMapper;
 
@@ -42,9 +43,12 @@ final class ApiToPollMapper extends AbstractApiToObjectMapper
             assert($user instanceof User);
             $entity->setCreatedBy($user);
         }
+        if ($endsAt = $dto->getEndsAt()) {
+            $entity->setEndsAt(CarbonImmutable::instance($endsAt));
+        }
+
         return $entity
             ->setPollName($dto->getPollName())
-            ->setAllowPictures($dto->isAllowPictures())
-            ->setEndsAt($dto->getEndsAt());
+            ->setAllowPictures($dto->isAllowPictures());
     }
 }

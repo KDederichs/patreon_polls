@@ -143,6 +143,7 @@ export default function PollVotePage({
         },
       )
       queryClient.setQueryData([pollOption['@id']], pollOption)
+      setOptionName('')
       setMediaIri(null)
     },
     onError: (error) => {

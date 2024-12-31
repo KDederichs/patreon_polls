@@ -42,7 +42,7 @@ class PollApi
     #[NotBlank]
     #[Length(max: 255)]
     private ?string $pollName = null;
-    private ?CarbonImmutable $endsAt = null;
+    private ?\DateTimeImmutable $endsAt = null;
     private bool $allowPictures = false;
     /**
      * @var array<string, PollVoteConfigDto>
@@ -88,12 +88,12 @@ class PollApi
         return $this;
     }
 
-    public function getEndsAt(): ?CarbonImmutable
+    public function getEndsAt(): ?\DateTimeImmutable
     {
         return $this->endsAt;
     }
 
-    public function setEndsAt(?CarbonImmutable $endsAt): PollApi
+    public function setEndsAt(?\DateTimeImmutable $endsAt): PollApi
     {
         $this->endsAt = $endsAt;
         return $this;

@@ -6,6 +6,7 @@ use App\Factory\PatreonCampaignFactory;
 use App\Factory\PatreonCampaignTierFactory;
 use App\Factory\PatreonPollVoteConfigFactory;
 use App\Factory\PatreonUserFactory;
+use App\Factory\PollFactory;
 use App\Factory\UserFactory;
 use App\Tests\ApiTestCase;
 
@@ -31,7 +32,7 @@ class CreatePollTest extends ApiTestCase
             ->post('/api/polls', [
                 'json' => [
                     'pollName' => 'Testi Poll',
-                    'endDate' => '01.01.3000',
+                    'endsAt' => '01.01.2027 00:00:00',
                     'allowPictures' => false,
                     'voteConfig' => [
                         'api/patreon_campaign_tiers/1' => [
@@ -77,7 +78,7 @@ class CreatePollTest extends ApiTestCase
             ->post('/api/polls', [
                 'json' => [
                     'pollName' => 'Testi Poll',
-                    'endDate' => '01.01.3000',
+                    'endsAt' => '01.01.2027 00:00:00',
                     'allowPictures' => false,
                     'voteConfig' => [
                         'api/patreon_campaign_tiers/'.$patreonCampaignTier1->getId()->toRfc4122() => [
@@ -100,6 +101,10 @@ class CreatePollTest extends ApiTestCase
             ])
             ->assertStatus(201)
             ->assertJson();
+
+        PollFactory::repository()->assert()->count(1);
+        $poll = PollFactory::repository()->firstOrFail();
+        self::assertNotNull($poll->getEndsAt());
         PatreonPollVoteConfigFactory::repository()->assert()->count(2);
     }
 
