@@ -7,7 +7,7 @@ use App\Entity\PollOption;
 use App\Entity\User;
 use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PollOptionRepository;
-use App\Repository\PatreonPollTierVoteConfigRepository;
+use App\Repository\PatreonPollConfigRepository;
 use App\Repository\PollVoteRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,10 +20,7 @@ class PollController extends AbstractController
 {
 
     public function __construct(
-        private readonly PollOptionRepository                $patreonPollOptionRepository,
-        private readonly PollVoteRepository                  $patreonPollVoteRepository,
-        private readonly PatreonPollTierVoteConfigRepository $configRepository,
-        private readonly PatreonCampaignMemberRepository     $campaignMemberRepository,
+        private readonly PollOptionRepository            $patreonPollOptionRepository,
     )
     {
 
@@ -32,7 +29,7 @@ class PollController extends AbstractController
     #[Route('/poll/{poll}/download-marbles', name: 'poll_marbles_download')]
     public function downloadMarblesCsv(Poll $poll, #[CurrentUser] User $user): Response
     {
-        if (!$poll->getUser()->getId()->equals($user->getId())) {
+        if (!$poll->getCreatedBy()?->getId()->equals($user->getId())) {
             throw new AccessDeniedHttpException();
         }
 

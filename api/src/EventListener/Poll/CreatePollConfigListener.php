@@ -1,23 +1,21 @@
 <?php
 
-namespace App\State\Processor;
+namespace App\EventListener\Poll;
 
 use ApiPlatform\Metadata\IriConverterInterface;
-use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\ProcessorInterface;
-use App\Dto\CreatePollInput;
+use App\ApiResource\PollApi;
 use App\Entity\AbstractCampaignTier;
 use App\Entity\AbstractVoteConfig;
 use App\Entity\Poll;
-use App\Entity\User;
+use App\Event\StateProcessor\StatePrePersistEvent;
 use App\Repository\PollRepository;
-use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
-final readonly class CreatePollProcessor implements ProcessorInterface
+#[AsEventListener(event: StatePrePersistEvent::class, method: 'onPrePersist')]
+final readonly class CreatePollConfigListener
 {
 
     public function __construct(
-        private Security $security,
         private IriConverterInterface $iriConverter,
         private PollRepository $pollRepository,
     )
@@ -25,31 +23,22 @@ final readonly class CreatePollProcessor implements ProcessorInterface
 
     }
 
-    /**
-     * @param CreatePollInput $data
-     * @param Operation $operation
-     * @param array $uriVariables
-     * @param array $context
-     * @return Poll
-     */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Poll
+    public function onPrePersist(StatePrePersistEvent $event)
     {
-        /** @var User $user */
-        $user = $this->security->getUser();
+        if ($event->getEntityClass() !== Poll::class) {
+            return;
+        }
 
-        $poll = new Poll();
-        $poll
-            ->setCreatedBy($user)
-            ->setPollName($data->getPollName())
-            ->setEndsAt($data->getEndDate());
+        /** @var Poll $poll */
+        $poll = $event->getEntity();
+        /** @var PollApi $dto */
+        $dto = $event->getDto();
 
-        $this->pollRepository->persist($poll);
-
-        foreach ($data->getVoteConfig() as $iri => $configDto) {
+        foreach ($dto->getVoteConfig() as $iri => $configDto) {
             try {
                 /** @var AbstractCampaignTier|null $entity */
                 $entity = $this->iriConverter->getResourceFromIri($iri);
-                if (!$entity || !$user->getId()->equals($entity->getOwner()->getId())) {
+                if (!$entity || !$poll->getCreatedBy()->getId()->equals($entity->getOwner()->getId())) {
                     continue;
                 }
 
@@ -67,9 +56,5 @@ final readonly class CreatePollProcessor implements ProcessorInterface
                 $this->pollRepository->persist($voteConfig);
             } catch (\Exception) {}
         }
-
-        $this->pollRepository->save();
-
-        return $poll;
     }
 }

@@ -2,56 +2,30 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Post;
-use App\Dto\CreatePollInput;
 use App\Repository\PollRepository;
-use App\State\Processor\CreatePollProcessor;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Types\UuidType;
-use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PollRepository::class)]
-#[ApiResource(
-    normalizationContext: [
-        'groups' => [
-            'poll:read'
-        ]
-    ]
-)]
-#[Get]
-#[GetCollection]
-#[Post(
-    denormalizationContext: [
-        'disable_type_enforcement' => true
-    ],
-    securityPostDenormalize: 'is_granted("create", object)',
-    input: CreatePollInput::class,
-    processor: CreatePollProcessor::class
-)]
 class Poll
 {
     #[Id, Column(type: UuidType::NAME)]
-    #[Groups(['poll:read'])]
     private Uuid $id;
     #[Column(type: 'datetime_immutable')]
-    #[Groups(['poll:read'])]
     private CarbonImmutable $createdAt;
     #[Column(type: 'text')]
-    #[Groups(['poll:read'])]
     private string $pollName;
     #[Column(type: 'datetime_immutable', nullable: true)]
-    #[Groups(['poll:read'])]
     private ?CarbonImmutable $endsAt = null;
     #[ManyToOne(targetEntity: User::class)]
-    private User $createdBy;
+    private ?User $createdBy = null;
+    #[Column(options: ['default' => false])]
+    private bool $allowPictures = false;
 
     public function __construct()
     {
@@ -85,9 +59,9 @@ class Poll
         return $this->endsAt;
     }
 
-    public function setEndsAt(?\DateTimeImmutable $endsAt): Poll
+    public function setEndsAt(?CarbonImmutable $endsAt): Poll
     {
-        $this->endsAt = CarbonImmutable::instance($endsAt);
+        $this->endsAt = $endsAt;
         return $this;
     }
 
@@ -96,19 +70,25 @@ class Poll
         return $this->pollName;
     }
 
-    public function getCreatedBy(): User
+    public function getCreatedBy(): ?User
     {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(User $createdBy): Poll
+    public function setCreatedBy(?User $createdBy): Poll
     {
         $this->createdBy = $createdBy;
         return $this;
     }
 
-    public function getUser(): User
+    public function isAllowPictures(): bool
     {
-        return $this->getCreatedBy();
+        return $this->allowPictures;
+    }
+
+    public function setAllowPictures(bool $allowPictures): Poll
+    {
+        $this->allowPictures = $allowPictures;
+        return $this;
     }
 }
