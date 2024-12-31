@@ -2,6 +2,7 @@
 
 namespace App\Mapper\Poll;
 
+use ApiPlatform\Metadata\Get;
 use App\ApiResource\PollApi;
 use App\Dto\PollVoteConfigDto;
 use App\Entity\Poll;
@@ -49,6 +50,9 @@ final class PollToApiMapper extends AbstractObjectToApiMapper
 
     protected function populateExternal(object $from, object $to, array $context): void
     {
+        if (!isset($context['operation']) || !($context['operation'] instanceof Get)) {
+            return;
+        }
         $entity = $from;
         $dto = $to;
         assert($entity instanceof Poll);
