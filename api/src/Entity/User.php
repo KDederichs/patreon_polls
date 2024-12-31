@@ -8,9 +8,11 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Symfony\Action\NotFoundAction;
 use App\Repository\UserRepository;
 use Carbon\CarbonImmutable;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\Table;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -36,6 +38,8 @@ class User implements UserInterface
     private ?string $username = null;
     #[Column(type: 'boolean', options: ['default' => false])]
     private bool $admin = false;
+    #[OneToMany(targetEntity: ApiToken::class, mappedBy: 'ownedBy', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $apiTokens;
 
     public function __construct()
     {
@@ -103,6 +107,17 @@ class User implements UserInterface
     public function setAdmin(bool $admin): User
     {
         $this->admin = $admin;
+        return $this;
+    }
+
+    public function getApiTokens(): Collection
+    {
+        return $this->apiTokens;
+    }
+
+    public function setApiTokens(Collection $apiTokens): User
+    {
+        $this->apiTokens = $apiTokens;
         return $this;
     }
 

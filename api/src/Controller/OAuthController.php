@@ -129,7 +129,7 @@ class OAuthController extends AbstractController implements ServiceSubscriberInt
         $token = $request->headers->has('Authorization') ? explode(' ',$request->headers->get('Authorization'))[1] : null;
         if (!$token) {
             $apiToken = $this->apiTokenRepository->createForUser($user);
-            $token = $apiToken->getToken();
+            $token = sprintf('%s.%s', $apiToken->getId()->toBase58(), $apiToken->getTokenPlain());
         }
 
         return new JsonResponse([

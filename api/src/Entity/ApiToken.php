@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\ApiTokenRepository;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -11,24 +12,27 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-#[Entity]
+#[Entity(repositoryClass: ApiTokenRepository::class)]
 class ApiToken
 {
     #[Id, Column(type: UuidType::NAME)]
-    private readonly Uuid $id;
+    private Uuid $id;
     #[Column(type: 'datetime_immutable')]
-    private readonly CarbonImmutable $createdAt;
-    #[ManyToOne(targetEntity: User::class)]
+    private CarbonImmutable $createdAt;
+    #[ManyToOne(targetEntity: User::class, inversedBy: 'apiTokens')]
     #[JoinColumn(nullable: false)]
     private User $ownedBy;
+    #[Column(type: 'datetime_immutable', nullable: true)]
+    private ?CarbonImmutable $expiresAt = null;
     #[Column(type: 'string', length: 64, unique: true)]
     private string $token;
+    private string $tokenPlain;
 
     public function __construct()
     {
         $this->id = Uuid::v7();
         $this->createdAt = CarbonImmutable::now();
-        $this->token = bin2hex(random_bytes(32));
+        $this->tokenPlain = bin2hex(random_bytes(32));
     }
 
     public function getId(): Uuid
@@ -39,6 +43,12 @@ class ApiToken
     public function getCreatedAt(): CarbonImmutable
     {
         return $this->createdAt;
+    }
+
+    public function setToken(string $token): ApiToken
+    {
+        $this->token = $token;
+        return $this;
     }
 
     public function getToken(): string
@@ -55,5 +65,30 @@ class ApiToken
     {
         $this->ownedBy = $ownedBy;
         return $this;
+    }
+
+    public function setExpiresAt(?CarbonImmutable $expiresAt): ApiToken
+    {
+        $this->expiresAt = $expiresAt;
+        return $this;
+    }
+
+    public function getExpiresAt(): ?CarbonImmutable
+    {
+        return $this->expiresAt;
+    }
+
+    public function getTokenPlain(): string
+    {
+        return $this->tokenPlain;
+    }
+
+    public function isValid(): bool
+    {
+        if (!$this->expiresAt) {
+            return true;
+        }
+
+        return $this->expiresAt->isFuture();
     }
 }
