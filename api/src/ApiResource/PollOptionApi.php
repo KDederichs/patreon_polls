@@ -56,6 +56,7 @@ class PollOptionApi
     #[ApiProperty(readable: false,types: ['https://schema.org/image'])]
     public ?MediaObject $image = null;
     private ?string $imageUri = null;
+    private bool $myOption = false;
 
     public function getId(): ?Uuid
     {
@@ -134,5 +135,14 @@ class PollOptionApi
         return $this;
     }
 
+    public function isMyOption(): bool
+    {
+        return $this->myOption;
+    }
 
+    public function setMyOption(bool $myOption): PollOptionApi
+    {
+        $this->myOption = $myOption;
+        return $this;
+    }
 }

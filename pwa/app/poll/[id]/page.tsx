@@ -1,5 +1,5 @@
 'use client'
-import React, { Usable, use } from 'react'
+import React, { Usable, useState } from 'react'
 
 import {
   Card,
@@ -17,7 +17,6 @@ import { Input } from '@nextui-org/input'
 import { Button } from '@nextui-org/button'
 import { Icon } from '@iconify/react'
 import { useGetPollInfo } from '@/hooks/query/Poll/useGetPollInfo'
-import { useRouter } from 'next/router'
 import { useDateFormatter } from '@react-aria/i18n'
 import {
   getLocalTimeZone,
@@ -25,8 +24,23 @@ import {
   parseAbsoluteToLocal,
 } from '@internationalized/date'
 import { useAuthStore } from '@/state/authState'
+import { useGetPollOptions } from '@/hooks/query/PollOption/useGetPollOptions'
+import { PollOption } from '@/types/entity/PollOption'
+import { useUploadImage } from '@/hooks/mutation/PollOption/useUploadImage'
+import { useCreatePollOption } from '@/hooks/mutation/PollOption/useCreatePollOption'
+import { useQueryClient } from '@tanstack/react-query'
+import { GenericHydraItem } from '@/types/GenericHydraItem'
+import { toast } from 'react-toastify'
+import { useDeleteImage } from '@/hooks/mutation/PollOption/useDeleteImage'
 
-const PollOptionCard = () => {
+interface PollOptionCardProps {
+  pollOption: PollOption
+  totalVoteCount: number
+}
+const PollOptionCard = ({
+  pollOption,
+  totalVoteCount,
+}: PollOptionCardProps) => {
   const [isSelected, setIsSelected] = React.useState(false)
   const isAuthenticated = useAuthStore((state) => state.token !== null)
 
@@ -41,16 +55,19 @@ const PollOptionCard = () => {
         setIsSelected((selected) => !selected)
       }}
     >
-      <CardBody className="overflow-visible p-0">
-        <Image
-          shadow="sm"
-          radius="lg"
-          width="100%"
-          alt="Woman listing to music"
-          className="h-[280px] w-full object-cover"
-          src="https://nextui.org/images/hero-card.jpeg"
-        />
-      </CardBody>
+      {pollOption.imageUri ? (
+        <CardBody className="overflow-visible p-0">
+          <Image
+            shadow="sm"
+            radius="lg"
+            width="100%"
+            alt="Woman listing to music"
+            className="h-[280px] w-full object-cover"
+            src={pollOption.imageUri}
+          />
+        </CardBody>
+      ) : null}
+
       <CardFooter
         className={clsx(
           'absolute bottom-1 z-10 ml-1 w-[calc(100%_-_8px)] justify-evenly overflow-hidden rounded-large border-1 border-white/20 py-1 shadow-small before:rounded-xl before:bg-white/10',
@@ -63,15 +80,16 @@ const PollOptionCard = () => {
           onValueChange={setIsSelected}
           size="sm"
         >
-          Character Name Here
+          {pollOption.optionName}
         </Checkbox>
         <Progress
-          className="max-w-[50%] shadow-lg"
+          className="ml-3 max-w-[50%] shadow-lg"
           size="sm"
-          aria-label="Loading..."
-          value={30}
+          aria-label={`${pollOption.numberOfVotes}/${totalVoteCount} Votes`}
+          value={pollOption.numberOfVotes}
+          maxValue={totalVoteCount}
           color={'success'}
-          label={'1/100'}
+          label={`${pollOption.numberOfVotes}/${totalVoteCount}`}
         />
       </CardFooter>
     </Card>
@@ -83,15 +101,79 @@ export default function PollVotePage({
 }: {
   params: Usable<{ id: string }>
 }) {
-  const { acceptedFiles, getRootProps, getInputProps } = useDropzone()
+  const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
+    multiple: false,
+    accept: { 'image/*': [] },
+    maxFiles: 1,
+  })
   const paramsResolved = React.use(params)
   const { data: pollData, isLoading: isPollLoading } = useGetPollInfo({
     pollId: paramsResolved.id,
   })
+  const { data: pollOptions, isLoading: pollOptionsLoading } =
+    useGetPollOptions({
+      pollId: paramsResolved.id,
+    })
   let formatter = useDateFormatter({ dateStyle: 'full', timeStyle: 'long' })
   const isAuthenticated = useAuthStore((state) => state.token !== null)
 
-  const maxOptionsReached = false
+  const totalVoteCount = (pollOptions ?? []).reduce((carry, currentValue) => {
+    return carry + currentValue.numberOfVotes
+  }, 0)
+  const [optionName, setOptionName] = useState<string>('')
+  const [mediaIri, setMediaIri] = useState<string | null>(null)
+
+  const queryClient = useQueryClient()
+  const imageDeleter = useDeleteImage({
+    onSuccess: () => {
+      setMediaIri(null)
+    },
+    onError: (error) => toast.error(error.message),
+  })
+
+  const optionCreator = useCreatePollOption({
+    onSuccess: (pollOption) => {
+      queryClient.setQueryData(
+        ['list', `/api/polls/${paramsResolved.id}/options`],
+        (oldData: Array<GenericHydraItem> | undefined) => {
+          if (undefined === oldData) {
+            return [pollOption]
+          }
+          return [...oldData, pollOption]
+        },
+      )
+      queryClient.setQueryData([pollOption['@id']], pollOption)
+      setMediaIri(null)
+    },
+    onError: (error) => {
+      toast.error(error.message)
+      if (mediaIri) {
+        imageDeleter.mutate(mediaIri)
+      }
+      setMediaIri(null)
+    },
+  })
+  const imageUploader = useUploadImage({
+    onSuccess: (media) => {
+      setMediaIri(media['@id'])
+      optionCreator.mutate({
+        optionName,
+        poll: `/api/polls/${paramsResolved.id}`,
+        image: media['@id'],
+      })
+    },
+    onError: (error) => toast.error(error.message),
+  })
+
+  const myOptionsCounter = pollOptions?.reduce((carry, option) => {
+    if (option.myOption) {
+      return carry + 1
+    }
+    return carry
+  }, 0)
+
+  const maxOptionsReached =
+    (myOptionsCounter ?? 0) >= (pollData?.config?.numberOfOptions ?? 1)
   const maxVotesReached = false
 
   const pollEndTime = pollData?.endsAt
@@ -113,12 +195,13 @@ export default function PollVotePage({
         <Spacer y={4} />
       </div>
       <div className="mt-12 grid w-full grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-        <PollOptionCard />
-        <PollOptionCard />
-        <PollOptionCard />
-        <PollOptionCard />
-        <PollOptionCard />
-        <PollOptionCard />
+        {(pollOptions ?? []).map((pollOption) => (
+          <PollOptionCard
+            key={pollOption['@id']}
+            pollOption={pollOption}
+            totalVoteCount={totalVoteCount}
+          />
+        ))}
         {pollData?.config?.canAddOptions && !maxOptionsReached ? (
           <Card
             radius="lg"
@@ -156,11 +239,36 @@ export default function PollVotePage({
                     autoComplete={'off'}
                     autoCorrect={'off'}
                     label={'Character name'}
+                    required={true}
+                    value={optionName}
+                    onValueChange={setOptionName}
                   />
                   <Button
                     color={'success'}
                     variant={'solid'}
-                    isDisabled={!isAuthenticated}
+                    isLoading={
+                      optionCreator.isPending ||
+                      imageUploader.isPending ||
+                      imageDeleter.isPending
+                    }
+                    isDisabled={!isAuthenticated || optionName.trim() === ''}
+                    onPress={() => {
+                      if (pollData?.allowPictures) {
+                        const pictureFormData = new FormData()
+                        acceptedFiles.forEach((file) => {
+                          pictureFormData.append('file', file)
+                        })
+                        if (acceptedFiles.length === 1) {
+                          imageUploader.mutate(pictureFormData)
+                          return
+                        }
+                      }
+
+                      optionCreator.mutate({
+                        optionName,
+                        poll: `/api/polls/${paramsResolved.id}`,
+                      })
+                    }}
                   >
                     Add
                   </Button>

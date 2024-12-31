@@ -133,6 +133,7 @@ class CreatePollOptionsTest extends ApiTestCase
             ->assertStatus(201)
             ->assertJson()
             ->assertJsonMatches('optionName', 'Testi Option')
+            ->assertJsonMatches('myOption', true)
             ->assertJsonMatches('numberOfVotes', 1);
     }
 
@@ -160,6 +161,7 @@ class CreatePollOptionsTest extends ApiTestCase
             ->assertJson()
             ->assertJsonMatches('optionName', 'Testi Option')
             ->assertJsonMatches('numberOfVotes', 1)
+            ->assertJsonMatches('myOption', true)
             ->assertJsonMatches('imageUri', 'http://localhost/api/media-object/'.$mediaObject->getId()->toRfc4122());
     }
 }

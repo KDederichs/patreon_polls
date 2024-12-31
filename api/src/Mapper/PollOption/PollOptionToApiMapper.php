@@ -5,7 +5,9 @@ namespace App\Mapper\PollOption;
 use App\ApiResource\PollApi;
 use App\ApiResource\PollOptionApi;
 use App\Entity\PollOption;
+use App\Entity\User;
 use App\Mapper\AbstractObjectToApiMapper;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfonycasts\MicroMapper\AsMapper;
@@ -18,6 +20,7 @@ final class PollOptionToApiMapper extends AbstractObjectToApiMapper
     public function __construct(
         private readonly MicroMapperInterface $microMapper,
         private readonly RouterInterface $router,
+        private readonly Security $security,
     )
     {
 
@@ -46,6 +49,8 @@ final class PollOptionToApiMapper extends AbstractObjectToApiMapper
             );
         }
 
+
+
         return $dto
             ->setPoll(
                 $this->microMapper->map($entity->getPoll(), PollApi::class)
@@ -58,6 +63,13 @@ final class PollOptionToApiMapper extends AbstractObjectToApiMapper
 
     protected function populateExternal(object $from, object $to, array $context): void
     {
-        // TODO: Implement populateExternal() method.
+        $entity = $from;
+        $dto = $to;
+        assert($entity instanceof PollOption);
+        assert($dto instanceof PollOptionApi);
+        if ($user = $this->security->getUser()) {
+            assert($user instanceof User);
+            $dto->setMyOption($user->getId()->equals($entity->getCreatedBy()?->getId()));
+        }
     }
 }

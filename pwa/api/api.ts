@@ -66,6 +66,19 @@ export const createEntity = async <T>(iri: string, data: any): Promise<T> => {
     .then((response) => response.data)
 }
 
+export const createEntityMutliPart = async <T>(
+  iri: string,
+  data: any,
+): Promise<T> => {
+  return privateAxiosInstance
+    .post<T>(iri, data, {
+      headers: {
+        'Cotent-Type': 'multipart/form-data',
+      },
+    })
+    .then((response) => response.data)
+}
+
 export const deleteEntity = async (iri: string): Promise<void> => {
   return privateAxiosInstance.delete(iri).then((response) => {})
 }
