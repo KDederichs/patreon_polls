@@ -2,6 +2,13 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Symfony\Action\NotFoundAction;
 use App\Repository\PollVoteRepository;
 use App\Security\UserOwnedInterface;
 use Carbon\CarbonImmutable;
@@ -16,6 +23,29 @@ use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PollVoteRepository::class)]
 #[UniqueConstraint(fields: ['option', 'votedBy'])]
+#[ApiResource]
+#[Get]
+#[GetCollection(controller: NotFoundAction::class)]
+#[ApiResource(
+    uriTemplate: '/polls/{id}/my-votes',
+    operations: [new GetCollection(
+        paginationEnabled: false,
+        normalizationContext: [
+            'groups' => [
+                'poll_vote:read'
+            ]
+        ]
+    )],
+    uriVariables: [
+        'id' => new Link(
+            toProperty: 'poll',
+            fromClass: Poll::class,
+            security: "is_granted('vote', poll)"
+        )
+    ]
+)]
+#[Post]
+#[Delete]
 class PollVote implements UserOwnedInterface
 {
     #[Id, Column(type: UuidType::NAME)]
