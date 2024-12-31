@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\Table;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -22,10 +23,10 @@ use Symfony\Component\Uid\Uuid;
 #[Entity(repositoryClass: UserRepository::class)]
 #[ApiResource]
 #[Get(
-    security: "this.getId().equals(user.getId())"
+    security: "object.getId().equals(user.getId())"
 )]
 #[GetCollection(controller: NotFoundAction::class, openapi: false)]
-class User implements UserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
     #[Id, Column(type: UuidType::NAME)]
@@ -121,4 +122,9 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getPassword(): ?string
+    {
+        // I only need the interface
+        return null;
+    }
 }
