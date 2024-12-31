@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\PollOptionRepository;
-use App\Security\UserOwnedInterface;
 use Carbon\CarbonImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -18,7 +17,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PollOptionRepository::class)]
-class PollOption implements UserOwnedInterface
+class PollOption
 {
     #[Id, Column(type: UuidType::NAME)]
     private Uuid $id;
@@ -26,12 +25,12 @@ class PollOption implements UserOwnedInterface
     private CarbonImmutable $createdAt;
     #[ManyToOne(targetEntity: Poll::class)]
     #[JoinColumn(nullable: false)]
-    private Poll $poll;
+    private ?Poll $poll = null;
     #[Column(type: 'text')]
-    private string $optionName;
+    private ?string $optionName = null;
     #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(nullable: false)]
-    private User $createdBy;
+    private ?User $createdBy = null;
     #[OneToOne(targetEntity: MediaObject::class, orphanRemoval: true)]
     private ?MediaObject $mediaObject = null;
     #[OneToMany(targetEntity: PollVote::class, mappedBy: 'option', cascade: ['remove'], fetch: 'EAGER')]
@@ -54,34 +53,34 @@ class PollOption implements UserOwnedInterface
         return $this->createdAt;
     }
 
-    public function getPoll(): Poll
+    public function getPoll(): ?Poll
     {
         return $this->poll;
     }
 
-    public function setPoll(Poll $poll): PollOption
+    public function setPoll(?Poll $poll): PollOption
     {
         $this->poll = $poll;
         return $this;
     }
 
-    public function getOptionName(): string
+    public function getOptionName(): ?string
     {
         return $this->optionName;
     }
 
-    public function setOptionName(string $optionName): PollOption
+    public function setOptionName(?string $optionName): PollOption
     {
         $this->optionName = $optionName;
         return $this;
     }
 
-    public function getCreatedBy(): User
+    public function getCreatedBy(): ?User
     {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(User $createdBy): PollOption
+    public function setCreatedBy(?User $createdBy): PollOption
     {
         $this->createdBy = $createdBy;
         return $this;
@@ -125,10 +124,5 @@ class PollOption implements UserOwnedInterface
     public function getUser(): User
     {
         return $this->getCreatedBy();
-    }
-
-    public static function getUserField(): string
-    {
-        return 'createdBy';
     }
 }

@@ -34,6 +34,7 @@ final class MediaObjectFactory extends PersistentProxyObjectFactory
     protected function defaults(): array|callable
     {
         return [
+            'uploadedBy' => UserFactory::new()
         ];
     }
 

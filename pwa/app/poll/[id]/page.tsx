@@ -91,6 +91,9 @@ export default function PollVotePage({
   let formatter = useDateFormatter({ dateStyle: 'full', timeStyle: 'long' })
   const isAuthenticated = useAuthStore((state) => state.token !== null)
 
+  const maxOptionsReached = false
+  const maxVotesReached = false
+
   const pollEndTime = pollData?.endsAt
     ? parseAbsoluteToLocal(pollData.endsAt)
     : now(getLocalTimeZone())
@@ -116,50 +119,56 @@ export default function PollVotePage({
         <PollOptionCard />
         <PollOptionCard />
         <PollOptionCard />
-        <Card
-          radius="lg"
-          className="h-[280px] border-none"
-        >
-          <Skeleton isLoaded={!isPollLoading}>
-            <CardBody className="overflow-visible">
-              <div
-                {...getRootProps()}
-                className="flex-column flex h-full items-center justify-center rounded border-2 border-dotted"
-              >
-                <input
-                  {...getInputProps()}
-                  disabled={!isAuthenticated}
-                />
-                <div className="grid-cols- grid">
-                  <div className="flex w-full justify-center p-2">
-                    <Icon
-                      icon={'mdi-light:image'}
-                      style={{ fontSize: '36px' }}
+        {pollData?.config?.canAddOptions && !maxOptionsReached ? (
+          <Card
+            radius="lg"
+            className="h-[280px] border-none"
+          >
+            <Skeleton isLoaded={!isPollLoading}>
+              {pollData?.allowPictures ? (
+                <CardBody className="overflow-visible">
+                  <div
+                    {...getRootProps()}
+                    className="flex-column flex h-full items-center justify-center rounded border-2 border-dotted"
+                  >
+                    <input
+                      {...getInputProps()}
+                      disabled={!isAuthenticated}
                     />
+                    <div className="grid-cols- grid">
+                      <div className="flex w-full justify-center p-2">
+                        <Icon
+                          icon={'mdi-light:image'}
+                          style={{ fontSize: '36px' }}
+                        />
+                      </div>
+                      <p className="text-xs">
+                        Optional character image (no NSFW)
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs">Optional character image (no NSFW)</p>
+                </CardBody>
+              ) : null}
+              <CardFooter>
+                <div className="grid w-full grid-cols-1 gap-5">
+                  <Input
+                    type={'text'}
+                    autoComplete={'off'}
+                    autoCorrect={'off'}
+                    label={'Character name'}
+                  />
+                  <Button
+                    color={'success'}
+                    variant={'solid'}
+                    isDisabled={!isAuthenticated}
+                  >
+                    Add
+                  </Button>
                 </div>
-              </div>
-            </CardBody>
-            <CardFooter>
-              <div className="grid w-full grid-cols-1 gap-5">
-                <Input
-                  type={'text'}
-                  autoComplete={'off'}
-                  autoCorrect={'off'}
-                  label={'Character name'}
-                />
-                <Button
-                  color={'success'}
-                  variant={'solid'}
-                  isDisabled={!isAuthenticated}
-                >
-                  Add
-                </Button>
-              </div>
-            </CardFooter>
-          </Skeleton>
-        </Card>
+              </CardFooter>
+            </Skeleton>
+          </Card>
+        ) : null}
       </div>
     </section>
   )

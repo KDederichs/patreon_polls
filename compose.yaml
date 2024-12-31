@@ -18,6 +18,7 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+      - media_storage:/app/var/storage
 
   pwa:
     image: ${IMAGES_PREFIX:-}patreon-polls-pwa
@@ -47,6 +48,7 @@ volumes:
   caddy_data:
   caddy_config:
   session_data:
+  media_storage:
 ###> doctrine/doctrine-bundle ###
   db_data:
 ###< doctrine/doctrine-bundle ###

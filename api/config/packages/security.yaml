@@ -35,6 +35,8 @@ security:
         - { path: ^/connect/patreon, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN } // force login
         - { path: ^/api/polls/, roles: PUBLIC_ACCESS, methods: ['GET'] }
+        - { path: ^/api/poll_options/, roles: PUBLIC_ACCESS, methods: ['GET'] }
+        - { path: ^/api/media-object/, roles: PUBLIC_ACCESS, methods: ['GET'] }
         - { path: ^/, roles: ROLE_USER } // force login
 
 

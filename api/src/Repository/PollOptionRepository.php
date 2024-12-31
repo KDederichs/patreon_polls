@@ -22,6 +22,19 @@ class PollOptionRepository extends AbstractBaseRepository
         ]);
     }
 
+    public function getNumberOfMyOptions(Poll $poll, User $user): int
+    {
+        $qb = $this->createQueryBuilder('po');
+        return $qb
+            ->select('count(po.id)')
+            ->where('po.poll = :poll')
+            ->andWhere('po.createdBy = :user')
+            ->setParameter('poll', $poll)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function findMyOptions(Poll $poll, User $user): array
     {
         return $this->findBy([

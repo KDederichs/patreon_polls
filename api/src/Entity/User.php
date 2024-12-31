@@ -96,7 +96,7 @@ class User implements UserInterface
 
     public function __toString(): string
     {
-        return $this->username;
+        return $this->username ?? $this->id->toRfc4122();
     }
 
     public function isAdmin(): bool
