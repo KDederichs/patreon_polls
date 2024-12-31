@@ -39,6 +39,8 @@ final class PatreonPollVoteConfigFactory extends PersistentProxyObjectFactory
             'limitedVotes' => self::faker()->boolean(),
             'poll' => PollFactory::new(),
             'votingPower' => self::faker()->randomNumber(),
+            'maxOptionAdd ' => self::faker()->randomNumber(),
+            'numberOfVotes' => self::faker()->randomNumber(),
         ];
     }
 

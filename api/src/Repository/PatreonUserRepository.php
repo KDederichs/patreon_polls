@@ -23,6 +23,13 @@ class PatreonUserRepository extends AbstractBaseRepository implements ResourceOw
         ]);
     }
 
+    public function findByUser(User $user): ?PatreonUser
+    {
+        return $this->findOneBy([
+            'user' => $user,
+        ]);
+    }
+
     public function userIsCreator(User $user): bool
     {
         $qb = $this->createQueryBuilder('pu');

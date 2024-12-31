@@ -9,7 +9,7 @@ use App\Entity\Poll;
 use App\Entity\PatreonPollVoteConfig;
 use Doctrine\Persistence\ManagerRegistry;
 
-class PatreonPollTierVoteConfigRepository   extends AbstractBaseRepository
+class PatreonPollConfigRepository   extends AbstractBaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -20,8 +20,17 @@ class PatreonPollTierVoteConfigRepository   extends AbstractBaseRepository
     {
         return $this->findOneBy([
             'campaignTier' => $campaignTier,
-            'patreonPoll' => $patreonPoll,
+            'poll' => $patreonPoll,
         ]);
     }
 
+    /**
+     * @return array<PatreonPollVoteConfig>
+     */
+    public function findByPoll(Poll $poll): array
+    {
+        return $this->findBy([
+            'poll' => $poll,
+        ]);
+    }
 }

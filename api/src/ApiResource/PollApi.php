@@ -13,6 +13,7 @@ use App\Entity\Poll;
 use App\State\EntityClassDtoStateProcessor;
 use App\State\EntityToDtoStateProvider;
 use Carbon\CarbonImmutable;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -50,6 +51,9 @@ class PollApi
     #[NotBlank]
     #[ApiProperty(readable: false)]
     private array $voteConfig = [];
+    #[SerializedName('config')]
+    #[ApiProperty(readable: true, writable: false)]
+    private ?PollVoteConfigDto $voteConfigDto = null;
 
     public function getId(): ?Uuid
     {
@@ -114,6 +118,17 @@ class PollApi
     public function setVoteConfig(array $voteConfig): PollApi
     {
         $this->voteConfig = $voteConfig;
+        return $this;
+    }
+
+    public function getVoteConfigDto(): ?PollVoteConfigDto
+    {
+        return $this->voteConfigDto;
+    }
+
+    public function setVoteConfigDto(?PollVoteConfigDto $voteConfigDto): PollApi
+    {
+        $this->voteConfigDto = $voteConfigDto;
         return $this;
     }
 }

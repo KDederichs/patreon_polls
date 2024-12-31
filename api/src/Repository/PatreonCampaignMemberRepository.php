@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\PatreonCampaign;
 use App\Entity\PatreonCampaignMember;
+use App\Entity\PatreonUser;
 use Doctrine\Persistence\ManagerRegistry;
 
 class PatreonCampaignMemberRepository   extends AbstractBaseRepository
@@ -18,6 +19,14 @@ class PatreonCampaignMemberRepository   extends AbstractBaseRepository
         return $this->findOneBy([
             'campaign' => $campaign,
             'patreonUserId' => $patreonUserId
+        ]);
+    }
+
+    public function findByCampaignAndPatreonUser(PatreonCampaign $campaign, PatreonUser $patreonUser): ?PatreonCampaignMember
+    {
+        return $this->findOneBy([
+            'campaign' => $campaign,
+            'patreonUser' => $patreonUser
         ]);
     }
 
