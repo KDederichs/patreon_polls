@@ -61,7 +61,7 @@ const PollOptionCard = ({
             shadow="sm"
             radius="lg"
             width="100%"
-            alt="Woman listing to music"
+            alt={pollOption.optionName}
             className="h-[280px] w-full object-cover"
             src={pollOption.imageUri}
           />
@@ -101,10 +101,18 @@ export default function PollVotePage({
 }: {
   params: Usable<{ id: string }>
 }) {
-  const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
+  const [image, setImage] = useState<File | null>(null)
+
+  const { getRootProps, getInputProps } = useDropzone({
     multiple: false,
     accept: { 'image/*': [] },
     maxFiles: 1,
+    onDrop: (acceptedFiles) => {
+      const droppedImage = acceptedFiles.pop()
+      if (droppedImage) {
+        setImage(droppedImage)
+      }
+    },
   })
   const paramsResolved = React.use(params)
   const { data: pollData, isLoading: isPollLoading } = useGetPollInfo({
@@ -145,6 +153,7 @@ export default function PollVotePage({
       queryClient.setQueryData([pollOption['@id']], pollOption)
       setOptionName('')
       setMediaIri(null)
+      setImage(null)
     },
     onError: (error) => {
       toast.error(error.message)
@@ -152,6 +161,7 @@ export default function PollVotePage({
         imageDeleter.mutate(mediaIri)
       }
       setMediaIri(null)
+      setImage(null)
     },
   })
   const imageUploader = useUploadImage({
@@ -206,34 +216,66 @@ export default function PollVotePage({
         {pollData?.config?.canAddOptions && !maxOptionsReached ? (
           <Card
             radius="lg"
+            isFooterBlurred={image !== undefined}
             className="h-[280px] border-none"
           >
             <Skeleton isLoaded={!isPollLoading}>
               {pollData?.allowPictures ? (
-                <CardBody className="overflow-visible">
-                  <div
-                    {...getRootProps()}
-                    className="flex-column flex h-full items-center justify-center rounded border-2 border-dotted"
-                  >
-                    <input
-                      {...getInputProps()}
-                      disabled={!isAuthenticated}
-                    />
-                    <div className="grid-cols- grid">
-                      <div className="flex w-full justify-center p-2">
-                        <Icon
-                          icon={'mdi-light:image'}
-                          style={{ fontSize: '36px' }}
-                        />
+                <CardBody
+                  className={clsx('overflow-visible', image ? 'p-0' : '')}
+                >
+                  {!image ? (
+                    <div
+                      {...getRootProps()}
+                      className="flex-column flex h-full items-center justify-center rounded border-2 border-dotted"
+                    >
+                      <input
+                        {...getInputProps()}
+                        disabled={!isAuthenticated}
+                      />
+                      <div className="grid-cols- grid">
+                        <div className="flex w-full justify-center p-2">
+                          <Icon
+                            icon={'mdi-light:image'}
+                            style={{ fontSize: '36px' }}
+                          />
+                        </div>
+                        <p className="text-xs">
+                          Optional character image (no NSFW)
+                        </p>
                       </div>
-                      <p className="text-xs">
-                        Optional character image (no NSFW)
-                      </p>
                     </div>
-                  </div>
+                  ) : (
+                    <div>
+                      <Button
+                        className={'absolute right-1 top-1 z-40 rounded-xl'}
+                        color={'danger'}
+                        variant={'ghost'}
+                        onPress={() => {
+                          setImage(null)
+                        }}
+                      >
+                        X
+                      </Button>
+                      <Image
+                        shadow="sm"
+                        radius="lg"
+                        width="100%"
+                        alt={optionName}
+                        className="h-[280px] w-full object-cover"
+                        src={URL.createObjectURL(image)}
+                      />
+                    </div>
+                  )}
                 </CardBody>
               ) : null}
-              <CardFooter>
+              <CardFooter
+                className={
+                  image
+                    ? 'absolute bottom-1 z-10 ml-1 w-[calc(100%_-_8px)] justify-evenly overflow-hidden rounded-large border-1 border-white/20 py-1 shadow-small before:rounded-xl before:bg-white/10'
+                    : undefined
+                }
+              >
                 <div className="grid w-full grid-cols-1 gap-5">
                   <Input
                     type={'text'}
@@ -256,10 +298,8 @@ export default function PollVotePage({
                     onPress={() => {
                       if (pollData?.allowPictures) {
                         const pictureFormData = new FormData()
-                        acceptedFiles.forEach((file) => {
-                          pictureFormData.append('file', file)
-                        })
-                        if (acceptedFiles.length === 1) {
+                        if (image) {
+                          pictureFormData.append('file', image)
                           imageUploader.mutate(pictureFormData)
                           return
                         }
