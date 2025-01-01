@@ -43,6 +43,7 @@ interface PollOptionCardProps {
   totalVoteCount: number
   votes: PollVote[]
   pollId: string
+  disabled: boolean
 }
 
 const spring = {
@@ -56,6 +57,7 @@ const PollOptionCard = ({
   totalVoteCount,
   votes,
   pollId,
+  disabled,
 }: PollOptionCardProps) => {
   const isAuthenticated = useAuthStore((state) => state.token !== null)
   const [vote, setVote] = useState<PollVote | null>(null)
@@ -131,7 +133,10 @@ const PollOptionCard = ({
       className="border-none"
       isPressable
       isDisabled={
-        !isAuthenticated || pollVoter.isPending || pollVoteDeleter.isPending
+        !isAuthenticated ||
+        pollVoter.isPending ||
+        pollVoteDeleter.isPending ||
+        disabled
       }
       onPress={onPress}
     >
@@ -169,7 +174,10 @@ const PollOptionCard = ({
           isSelected={isSelected}
           onValueChange={onPress}
           disabled={
-            pollVoter.isPending || pollVoteDeleter.isPending || !isAuthenticated
+            pollVoter.isPending ||
+            pollVoteDeleter.isPending ||
+            !isAuthenticated ||
+            disabled
           }
           size="sm"
         >
@@ -282,8 +290,9 @@ export default function PollVotePage({
 
   const maxOptionsReached =
     (myOptionsCounter ?? 0) >= (pollData?.config?.numberOfOptions ?? 1)
-  const maxVotesReached = false
-
+  const maxVotesReached =
+    (myVotes?.length ?? 0) >= (pollData?.config?.numberOfVotes ?? 1) &&
+    (pollData?.config?.hasLimitedVotes ?? false)
   const pollEndTime = pollData?.endsAt
     ? parseAbsoluteToLocal(pollData.endsAt)
     : now(getLocalTimeZone())
@@ -316,6 +325,7 @@ export default function PollVotePage({
                 totalVoteCount={totalVoteCount}
                 votes={myVotes ?? []}
                 pollId={paramsResolved.id}
+                disabled={maxVotesReached}
               />
             </motion.div>
           ))}
