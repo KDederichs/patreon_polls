@@ -36,6 +36,7 @@ import { useGetMyVotes } from '@/hooks/query/PollVote/useGetMyVotes'
 import { PollVote } from '@/types/entity/PollVote'
 import { useCreatePollVote } from '@/hooks/mutation/PollVote/useCreatePollVote'
 import { useDeletePollVote } from '@/hooks/mutation/PollVote/useDeletePollVote'
+import { motion } from 'framer-motion'
 
 interface PollOptionCardProps {
   pollOption: PollOption
@@ -147,7 +148,11 @@ const PollOptionCard = ({
         </CardBody>
       ) : (
         <CardBody className="overflow-visible p-0">
-          <div className={'ce flex h-full w-full items-center justify-center'}>
+          <div
+            className={
+              'flex h-[280px] min-w-[380px] items-center justify-center'
+            }
+          >
             <h1>{pollOption.optionName} (No picture)</h1>
           </div>
         </CardBody>
@@ -301,13 +306,18 @@ export default function PollVotePage({
         {(pollOptions ?? [])
           .sort((o1, o2) => o2.numberOfVotes - o1.numberOfVotes)
           .map((pollOption) => (
-            <PollOptionCard
+            <motion.div
               key={pollOption['@id']}
-              pollOption={pollOption}
-              totalVoteCount={totalVoteCount}
-              votes={myVotes ?? []}
-              pollId={paramsResolved.id}
-            />
+              animate={spring}
+              layout
+            >
+              <PollOptionCard
+                pollOption={pollOption}
+                totalVoteCount={totalVoteCount}
+                votes={myVotes ?? []}
+                pollId={paramsResolved.id}
+              />
+            </motion.div>
           ))}
         {pollData?.config?.canAddOptions && !maxOptionsReached ? (
           <Card
