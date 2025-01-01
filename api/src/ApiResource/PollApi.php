@@ -21,12 +21,15 @@ use Symfony\Component\Validator\Constraints\Valid;
 
 #[ApiResource(
     shortName: 'Poll',
+    order: ['id' => 'DESC'],
     provider: EntityToDtoStateProvider::class,
     processor: EntityClassDtoStateProcessor::class,
     stateOptions: new Options(entityClass: Poll::class)
 )]
 #[Get]
-#[GetCollection]
+#[GetCollection(
+    paginationEnabled: false
+)]
 #[Post(
     denormalizationContext: [
         'disable_type_enforcement' => true

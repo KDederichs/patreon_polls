@@ -21,8 +21,10 @@ class ListPollTest extends ApiTestCase
 
     public function testGetPoll(): void
     {
-        $poll = PollFactory::createOne();
         $user = UserFactory::createOne();
+        $poll = PollFactory::createOne([
+            'createdBy' => $user
+        ]);
 
         $this
             ->browser()
