@@ -1,5 +1,5 @@
 'use client'
-import React, { Usable, useState } from 'react'
+import React, { Usable, useEffect, useState } from 'react'
 
 import {
   Card,
@@ -32,17 +32,96 @@ import { useQueryClient } from '@tanstack/react-query'
 import { GenericHydraItem } from '@/types/GenericHydraItem'
 import { toast } from 'react-toastify'
 import { useDeleteImage } from '@/hooks/mutation/PollOption/useDeleteImage'
+import { useGetMyVotes } from '@/hooks/query/PollVote/useGetMyVotes'
+import { PollVote } from '@/types/entity/PollVote'
+import { useCreatePollVote } from '@/hooks/mutation/PollVote/useCreatePollVote'
+import { useDeletePollVote } from '@/hooks/mutation/PollVote/useDeletePollVote'
 
 interface PollOptionCardProps {
   pollOption: PollOption
   totalVoteCount: number
+  votes: PollVote[]
+  pollId: string
 }
+
+const spring = {
+  type: 'spring',
+  damping: 25,
+  stiffness: 120,
+}
+
 const PollOptionCard = ({
   pollOption,
   totalVoteCount,
+  votes,
+  pollId,
 }: PollOptionCardProps) => {
-  const [isSelected, setIsSelected] = React.useState(false)
   const isAuthenticated = useAuthStore((state) => state.token !== null)
+  const [vote, setVote] = useState<PollVote | null>(null)
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    const v = votes.find((v1) => {
+      return v1.pollOption === pollOption['@id']
+    })
+    setVote(v ?? null)
+  }, [votes, pollOption])
+
+  const isSelected = vote !== null
+
+  const pollVoter = useCreatePollVote({
+    onSuccess: (pollVote) => {
+      queryClient.setQueryData(
+        ['list', `/api/polls/${pollId}/my-votes`],
+        (oldData: Array<GenericHydraItem> | undefined) => {
+          if (undefined === oldData) {
+            return [pollOption]
+          }
+          return [...oldData, pollVote]
+        },
+      )
+      queryClient.setQueryData([pollOption['@id']], pollVote)
+      queryClient.refetchQueries({
+        queryKey: ['list', `/api/polls/${pollId}/options`],
+      })
+    },
+    onError: (error) => toast.error(error.message),
+  })
+
+  const pollVoteDeleter = useDeletePollVote({
+    onSuccess: () => {
+      const iri = vote!['@id']
+      queryClient.setQueryData(
+        ['list', `/api/polls/${pollId}/my-votes`],
+        (oldData: Array<GenericHydraItem> | undefined) => {
+          if (undefined === oldData) {
+            return []
+          }
+          return [...oldData.filter((old) => old['@id'] !== iri)]
+        },
+      )
+      queryClient.setQueryData([iri], undefined)
+      queryClient.refetchQueries({
+        queryKey: ['list', `/api/polls/${pollId}/options`],
+      })
+    },
+    onError: (error) => toast.error(error.message),
+  })
+
+  const onPress = () => {
+    if (isSelected) {
+      if (!pollVoteDeleter.isPending) {
+        pollVoteDeleter.mutate(vote['@id'])
+      }
+    } else {
+      if (!pollVoter.isPending) {
+        pollVoter.mutate({
+          pollOption: pollOption['@id'],
+          poll: `/api/polls/${pollId}`,
+        })
+      }
+    }
+  }
 
   return (
     <Card
@@ -50,10 +129,10 @@ const PollOptionCard = ({
       isFooterBlurred
       className="border-none"
       isPressable
-      isDisabled={!isAuthenticated}
-      onPress={() => {
-        setIsSelected((selected) => !selected)
-      }}
+      isDisabled={
+        !isAuthenticated || pollVoter.isPending || pollVoteDeleter.isPending
+      }
+      onPress={onPress}
     >
       {pollOption.imageUri ? (
         <CardBody className="overflow-visible p-0">
@@ -83,7 +162,10 @@ const PollOptionCard = ({
         <Checkbox
           color={'success'}
           isSelected={isSelected}
-          onValueChange={setIsSelected}
+          onValueChange={onPress}
+          disabled={
+            pollVoter.isPending || pollVoteDeleter.isPending || !isAuthenticated
+          }
           size="sm"
         >
           {pollOption.optionName}
@@ -128,6 +210,10 @@ export default function PollVotePage({
     useGetPollOptions({
       pollId: paramsResolved.id,
     })
+
+  const { data: myVotes, isLoading: myVotesAreLoading } = useGetMyVotes({
+    pollId: paramsResolved.id,
+  })
   let formatter = useDateFormatter({ dateStyle: 'full', timeStyle: 'long' })
   const isAuthenticated = useAuthStore((state) => state.token !== null)
 
@@ -212,13 +298,17 @@ export default function PollVotePage({
         <Spacer y={4} />
       </div>
       <div className="mt-12 grid w-full grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {(pollOptions ?? []).map((pollOption) => (
-          <PollOptionCard
-            key={pollOption['@id']}
-            pollOption={pollOption}
-            totalVoteCount={totalVoteCount}
-          />
-        ))}
+        {(pollOptions ?? [])
+          .sort((o1, o2) => o2.numberOfVotes - o1.numberOfVotes)
+          .map((pollOption) => (
+            <PollOptionCard
+              key={pollOption['@id']}
+              pollOption={pollOption}
+              totalVoteCount={totalVoteCount}
+              votes={myVotes ?? []}
+              pollId={paramsResolved.id}
+            />
+          ))}
         {pollData?.config?.canAddOptions && !maxOptionsReached ? (
           <Card
             radius="lg"
