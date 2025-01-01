@@ -23,29 +23,6 @@ use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PollVoteRepository::class)]
 #[UniqueConstraint(fields: ['option', 'votedBy'])]
-#[ApiResource]
-#[Get]
-#[GetCollection(controller: NotFoundAction::class)]
-#[ApiResource(
-    uriTemplate: '/polls/{id}/my-votes',
-    operations: [new GetCollection(
-        paginationEnabled: false,
-        normalizationContext: [
-            'groups' => [
-                'poll_vote:read'
-            ]
-        ]
-    )],
-    uriVariables: [
-        'id' => new Link(
-            toProperty: 'poll',
-            fromClass: Poll::class,
-            security: "is_granted('vote', poll)"
-        )
-    ]
-)]
-#[Post]
-#[Delete]
 class PollVote implements UserOwnedInterface
 {
     #[Id, Column(type: UuidType::NAME)]
@@ -60,7 +37,7 @@ class PollVote implements UserOwnedInterface
     private PollOption $option;
     #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(nullable: false)]
-    private User $votedBy;
+    private ?User $votedBy = null;
     #[Column(type: 'smallint', options: ['default' => 1])]
     private int $votePower = 1;
 
@@ -92,12 +69,12 @@ class PollVote implements UserOwnedInterface
         return $this;
     }
 
-    public function getVotedBy(): User
+    public function getVotedBy(): ?User
     {
         return $this->votedBy;
     }
 
-    public function setVotedBy(User $votedBy): PollVote
+    public function setVotedBy(User $votedBy): ?PollVote
     {
         $this->votedBy = $votedBy;
         return $this;

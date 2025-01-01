@@ -8,6 +8,7 @@ use App\Factory\PatreonUserFactory;
 use App\Factory\PollOptionFactory;
 use App\Factory\UserFactory;
 use App\Tests\ApiTestCase;
+use Carbon\CarbonImmutable;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class CreatePollOptionsTest extends ApiTestCase
@@ -114,6 +115,25 @@ class CreatePollOptionsTest extends ApiTestCase
             ->assertStatus(403)
             ->assertJson()
             ->assertJsonMatches('detail', 'Access Denied.');
+    }
+
+    public function testItCanNotCreateAnOptionAfterPollHasEnded()
+    {
+        $user = UserFactory::createOne();
+        $user2 = UserFactory::createOne();
+        $poll = $this->setUpPoll($user, $user2, endsAt: CarbonImmutable::parse('yesterday'), addOptions: true, maxOptionAdd: 1000);
+        $this
+            ->browser()
+            ->actingAs($user)
+            ->post('/api/poll_options', [
+                'json' => [
+                    'poll' => '/api/polls/'.$poll->getId()->toRfc4122(),
+                    'optionName' => 'Testi Option',
+                ]
+            ])
+            ->assertStatus(422)
+            ->assertJson()
+            ->assertJsonMatches('detail', 'The poll has ended.');
     }
 
     public function testCanCreateOptionWhenCreator(): void

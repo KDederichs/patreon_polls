@@ -40,7 +40,8 @@ readonly class UserOwnedExtension implements QueryCollectionExtensionInterface, 
         $user = $this->security->getUser();
 
         if (!$user instanceof User) {
-            throw new AccessDeniedException('Not a valid user');
+            //Let firewall handle authentication
+            return;
         }
 
         $userField = $resourceClass::getUserField();

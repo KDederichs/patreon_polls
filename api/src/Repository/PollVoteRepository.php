@@ -23,4 +23,17 @@ class PollVoteRepository extends AbstractBaseRepository
             'votedBy' => $user
         ]);
     }
+
+    public function getNumberOfVotesForPoll(User $user, Poll $poll): int
+    {
+        $qb = $this->createQueryBuilder('pv');
+        return $qb
+            ->select('count(pv.id)')
+            ->where('pv.poll = :poll')
+            ->andWhere('pv.votedBy = :user')
+            ->setParameter('poll', $poll)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

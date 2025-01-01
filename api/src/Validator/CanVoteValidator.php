@@ -3,12 +3,13 @@
 namespace App\Validator;
 
 use App\ApiResource\PollOptionApi;
-
+use App\ApiResource\PollVoteApi;
 use App\Entity\AbstractVoteConfig;
 use App\Entity\Poll;
 use App\Entity\User;
 use App\Mapper\AbstractApiToObjectMapper;
 use App\Repository\PollOptionRepository;
+use App\Repository\PollVoteRepository;
 use App\Service\VoteConfigService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Validator\Constraint;
@@ -16,13 +17,14 @@ use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfonycasts\MicroMapper\MicroMapperInterface;
 
-class CanAddOptionValidator extends ConstraintValidator
+class CanVoteValidator extends ConstraintValidator
 {
+
     public function __construct(
         private readonly Security $security,
         private readonly VoteConfigService $configService,
         private readonly MicroMapperInterface $microMapper,
-        private readonly PollOptionRepository $optionRepository,
+        private readonly PollVoteRepository $voteRepository,
     )
     {
 
@@ -30,12 +32,12 @@ class CanAddOptionValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if (!$constraint instanceof CanAddOption) {
-            throw new UnexpectedTypeException($constraint, CanAddOption::class);
+        if (!$constraint instanceof CanVote) {
+            throw new UnexpectedTypeException($constraint, CanVote::class);
         }
 
-        if (!$value instanceof PollOptionApi) {
-            throw new UnexpectedTypeException($value, PollOptionApi::class);
+        if (!$value instanceof PollVoteApi) {
+            throw new UnexpectedTypeException($value, PollVoteApi::class);
         }
 
         $user = $this->security->getUser();
@@ -59,21 +61,14 @@ class CanAddOptionValidator extends ConstraintValidator
         /** @var AbstractVoteConfig $config */
         $config = $this->configService->getConfigForUser($poll, $user);
 
-        if (!$config->isAddOptions()) {
-            $this->context->addViolation('Adding options for this poll is not enabled.');
-        }
-
-        if ($value->getImage() && !$poll->isAllowPictures()) {
-            $this->context->addViolation('Adding pictures to poll options is not allowed.');
-        }
-
-        if (!$config->isAddOptions()) {
+        if (!$config?->isLimitedVotes()) {
             return;
         }
 
-        $myVotes = $this->optionRepository->getNumberOfMyOptions($poll, $user);
-        if ($myVotes >= $config->getMaxOptionAdd()) {
-            $this->context->addViolation(sprintf('You can not add more than %s options.', $config->getMaxOptionAdd()));
+        $myVotes = $this->voteRepository->getNumberOfVotesForPoll($user, $poll);
+
+        if ($myVotes >= $config->getNumberOfVotes()) {
+            $this->context->addViolation(sprintf('You can only vote %s times.', $config->getNumberOfVotes()));
         }
     }
 }
