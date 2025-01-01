@@ -66,7 +66,13 @@ const PollOptionCard = ({
             src={pollOption.imageUri}
           />
         </CardBody>
-      ) : null}
+      ) : (
+        <CardBody className="overflow-visible p-0">
+          <div className={'ce flex h-full w-full items-center justify-center'}>
+            <h1>{pollOption.optionName} (No picture)</h1>
+          </div>
+        </CardBody>
+      )}
 
       <CardFooter
         className={clsx(
