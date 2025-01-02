@@ -4,7 +4,7 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query'
 import { getListEntities } from '@/api/api'
-import { PatreonCampaignTier } from '@/types/entity/PatreonCampaignTier'
+import { GenericCampaignTier } from '@/types/entity/GenericCampaignTier'
 import { Poll } from '@/types/entity/Poll'
 
 export const useListPolls = (): UseQueryResult<Poll[]> => {

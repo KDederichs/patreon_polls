@@ -6,16 +6,16 @@ import {
 import { getListEntities } from '@/api/api'
 import { GenericCampaignTier } from '@/types/entity/GenericCampaignTier'
 
-export const useListPatreonCampaignTiers = ({
+export const useListSubscribestarTiers = ({
   id,
 }: {
   id: string
 }): UseQueryResult<GenericCampaignTier[]> => {
   return useQuery<GenericCampaignTier[]>({
-    queryKey: [`/api/patreon_campaigns/${id}/tiers`],
+    queryKey: [`/api/subscribestar_users/${id}/tiers`],
     queryFn: () =>
       getListEntities<GenericCampaignTier>(
-        `/api/patreon_campaigns/${id}/tiers`,
+        `/api/subscribestar_users/${id}/tiers`,
       ),
     placeholderData: keepPreviousData,
     staleTime: 60 * 1000,

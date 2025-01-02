@@ -16,7 +16,7 @@ class SubscribestarUserRepository extends AbstractBaseRepository implements Reso
         parent::__construct($registry, SubscribestarUser::class);
     }
 
-    public function findByPatreonId(string $patreonId, bool $creator = false): ?SubscribestarUser
+    public function findBySubscribestarId(string $patreonId, bool $creator = false): ?SubscribestarUser
     {
         return $this->findOneBy([
             'resourceId' => $patreonId,
@@ -46,6 +46,6 @@ class SubscribestarUserRepository extends AbstractBaseRepository implements Reso
 
     public function getOAuthResource(string $resourceId, bool $creator): ?OauthResource
     {
-        return $this->findByPatreonId($resourceId, $creator);
+        return $this->findBySubscribestarId($resourceId, $creator);
     }
 }

@@ -20,17 +20,31 @@ import { useListPatreonCampaigns } from '@/hooks/query/PatreonCampaign/useListPa
 import { useListPatreonCampaignTiers } from '@/hooks/query/PatreonCampaignTier/useListPatreonCampaignTiers'
 import TierSelector from '@/components/polls/tier-selector'
 import { useSyncPatreonCampaigns } from '@/hooks/mutation/PatreonCampaign/useSyncPatreonCampaigns'
-import { PatreonCampaignTier } from '@/types/entity/PatreonCampaignTier'
+import { GenericCampaignTier } from '@/types/entity/GenericCampaignTier'
 import TierVoteConfig, { VoteConfig } from '@/components/polls/tier-vote-config'
 import { useCreatePoll } from '@/hooks/mutation/Poll/useCreatePoll'
 import { useRouter } from 'next/navigation'
+import { useListSubscribestarUser } from '@/hooks/query/SubscribestarUser/useListSubscribestarUser'
+import { useListSubscribestarTiers } from '@/hooks/query/SubscribestarTier/useListSubscribestarTiers'
+import { useSyncSubscribestarTiers } from '@/hooks/mutation/SubscribestarTier/useSyncSubscribestarTiers'
 
 export default function PollCreatePage() {
   const { data: patreonData } = useListPatreonUsers()
+  const { data: subscribestarUsers } = useListSubscribestarUser()
   const patreonSyncMutator = useSyncPatreonCampaigns()
 
   const isPatreonCreator =
     patreonData?.member?.find((ptrUser) => ptrUser.creator) !== undefined
+
+  const subscribestarCreatorUser = subscribestarUsers?.member?.find(
+    (ptrUser) => ptrUser.creator,
+  )
+
+  const subscribestarSyncMutator = useSyncSubscribestarTiers({
+    subscribestarUserId: subscribestarCreatorUser?.id ?? '',
+  })
+
+  const isSubscribestarCreator = subscribestarCreatorUser !== undefined
 
   const [isPatreonSelected, setIsPatreonSelected] = React.useState(false)
   const [isSubscribeStarSelected, setIsSubscribeStarSelected] =
@@ -39,7 +53,12 @@ export default function PollCreatePage() {
     React.useState<string>('')
   const { data: patreonCampaigns, isLoading: patreonCampaignsLoading } =
     useListPatreonCampaigns({ enabled: isPatreonCreator })
-  const [selectedTiers, setSelectedTiers] = useState<PatreonCampaignTier[]>([])
+  const [selectedTiersPatreon, setSelectedTiersPatreon] = useState<
+    GenericCampaignTier[]
+  >([])
+  const [selectedTiersSubscribestar, setSelectedTiersSubscribestar] = useState<
+    GenericCampaignTier[]
+  >([])
   const [voteConfig, setVoteConfig] = useState<{ [key: string]: VoteConfig }>(
     {},
   )
@@ -135,12 +154,13 @@ export default function PollCreatePage() {
                   ) : null}
 
                   <TierSelector
-                    campaignId={selectedPatreonCampaign}
-                    onTierSelectUpdate={setSelectedTiers}
+                    id={selectedPatreonCampaign}
+                    onTierSelectUpdate={setSelectedTiersPatreon}
+                    tierLoader={useListPatreonCampaignTiers}
                   />
                 </div>
                 <Divider />
-                {selectedTiers.map((selectedTier) => {
+                {selectedTiersPatreon.map((selectedTier) => {
                   return (
                     <TierVoteConfig
                       key={selectedTier.id}
@@ -159,6 +179,7 @@ export default function PollCreatePage() {
             <Checkbox
               isSelected={isSubscribeStarSelected}
               onValueChange={setIsSubscribeStarSelected}
+              disabled={!isSubscribestarCreator}
             >
               SubscribeStar Subscribers
             </Checkbox>
@@ -167,140 +188,33 @@ export default function PollCreatePage() {
             <>
               <Divider />
               <CardBody>
-                <h2 className="text-large">Which tiers can vote?</h2>
-                <Checkbox
-                  aria-label={'Tier 1'}
-                  classNames={{
-                    base: cn(
-                      'inline-flex w-full max-w-md bg-content1',
-                      'hover:bg-content2 items-center justify-start',
-                      'cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent',
-                      'data-[selected=true]:border-primary',
-                      'mt-1 mb-1',
-                    ),
-                    label: 'w-full',
+                <Button
+                  className="mb-2 mt-5"
+                  variant="ghost"
+                  color={'success'}
+                  isLoading={subscribestarSyncMutator.isPending}
+                  onPress={() => {
+                    subscribestarSyncMutator.mutate()
                   }}
                 >
-                  <div className="flex w-full justify-between gap-2">
-                    Tier 1
-                  </div>
-                </Checkbox>
-                <Checkbox
-                  aria-label={'Tier 2'}
-                  classNames={{
-                    base: cn(
-                      'inline-flex w-full max-w-md bg-content1',
-                      'hover:bg-content2 items-center justify-start',
-                      'cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent',
-                      'data-[selected=true]:border-primary',
-                      'mt-1 mb-1',
-                    ),
-                    label: 'w-full',
-                  }}
-                >
-                  <div className="flex w-full justify-between gap-2">
-                    Tier 2
-                  </div>
-                </Checkbox>
-                <Checkbox
-                  aria-label={'Tier 3'}
-                  classNames={{
-                    base: cn(
-                      'inline-flex w-full max-w-md bg-content1',
-                      'hover:bg-content2 items-center justify-start',
-                      'cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent',
-                      'data-[selected=true]:border-primary',
-                      'mt-1 mb-1',
-                    ),
-                    label: 'w-full',
-                  }}
-                >
-                  <div className="flex w-full justify-between gap-2">
-                    Tier 3
-                  </div>
-                </Checkbox>
+                  Sync Subscribestar
+                </Button>
+                <TierSelector
+                  id={subscribestarCreatorUser!.id}
+                  onTierSelectUpdate={setSelectedTiersSubscribestar}
+                  tierLoader={useListSubscribestarTiers}
+                />
                 <Divider />
-                <Spacer y={4} />
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-medium">Tier 1 Settings</h3>
-                  </CardHeader>
-                  <CardBody>
-                    <div className="grid grid-cols-2 gap-5">
-                      <Checkbox>Can add options</Checkbox>
-                      <Input
-                        type={'number'}
-                        label="How many?"
-                      />
-                    </div>
-                    <div className="mt-2 grid grid-cols-2 gap-5">
-                      <Checkbox>Limited votes</Checkbox>
-                      <Input
-                        type={'number'}
-                        label="How many?"
-                      />
-                    </div>
-                    <Input
-                      type={'number'}
-                      label="Voting power"
-                      className="mt-2"
+                {selectedTiersSubscribestar.map((selectedTier) => {
+                  return (
+                    <TierVoteConfig
+                      key={selectedTier.id}
+                      selectedTier={selectedTier}
+                      onChange={onVoteConfigChange}
+                      previousConfig={voteConfig[selectedTier['@id']]}
                     />
-                  </CardBody>
-                </Card>
-                <Spacer y={4} />
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-medium">Tier 2 Settings</h3>
-                  </CardHeader>
-                  <CardBody>
-                    <div className="grid grid-cols-2 gap-5">
-                      <Checkbox>Can add options</Checkbox>
-                      <Input
-                        type={'number'}
-                        label="How many?"
-                      />
-                    </div>
-                    <div className="mt-2 grid grid-cols-2 gap-5">
-                      <Checkbox>Limited votes</Checkbox>
-                      <Input
-                        type={'number'}
-                        label="How many?"
-                      />
-                    </div>
-                    <Input
-                      type={'number'}
-                      label="Voting power"
-                      className="mt-2"
-                    />
-                  </CardBody>
-                </Card>
-                <Spacer y={4} />
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-medium">Tier 3 Settings</h3>
-                  </CardHeader>
-                  <CardBody>
-                    <div className="grid grid-cols-2 gap-5">
-                      <Checkbox>Can add options</Checkbox>
-                      <Input
-                        type={'number'}
-                        label="How many?"
-                      />
-                    </div>
-                    <div className="mt-2 grid grid-cols-2 gap-5">
-                      <Checkbox>Limited votes</Checkbox>
-                      <Input
-                        type={'number'}
-                        label="How many?"
-                      />
-                    </div>
-                    <Input
-                      type={'number'}
-                      label="Voting power"
-                      className="mt-2"
-                    />
-                  </CardBody>
-                </Card>
+                  )
+                })}
               </CardBody>
             </>
           ) : null}

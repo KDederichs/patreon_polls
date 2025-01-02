@@ -100,8 +100,8 @@ class SubscribestarService implements LoggerAwareInterface
                     $tier
                         ->setSubscribestarUser($subscribestarUser)
                         ->setSubscribestarTierId($tierData['id'])
-                        ->setTierName($tier['title'])
-                        ->setAmountInCents($tier['cost']);
+                        ->setTierName($tierData['title'])
+                        ->setAmountInCents($tierData['cost']);
                     $this->subscribestarTierRepository->persist($tier);
 
                     foreach ($this->subscribestarSubscriptionRepository->findForTierId($tierData['id']) as $subscription) {
@@ -111,8 +111,8 @@ class SubscribestarService implements LoggerAwareInterface
                     }
                 } else {
                     $tier
-                        ->setTierName($tier['title'])
-                        ->setAmountInCents($tier['cost']);
+                        ->setTierName($tierData['title'])
+                        ->setAmountInCents($tierData['cost']);
                 }
             }
             $this->subscribestarTierRepository->save();

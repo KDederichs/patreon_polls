@@ -56,6 +56,12 @@ export const syncPatreon = async (): Promise<void> => {
     .then((response) => response.data)
 }
 
+export const syncSubscribestar = async (): Promise<void> => {
+  return privateAxiosInstance
+    .post<void>(`/api/subscribestar_tiers/sync`)
+    .then((response) => response.data)
+}
+
 export const getEntityByIri = async <T>(iri: string): Promise<T> => {
   return privateAxiosInstance.get<T>(iri).then((response) => response.data)
 }

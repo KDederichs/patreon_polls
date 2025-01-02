@@ -1,11 +1,11 @@
 'use client'
-import { PatreonCampaignTier } from '@/types/entity/PatreonCampaignTier'
+import { GenericCampaignTier } from '@/types/entity/GenericCampaignTier'
 import { Card, CardBody, CardHeader, Checkbox, Spacer } from '@nextui-org/react'
 import { Input } from '@nextui-org/input'
 import { useEffect, useState } from 'react'
 
 interface Props {
-  selectedTier: PatreonCampaignTier
+  selectedTier: GenericCampaignTier
   previousConfig?: VoteConfig
   onChange: (tierIri: string, config: VoteConfig) => void
 }

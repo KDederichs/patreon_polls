@@ -6,15 +6,24 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Post;
 use ApiPlatform\Symfony\Action\NotFoundAction;
 use App\Repository\SubscribestarTierRepository;
+use App\State\Processor\SyncSubscribestarTierProcessor;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 
 #[Entity(repositoryClass: SubscribestarTierRepository::class)]
+#[ApiResource]
 #[Get(controller: NotFoundAction::class, openapi: false)]
+#[Post(
+    uriTemplate: '/subscribestar_tiers/sync',
+    input: false,
+    output: false,
+    processor: SyncSubscribestarTierProcessor::class,
+)]
 #[ApiResource(
     uriTemplate: '/subscribestar_users/{id}/tiers',
     operations: [new GetCollection(
@@ -29,7 +38,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
         'id' => new Link(
             toProperty: 'subscribestarUser',
             fromClass: SubscribestarUser::class,
-            security: "subscribestarUser == user"
+            security: "subscribestarUser.getUser() == user"
         )
     ]
 )]
