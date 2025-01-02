@@ -15,21 +15,21 @@ use Symfony\Component\Uid\Uuid;
 
 #[Entity(repositoryClass: PatreonPollConfigRepository::class)]
 #[UniqueConstraint(fields: ['poll', 'campaignTier'])]
-class PatreonPollVoteConfig extends AbstractVoteConfig
+class SubscribestarPollVoteConfig extends AbstractVoteConfig
 {
-    #[ManyToOne(targetEntity: PatreonCampaignTier::class, fetch: 'EAGER')]
+    #[ManyToOne(targetEntity: SubscribestarTier::class, fetch: 'EAGER')]
     #[JoinColumn(nullable: false)]
-    public PatreonCampaignTier $campaignTier;
+    public SubscribestarTier $campaignTier;
 
 
-    public function getCampaignTier(): PatreonCampaignTier
+    public function getCampaignTier(): SubscribestarTier
     {
         return $this->campaignTier;
     }
 
-    public function setCampaignTier(AbstractCampaignTier $abstractCampaignTier): PatreonPollVoteConfig
+    public function setCampaignTier(AbstractCampaignTier $abstractCampaignTier): SubscribestarPollVoteConfig
     {
-        assert($abstractCampaignTier instanceof PatreonCampaignTier);
+        assert($abstractCampaignTier instanceof SubscribestarTier);
         $this->campaignTier = $abstractCampaignTier;
         return $this;
     }
