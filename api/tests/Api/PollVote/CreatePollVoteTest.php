@@ -2,8 +2,13 @@
 
 namespace App\Tests\Api\PollVote;
 
+use App\Factory\PollFactory;
 use App\Factory\PollOptionFactory;
 use App\Factory\PollVoteFactory;
+use App\Factory\SubscribestarPollVoteConfigFactory;
+use App\Factory\SubscribestarSubscriptionFactory;
+use App\Factory\SubscribestarTierFactory;
+use App\Factory\SubscribestarUserFactory;
 use App\Factory\UserFactory;
 use App\Tests\ApiTestCase;
 use Carbon\CarbonImmutable;
@@ -130,6 +135,68 @@ class CreatePollVoteTest extends ApiTestCase
         $user = UserFactory::createOne();
         $user2 = UserFactory::createOne();
         $poll = $this->setUpPoll($user, $user2, votingPower: 5);
+        $pollOption = PollOptionFactory::createOne([
+            'poll' => $poll
+        ]);
+
+        $this
+            ->browser()
+            ->actingAs($user)
+            ->post('/api/poll_votes', [
+                'json' => [
+                    'pollOption' => '/api/poll_options/'.$pollOption->getId()->toRfc4122(),
+                    'poll' => '/api/polls/'.$poll->getId()
+                ]
+            ])
+            ->assertStatus(201)
+            ->assertJson()
+            ->assertJsonMatches('votePower', 5)
+            ->assertJsonMatches('pollOption', '/api/poll_options/'.$pollOption->getId()->toRfc4122())
+        ;
+    }
+
+    public function testSubscriberCanVoteSubscribestar(): void
+    {
+        $user = UserFactory::createOne();
+        $user2 = UserFactory::createOne();
+        $poll = PollFactory::createOne([
+            'createdBy' => $user,
+            'endsAt' => null,
+        ]);
+
+        $subcribeStarUserCreator = SubscribestarUserFactory::createOne([
+            'resourceId' => '1',
+            'user' => $user2,
+            'creator' => true
+        ]);
+
+        $subscribestarUser = SubscribestarUserFactory::createOne([
+            'resourceId' => '2',
+            'user' => $user,
+        ]);
+
+        $subscribeStarTier = SubscribestarTierFactory::createOne([
+            'subscribestarUser' => $subcribeStarUserCreator
+        ]);
+
+        SubscribestarSubscriptionFactory::createOne([
+            'active' => true,
+            'contentProviderId' => '1',
+            'subscribestarId' => '1',
+            'tierId' => $subscribeStarTier->getSubscribestarTierId(),
+            'subscribestarTier' => $subscribeStarTier,
+            'subscribedTo' => $subcribeStarUserCreator,
+            'subscribestarUser' => $subscribestarUser
+        ]);
+
+        SubscribestarPollVoteConfigFactory::createOne([
+            'limitedVotes' => false,
+            'poll' => $poll,
+            'campaignTier' => $subscribeStarTier,
+            'votingPower' => 5
+        ]);
+
+
         $pollOption = PollOptionFactory::createOne([
             'poll' => $poll
         ]);

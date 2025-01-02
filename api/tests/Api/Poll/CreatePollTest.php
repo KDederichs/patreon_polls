@@ -7,6 +7,9 @@ use App\Factory\PatreonCampaignTierFactory;
 use App\Factory\PatreonPollVoteConfigFactory;
 use App\Factory\PatreonUserFactory;
 use App\Factory\PollFactory;
+use App\Factory\SubscribestarPollVoteConfigFactory;
+use App\Factory\SubscribestarTierFactory;
+use App\Factory\SubscribestarUserFactory;
 use App\Factory\UserFactory;
 use App\Tests\ApiTestCase;
 
@@ -54,12 +57,24 @@ class CreatePollTest extends ApiTestCase
     public function testCanCreatePoll(): void
     {
         $user = UserFactory::createOne([
-            'patreonId' => '1'
+            'patreonId' => '1',
+            'subscribestarId' => '1'
         ]);
+
+        $subcribeStarUser = SubscribestarUserFactory::createOne([
+            'resourceId' => '1',
+            'user' => $user,
+            'creator' => true
+        ]);
+
         PatreonUserFactory::createOne([
             'resourceId' => '1',
             'user' => $user,
             'creator' => true
+        ]);
+
+        $subscribeStarTier = SubscribestarTierFactory::createOne([
+            'subscribestarUser' => $subcribeStarUser
         ]);
 
         $patreonCampaign = PatreonCampaignFactory::createOne([
@@ -92,6 +107,12 @@ class CreatePollTest extends ApiTestCase
                             'hasLimitedVotes' => true,
                             'canAddOptions' => false,
                             'numberOfVotes' => 20
+                        ],
+                        'api/subscribestar_tiers/'.$subscribeStarTier->getId()->toRfc4122() => [
+                            'votingPower' => 10,
+                            'hasLimitedVotes' => true,
+                            'canAddOptions' => false,
+                            'numberOfVotes' => 20
                         ]
                     ]
                 ],
@@ -106,6 +127,7 @@ class CreatePollTest extends ApiTestCase
         $poll = PollFactory::repository()->firstOrFail();
         self::assertNotNull($poll->getEndsAt());
         PatreonPollVoteConfigFactory::repository()->assert()->count(2);
+        SubscribestarPollVoteConfigFactory::repository()->assert()->count(1);
     }
 
 }
