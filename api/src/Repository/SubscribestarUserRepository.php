@@ -7,6 +7,7 @@ use App\Entity\PatreonCampaignWebhook;
 use App\Entity\PatreonUser;
 use App\Entity\SubscribestarUser;
 use App\Entity\User;
+use Carbon\CarbonImmutable;
 use Doctrine\Persistence\ManagerRegistry;
 
 class SubscribestarUserRepository extends AbstractBaseRepository implements ResourceOwnedInterface
@@ -29,6 +30,17 @@ class SubscribestarUserRepository extends AbstractBaseRepository implements Reso
         return $this->findOneBy([
             'user' => $user,
         ]);
+    }
+
+    public function findForTokenRenew(): array
+    {
+        $qb = $this->createQueryBuilder('su');
+        return $qb
+            ->select('su')
+            ->where(':date >= su.accessTokenExpiresAt')
+            ->setParameter('date',CarbonImmutable::now()->addDays(2)->toDateTimeImmutable())
+            ->getQuery()
+            ->getResult();
     }
 
     public function userIsCreator(User $user): bool

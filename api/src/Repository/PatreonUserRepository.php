@@ -6,6 +6,7 @@ use App\Entity\OauthResource;
 use App\Entity\PatreonCampaignWebhook;
 use App\Entity\PatreonUser;
 use App\Entity\User;
+use Carbon\CarbonImmutable;
 use Doctrine\Persistence\ManagerRegistry;
 
 class PatreonUserRepository extends AbstractBaseRepository implements ResourceOwnedInterface
@@ -41,6 +42,17 @@ class PatreonUserRepository extends AbstractBaseRepository implements ResourceOw
             ->setParameter('user', $user)
             ->getQuery()
             ->getSingleScalarResult() > 0;
+    }
+
+    public function findForTokenRenew(): array
+    {
+        $qb = $this->createQueryBuilder('pu');
+        return $qb
+            ->select('pu')
+            ->where(':date >= pu.accessTokenExpiresAt')
+            ->setParameter('date',CarbonImmutable::now()->addDays(2)->toDateTimeImmutable())
+            ->getQuery()
+            ->getResult();
     }
 
     public function getOAuthResource(string $resourceId, bool $creator): ?OauthResource

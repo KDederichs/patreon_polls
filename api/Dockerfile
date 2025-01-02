@@ -52,6 +52,7 @@ COPY --link frankenphp/conf.d/app.ini $PHP_INI_DIR/conf.d/
 COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile
 COPY --link frankenphp/messanger/messanger-worker.conf /etc/supervisor/conf.d/messanger-worker.conf
+COPY --link frankenphp/messanger/scheduler-worker.conf /etc/supervisor/conf.d/scheduler-worker.conf
 
 ENTRYPOINT ["docker-entrypoint"]
 
