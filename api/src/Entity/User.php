@@ -35,6 +35,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private CarbonImmutable $createdAt;
     #[Column(type: 'string', length: 64, unique: true, nullable: true)]
     private ?string $patreonId = null;
+    #[Column(type: 'string', length: 64, unique: true, nullable: true)]
+    private ?string $subscribestarId = null;
     #[Column(type: 'text', nullable: true)]
     private ?string $username = null;
     #[Column(type: 'boolean', options: ['default' => false])]
@@ -119,6 +121,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setApiTokens(Collection $apiTokens): User
     {
         $this->apiTokens = $apiTokens;
+        return $this;
+    }
+
+    public function getSubscribestarId(): ?string
+    {
+        return $this->subscribestarId;
+    }
+
+    public function setSubscribestarId(?string $subscribestarId): User
+    {
+        $this->subscribestarId = $subscribestarId;
         return $this;
     }
 

@@ -1,34 +1,71 @@
 'use client'
 
-import type {CardProps} from "@nextui-org/react";
+import type { CardProps } from '@nextui-org/react'
 
-import React from "react";
-import {Card, CardHeader, CardBody, Button} from "@nextui-org/react";
-import {Icon} from "@iconify/react";
-import CellWrapper from "@/components/common/cell-wrapper";
+import React from 'react'
+import { Card, CardHeader, CardBody, Button } from '@nextui-org/react'
+import { Icon } from '@iconify/react'
+import CellWrapper from '@/components/common/cell-wrapper'
 import { Link } from '@nextui-org/link'
 import { toast } from 'react-toastify'
 import { useListPatreonUsers } from '@/hooks/query/PatreonUser/useListPatreonUsers'
-
+import { useListSubscribestarUser } from '@/hooks/query/SubscribestarUser/useListSubscribestarUser'
+import { useConnectResource } from '@/hooks/mutation/Oauth/useConnectResource'
+import { useRouter } from 'next/navigation'
 
 export default function ConnectionSettings(props: CardProps) {
+  const {
+    data: patreonUsers,
+    isFetching: patreonUsersFetching,
+    isLoading: patreonUsersLoading,
+  } = useListPatreonUsers()
+  const {
+    data: subscribestarUsers,
+    isFetching: subscribestarUserFetching,
+    isLoading: subscribestarUserLoading,
+  } = useListSubscribestarUser()
 
-  const { data, isFetching, isLoading, error } = useListPatreonUsers()
-
-  const patreonUsername = data?.member?.reduce((carry, current) => {
+  const patreonUsername = patreonUsers?.member?.reduce((carry, current) => {
     return current.username ?? 'Unknown'
   }, 'Unknown')
-  const isPatreonCreator = data?.member?.find((ptrUser) => ptrUser.creator) !== undefined
+  const isPatreonCreator =
+    patreonUsers?.member?.find((ptrUser) => ptrUser.creator) !== undefined
+  const subscribeStarUsername = subscribestarUsers?.member?.reduce(
+    (carry, current) => {
+      return current.username ?? 'Unknown'
+    },
+    'Unknown',
+  )
 
-  const isPatreonConnected = !isFetching && data?.member !== undefined
-  const isSubscribestarConnected = false
-  const subscribestarCreator = false
+  const router = useRouter()
+
+  const isPatreonConnected =
+    !patreonUsersFetching && patreonUsers?.member?.length !== 0
+  const isSubscribestarConnected =
+    !subscribestarUserFetching && subscribestarUsers?.member?.length !== 0
+  const isSubscribestarCreator =
+    subscribestarUsers?.member?.find((ptrUser) => ptrUser.creator) !== undefined
+
+  const oauthConnector = useConnectResource({
+    onSuccess: (response) => {
+      const redirectUrl = response.redirectUri.replaceAll('%2B', '+')
+      console.log(redirectUrl)
+      window.location.href = redirectUrl
+      return false
+    },
+    onError: (error) => toast.error(error.message),
+  })
 
   return (
-    <Card className="" {...props}>
+    <Card
+      className=""
+      {...props}
+    >
       <CardHeader className="flex flex-col items-start px-4 pb-0 pt-4">
         <p className="text-large">Security Settings</p>
-        <p className="text-small text-default-500">Manage your security preferences</p>
+        <p className="text-small text-default-500">
+          Manage your security preferences
+        </p>
       </CardHeader>
       <CardBody className="space-y-2">
         {/* Patreon */}
@@ -41,32 +78,49 @@ export default function ConnectionSettings(props: CardProps) {
           </div>
           <div className="flex w-full flex-wrap items-center justify-around gap-6 sm:w-auto sm:flex-nowrap">
             <div className="flex flex-col items-end">
-              {isPatreonConnected ? (<>
-                <p>{patreonUsername}</p>
-                <p className="text-small text-success">{isPatreonCreator ? 'Creator' : 'User'}</p>
-              </>) : <p>Not connected</p>}
+              {isPatreonConnected ? (
+                <>
+                  <p>{patreonUsername}</p>
+                  <p className="text-small text-success">
+                    {isPatreonCreator ? 'Creator' : 'User'}
+                  </p>
+                </>
+              ) : (
+                <p>Not connected</p>
+              )}
             </div>
-            {!isPatreonConnected ? <Button
-              color={'success'}
-              as={Link}
-              target="_blank"
-              isLoading={isLoading}
-              href={'/connect/patreon?mode=user'}
-              radius="full"
-              variant="bordered"
-            >
-              Connect
-            </Button> : null}
-            {isPatreonConnected && !isPatreonCreator? <Button
-              as={Link}
-              isLoading={isLoading}
-              href={'/connect/patreon?mode=creator'}
-              color={'success'}
-              radius="full"
-              variant="bordered"
-            >
-              Convert to creator account
-            </Button> : null}
+            {!isPatreonConnected ? (
+              <Button
+                color={'success'}
+                isLoading={patreonUsersLoading || oauthConnector.isPending}
+                onPress={() => {
+                  oauthConnector.mutate({
+                    mode: 'user',
+                    uri: '/connect/patreon',
+                  })
+                }}
+                radius="full"
+                variant="bordered"
+              >
+                Connect
+              </Button>
+            ) : null}
+            {isPatreonConnected && !isPatreonCreator ? (
+              <Button
+                isLoading={patreonUsersLoading || oauthConnector.isPending}
+                onPress={() => {
+                  oauthConnector.mutate({
+                    mode: 'creator',
+                    uri: '/connect/patreon',
+                  })
+                }}
+                color={'success'}
+                radius="full"
+                variant="bordered"
+              >
+                Convert to creator account
+              </Button>
+            ) : null}
           </div>
         </CellWrapper>
         {/* Subscribestar */}
@@ -79,21 +133,52 @@ export default function ConnectionSettings(props: CardProps) {
           </div>
           <div className="flex w-full flex-wrap items-center justify-around gap-6 sm:w-auto sm:flex-nowrap">
             <div className="flex flex-col items-end">
-              {isSubscribestarConnected ? (<>
-                <p>{'a'}</p>
-                <p className="text-small text-success">{subscribestarCreator ? 'Creator' : 'User'}</p>
-              </>) : <p>Not connected</p>}
+              {isSubscribestarConnected ? (
+                <>
+                  <p>{subscribeStarUsername}</p>
+                  <p className="text-small text-success">
+                    {isSubscribestarCreator ? 'Creator' : 'User'}
+                  </p>
+                </>
+              ) : (
+                <p>Not connected</p>
+              )}
             </div>
-            <Button
-              color={'secondary'}
-              radius="full"
-              variant="bordered"
-            >
-              Connect
-            </Button>
+            {!isSubscribestarConnected ? (
+              <Button
+                color={'success'}
+                isLoading={subscribestarUserLoading || oauthConnector.isPending}
+                onPress={() => {
+                  oauthConnector.mutate({
+                    mode: 'user',
+                    uri: '/connect/subscribestar',
+                  })
+                }}
+                radius="full"
+                variant="bordered"
+              >
+                Connect
+              </Button>
+            ) : null}
+            {isSubscribestarConnected && !isSubscribestarCreator ? (
+              <Button
+                isLoading={subscribestarUserLoading || oauthConnector.isPending}
+                onPress={() => {
+                  oauthConnector.mutate({
+                    mode: 'creator',
+                    uri: '/connect/subscribestar',
+                  })
+                }}
+                color={'success'}
+                radius="full"
+                variant="bordered"
+              >
+                Convert to creator account
+              </Button>
+            ) : null}
           </div>
         </CellWrapper>
       </CardBody>
     </Card>
-  );
+  )
 }

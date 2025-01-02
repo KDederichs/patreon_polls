@@ -13,7 +13,7 @@ const publicAxiosInstance = axios.create({
 
 const privateAxiosInstance = axios.create({
   headers: {
-    Accept: 'application/ld+json',
+    Accept: 'application/ld+json, application/json',
     'Content-Type': 'application/ld+json',
   },
 })

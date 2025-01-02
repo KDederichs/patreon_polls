@@ -14,9 +14,11 @@ use App\Repository\ApiTokenRepository;
 use App\Repository\OAuthStateRepository;
 use App\Repository\PatreonUserRepository;
 use App\Repository\ResourceOwnedInterface;
+use App\Repository\SubscribestarUserRepository;
 use App\Repository\UserRepository;
 use App\Service\Oauth\GenericOAuthService;
 use App\Service\Oauth\PatreonOAuthService;
+use App\Service\Oauth\SubscribestarOAuthService;
 use Carbon\CarbonImmutable;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,6 +27,7 @@ use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
@@ -52,6 +55,8 @@ class OAuthController extends AbstractController implements ServiceSubscriberInt
         return [
             'patreon_repo' => PatreonUserRepository::class,
             'patreon_oauth' => PatreonOAuthService::class,
+            'subscribestar_oauth' => SubscribestarOAuthService::class,
+            'subscribestar_repo' => SubscribestarUserRepository::class,
         ];
     }
 
@@ -67,7 +72,7 @@ class OAuthController extends AbstractController implements ServiceSubscriberInt
         /** @var OauthState|null $oAuthState */
         $oAuthState = $this->authStateRepository->find(Uuid::fromString($stateId));
         if (!$oAuthState) {
-            throw new AccessDeniedException();
+            throw new BadRequestHttpException('Invalid Auth state');
         }
         $provider = $oAuthState->getProvider();
         $resourceOwnerName = $provider->value;
@@ -79,12 +84,13 @@ class OAuthController extends AbstractController implements ServiceSubscriberInt
         $oauthToken = $oauth->getAccessToken($code);
 
         if (!$oauthToken) {
-            throw new BadRequestHttpException();
+            throw new BadRequestHttpException('Invalid OAuth Token');
         }
 
         $identity = $oauth->getIdentity($oauthToken->getAccessToken(), $oauthToken->getTokenType());
 
-        $user = $this->security->getUser() ?? $this->userRepository->findByResourceOwnerId($resourceOwnerName, $identity->getId());
+        $user = $oAuthState->getUser() ?? $this->security->getUser();
+        $user = $user ?? $this->userRepository->findByResourceOwnerId($resourceOwnerName, $identity->getId());
         if (!$user) {
             $user = new User();
             $this->userRepository->persist($user);

@@ -32,7 +32,6 @@ security:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/oauth/connect, roles: PUBLIC_ACCESS }
-        - { path: ^/connect/patreon, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN } // force login
         - { path: ^/api/polls/, roles: PUBLIC_ACCESS, methods: ['GET'] }
         - { path: ^/api/poll_options/, roles: PUBLIC_ACCESS, methods: ['GET'] }

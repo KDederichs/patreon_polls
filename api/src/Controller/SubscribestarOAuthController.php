@@ -2,13 +2,13 @@
 
 namespace App\Controller;
 
-use App\Dto\OAuth\OAuthConnectPayload;
 use App\Dto\OAuth\RequestOAuthConnectPayload;
 use App\Entity\OauthState;
 use App\Enum\OAuthAuthType;
 use App\Enum\OAuthProvider;
 use App\Repository\OAuthStateRepository;
 use App\Service\Oauth\PatreonOAuthService;
+use App\Service\Oauth\SubscribestarOAuthService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,10 +18,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
-class PatreonOAuthController extends AbstractController
+class SubscribestarOAuthController extends AbstractController
 {
     public function __construct(
-        private readonly PatreonOAuthService  $patreonOAuth,
+        private readonly SubscribestarOAuthService  $authService,
         private readonly OAuthStateRepository $authStateRepository,
         private readonly Security $security
     )
@@ -29,23 +29,23 @@ class PatreonOAuthController extends AbstractController
 
     }
 
-    #[Route('/login/patreon', methods: ['GET'])]
-    public function patreonLogin(): Response
+    #[Route('/login/subscribestar', methods: ['GET'])]
+    public function subscribestarLogin(): Response
     {
         $authState = new OauthState();
         $authState
             ->setAuthType(OAuthAuthType::Login)
-            ->setProvider(OAuthProvider::Patreon);
+            ->setProvider(OAuthProvider::SubscribeStar);
 
         $this->authStateRepository->persist($authState);
         $this->authStateRepository->save();
 
 
-        return new RedirectResponse($this->patreonOAuth->getOauthUrl($authState));
+        return new RedirectResponse($this->authService->getOauthUrl($authState));
     }
 
-    #[Route('/connect/patreon', methods: ['POST'])]
-    public function patreonConnect(#[MapRequestPayload] RequestOAuthConnectPayload $payload): Response
+    #[Route('/connect/subscribestar', methods: ['POST'])]
+    public function subscribestarConnect(#[MapRequestPayload] RequestOAuthConnectPayload $payload): Response
     {
 
         $mode = $payload->getMode();
@@ -54,13 +54,14 @@ class PatreonOAuthController extends AbstractController
         $authState
             ->setUser($this->security->getUser())
             ->setAuthType($mode === 'creator' ? OAuthAuthType::ConnectAsCreator : OAuthAuthType::Connect)
-            ->setProvider(OAuthProvider::Patreon);
+            ->setProvider(OAuthProvider::SubscribeStar);
 
         $this->authStateRepository->persist($authState);
         $this->authStateRepository->save();
 
+
         return new JsonResponse([
-            'redirectUri' => $this->patreonOAuth->getOauthUrl($authState)
+            'redirectUri' => $this->authService->getOauthUrl($authState)
         ]);
     }
 }
