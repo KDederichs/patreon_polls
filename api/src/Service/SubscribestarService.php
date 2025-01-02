@@ -105,7 +105,9 @@ class SubscribestarService implements LoggerAwareInterface
                     $this->subscribestarTierRepository->persist($tier);
 
                     foreach ($this->subscribestarSubscriptionRepository->findForTierId($tierData['id']) as $subscription) {
-                        $subscription->setSubscribestarTier($tier);
+                        $subscription
+                            ->setSubscribedTo($subscribestarUser)
+                            ->setSubscribestarTier($tier);
                     }
                 } else {
                     $tier
@@ -172,9 +174,10 @@ class SubscribestarService implements LoggerAwareInterface
                 }
 
                 if (!$subscription->getSubscribestarTier()) {
-                    $subscription->setSubscribestarTier(
-                        $this->subscribestarTierRepository->findBySubscribestarTierId($subscriptionData['tier_id'])
-                    );
+                    $tier =                         $this->subscribestarTierRepository->findBySubscribestarTierId($subscriptionData['tier_id']);
+                    $subscription
+                        ->setSubscribedTo($tier?->getSubscribestarUser())
+                        ->setSubscribestarTier($tier);
                 }
             }
             $this->subscribestarSubscriptionRepository->save();

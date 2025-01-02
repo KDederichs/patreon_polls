@@ -22,6 +22,20 @@ class SubscribestarSubscriptionRepository   extends AbstractBaseRepository
     }
 
     /**
+     * @param SubscribestarUser $user
+     * @param SubscribestarUser $creator
+     * @return array<SubscribestarSubscription>
+     */
+    public function findActiveBySubscribeStarUser(SubscribestarUser $user, SubscribestarUser $creator): array
+    {
+        return $this->findBy([
+            'active' => true,
+            'subscribestarUser' => $user,
+            'subscribedTo' => $creator
+        ]);
+    }
+
+    /**
      * @param string $tierId
      * @return array<SubscribestarSubscription>
      */

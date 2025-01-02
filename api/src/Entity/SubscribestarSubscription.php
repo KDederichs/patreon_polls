@@ -30,6 +30,8 @@ class SubscribestarSubscription
     private string $contentProviderId;
     #[Column]
     private bool $active;
+    #[ManyToOne(targetEntity: SubscribestarUser::class)]
+    private ?SubscribestarUser $subscribedTo = null;
     #[ManyToOne(targetEntity: SubscribestarTier::class)]
     private ?SubscribestarTier $subscribestarTier = null;
 
@@ -114,6 +116,17 @@ class SubscribestarSubscription
     public function setSubscribestarTier(?SubscribestarTier $subscribestarTier): SubscribestarSubscription
     {
         $this->subscribestarTier = $subscribestarTier;
+        return $this;
+    }
+
+    public function getSubscribedTo(): ?SubscribestarUser
+    {
+        return $this->subscribedTo;
+    }
+
+    public function setSubscribedTo(?SubscribestarUser $subscribedTo): SubscribestarSubscription
+    {
+        $this->subscribedTo = $subscribedTo;
         return $this;
     }
 }

@@ -3,11 +3,15 @@
 namespace App\Service;
 
 use App\Entity\AbstractVoteConfig;
+use App\Entity\PatreonCampaignTier;
 use App\Entity\Poll;
 use App\Entity\User;
 use App\Repository\PatreonCampaignMemberRepository;
 use App\Repository\PatreonPollConfigRepository;
 use App\Repository\PatreonUserRepository;
+use App\Repository\SubscribestarPollConfigRepository;
+use App\Repository\SubscribestarSubscriptionRepository;
+use App\Repository\SubscribestarUserRepository;
 
 final readonly class VoteConfigService
 {
@@ -15,6 +19,9 @@ final readonly class VoteConfigService
         private PatreonUserRepository           $patreonUserRepository,
         private PatreonCampaignMemberRepository $patreonCampaignMemberRepository,
         private PatreonPollConfigRepository     $patreonPollConfigRepository,
+        private SubscribestarUserRepository $subscribestarUserRepository,
+        private SubscribestarPollConfigRepository $subscribestarPollConfigRepository,
+        private SubscribestarSubscriptionRepository $subscribestarSubscriptionRepository
     )
     {
 
@@ -22,10 +29,59 @@ final readonly class VoteConfigService
 
     public function getConfigForUser(Poll $poll, User $user): ?AbstractVoteConfig
     {
-        return $this->getPatreonConfigForUser($poll, $user);
+        $patreonConfig = $this->getPatreonConfigForUser($poll, $user);
+        $subscribestarConfig = $this->getSubscribestarConfigForUser($poll, $user);
+
+        $patreonVotePower = $patreonConfig?->getVotingPower() ?? -1;
+        $subscribestarVotePower = $subscribestarConfig?->getVotingPower() ?? -1;
+
+        if (!$patreonConfig && !$subscribestarConfig) {
+            return null;
+        }
+
+        if ($patreonVotePower > $subscribestarVotePower) {
+            return $patreonConfig;
+        }
+
+        return $subscribestarConfig;
     }
 
-    public function getPatreonConfigForUser(Poll $poll, User $user): ?AbstractVoteConfig
+    private function getSubscribestarConfigForUser(Poll $poll, User $user):? AbstractVoteConfig
+    {
+        $subscribeStarUser = $this->subscribestarUserRepository->findByUser($user);
+        if (!$subscribeStarUser) {
+            return null;
+        }
+
+        $subscirbestarConfigs = $this->subscribestarPollConfigRepository->findByPoll($poll);
+        if (empty($subscirbestarConfigs)) {
+            return null;
+        }
+        $creator = $subscirbestarConfigs[0]->getCampaignTier()->getSubscribestarUser();
+        $subscriptions = $this->subscribestarSubscriptionRepository->findActiveBySubscribeStarUser($subscribeStarUser, $creator);
+        $subscription = null;
+        foreach ($subscriptions as $sub) {
+            if (!$subscription) {
+                $subscription = $sub;
+            }
+            if ($sub->getSubscribestarTier()->getAmountInCents() > $subscription->getSubscribestarTier()->getAmountInCents()) {
+                $subscription = $sub;
+            }
+        }
+
+        if (!$subscription) {
+            return null;
+        }
+
+        foreach ($subscirbestarConfigs as $config) {
+            if ($config->getCampaignTier()->getId()->equals($subscription->getSubscribestarTier()->getId())) {
+                return $config;
+            }
+        }
+        return null;
+    }
+
+    private function getPatreonConfigForUser(Poll $poll, User $user): ?AbstractVoteConfig
     {
         $patreonUser = $this->patreonUserRepository->findByUser($user);
 
