@@ -14,7 +14,7 @@ class MakeAdminCommand extends Command
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        string $name = null
+        ?string $name = null
     )
     {
         parent::__construct($name);

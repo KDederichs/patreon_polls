@@ -120,7 +120,7 @@ class PatreonService implements LoggerAwareInterface
         $this->bus->dispatch(new FetchCampaignMembersMessage($campaign->getId()));
     }
 
-    public function doFetchMembersRequest(PatreonCampaign $campaign, string $cursor = null): array
+    public function doFetchMembersRequest(PatreonCampaign $campaign, ?string $cursor = null): array
     {
         $user = $campaign->getOwner();
         $this->refreshAccessToken($user);

@@ -11,7 +11,6 @@ use App\Factory\PatreonCampaignTierFactory;
 use App\Factory\PatreonPollVoteConfigFactory;
 use App\Factory\PatreonUserFactory;
 use App\Factory\PollFactory;
-use App\Factory\UserFactory;
 use Carbon\CarbonImmutable;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Browser\HttpOptions;

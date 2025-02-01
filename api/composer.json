@@ -52,7 +52,6 @@
         "dama/doctrine-test-bundle": "^8.0",
         "friendsofphp/php-cs-fixer": "^3.57",
         "league/flysystem-memory": "^3.29",
-        "mockery/mockery": "^1.6",
         "mtdowling/jmespath.php": "^2.7",
         "seld/jsonlint": "^1.10",
         "symfony/browser-kit": "^7",
