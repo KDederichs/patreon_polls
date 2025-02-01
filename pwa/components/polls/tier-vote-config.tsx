@@ -1,7 +1,7 @@
 'use client'
 import { GenericCampaignTier } from '@/types/entity/GenericCampaignTier'
-import { Card, CardBody, CardHeader, Checkbox, Spacer } from '@nextui-org/react'
-import { Input } from '@nextui-org/input'
+import { Card, CardBody, CardHeader, Checkbox, Spacer } from "@heroui/react"
+import { Input } from "@heroui/input"
 import { useEffect, useState } from 'react'
 
 interface Props {

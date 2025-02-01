@@ -1,5 +1,5 @@
 import React from "react";
-import {cn} from "@nextui-org/react";
+import {cn} from "@heroui/react";
 
 const CellWrapper = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({children, className, ...props}, ref) => (

@@ -1,10 +1,10 @@
 "use client"
 
 import React from "react";
-import {Avatar, Button, Spacer, Tab, Tabs, Tooltip, useDisclosure} from "@nextui-org/react";
+import {Avatar, Button, Spacer, Tab, Tabs, Tooltip, useDisclosure} from "@heroui/react";
 import {Icon} from "@iconify/react";
 import {useMediaQuery} from "usehooks-ts";
-import {cn} from "@nextui-org/react";
+import {cn} from "@heroui/react";
 import AccountSetting from "@/components/settings/account-setting";
 import ConnectionSettings from "@/components/settings/connection-settings";
 

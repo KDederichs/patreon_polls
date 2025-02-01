@@ -1,7 +1,7 @@
 'use client'
 
-import { Spinner } from '@nextui-org/spinner'
-import { Checkbox, cn } from '@nextui-org/react'
+import { Spinner } from "@heroui/spinner"
+import { Checkbox, cn } from "@heroui/react"
 import { useEffect, useState } from 'react'
 import { GenericCampaignTier } from '@/types/entity/GenericCampaignTier'
 import { UseQueryResult } from '@tanstack/react-query'

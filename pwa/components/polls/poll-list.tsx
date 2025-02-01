@@ -1,8 +1,8 @@
 'use client'
 
 import { ListPoll } from '@/types/ListPoll'
-import { Card, CardBody, Chip } from '@nextui-org/react'
-import { Button } from '@nextui-org/button'
+import { Card, CardBody, Chip } from "@heroui/react"
+import { Button } from "@heroui/button"
 import moment from 'moment-timezone'
 import { useListPolls } from '@/hooks/query/Poll/useListPolls'
 import {

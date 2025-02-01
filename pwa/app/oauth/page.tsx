@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Spinner } from '@nextui-org/spinner'
+import { Spinner } from "@heroui/spinner"
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useConnectOAuth } from '@/hooks/mutation/User/useConnectOAuth'
 import { toast } from 'react-toastify'

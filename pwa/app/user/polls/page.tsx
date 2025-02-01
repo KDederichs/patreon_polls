@@ -1,10 +1,10 @@
 'use client'
 
 import PollList from '@/components/polls/poll-list'
-import { Spacer } from '@nextui-org/react'
-import { Button } from '@nextui-org/button'
+import { Spacer } from "@heroui/react"
+import { Button } from "@heroui/button"
 import { Icon } from '@iconify/react'
-import { Link } from '@nextui-org/link'
+import { Link } from "@heroui/link"
 
 export default function PollsPage() {
   return (

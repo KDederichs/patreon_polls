@@ -9,12 +9,12 @@ import {
   CardBody,
   Checkbox,
   Skeleton,
-} from '@nextui-org/react'
-import { Progress } from '@nextui-org/progress'
+} from "@heroui/react"
+import { Progress } from "@heroui/progress"
 import clsx from 'clsx'
 import { useDropzone } from 'react-dropzone'
-import { Input } from '@nextui-org/input'
-import { Button } from '@nextui-org/button'
+import { Input } from "@heroui/input"
+import { Button } from "@heroui/button"
 import { Icon } from '@iconify/react'
 import { useGetPollInfo } from '@/hooks/query/Poll/useGetPollInfo'
 import { useDateFormatter } from '@react-aria/i18n'

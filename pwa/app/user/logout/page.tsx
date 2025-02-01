@@ -1,5 +1,5 @@
 "use client"
-import { Spinner } from '@nextui-org/spinner'
+import { Spinner } from "@heroui/spinner"
 import { useLogout } from '@/hooks/mutation/User/useLogout'
 import { toast } from 'react-toastify'
 import { useEffect } from 'react'
