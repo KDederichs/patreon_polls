@@ -50,8 +50,43 @@ class SubscribestarOAuthService extends GenericOAuthService
 
     public function getIdentity(string $accessToken, string $tokenType): ?OAuthIdentity
     {
+        try {
+            $response = $this->client->request(
+                'POST',
+                sprintf('%s/api/graphql/v1', self::API_URL),
+                [
+                    'headers' => [
+                        'Authorization' => sprintf('%s %s', $tokenType, $accessToken),
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json',
+                    ],
+                    'json' => [
+                        'query' => "{user {name, id}}"
+                    ]
+                ]
+            );
 
+            if ($response->getStatusCode() > 299) {
+                $this->logger?->error(sprintf('Error fetching subscribestar identity: %s', $response->getContent()));
+                return null;
+            }
 
+            $decoded = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+            if (!isset($decoded['data']['user']['id'])) {
+                $this->logger?->error(sprintf('Missing subscribestar ID: %s', $response->getContent()));
+                return null;
+            }
+
+            return new OAuthIdentity(
+                $decoded['data']['user']['id'],
+                $decoded['data']['user']['name'] ?? null
+            );
+
+        } catch (TransportExceptionInterface|\JsonException $e) {
+            $this->logger?->error(sprintf('Error fetching subscribestar identity: %s', $e->getMessage()));
+            return null;
+        }
     }
 
     protected function getScope(OauthState $oauthState): string
