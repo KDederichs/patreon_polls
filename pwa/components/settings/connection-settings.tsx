@@ -1,12 +1,12 @@
 'use client'
 
-import type { CardProps } from "@heroui/react"
+import type { CardProps } from '@heroui/react'
 
 import React from 'react'
-import { Card, CardHeader, CardBody, Button } from "@heroui/react"
+import { Card, CardHeader, CardBody, Button } from '@heroui/react'
 import { Icon } from '@iconify/react'
 import CellWrapper from '@/components/common/cell-wrapper'
-import { Link } from "@heroui/link"
+import { Link } from '@heroui/link'
 import { toast } from 'react-toastify'
 import { useListPatreonUsers } from '@/hooks/query/PatreonUser/useListPatreonUsers'
 import { useListSubscribestarUser } from '@/hooks/query/SubscribestarUser/useListSubscribestarUser'
@@ -62,10 +62,8 @@ export default function ConnectionSettings(props: CardProps) {
       {...props}
     >
       <CardHeader className="flex flex-col items-start px-4 pb-0 pt-4">
-        <p className="text-large">Security Settings</p>
-        <p className="text-small text-default-500">
-          Manage your security preferences
-        </p>
+        <p className="text-large">Connection Settings</p>
+        <p className="text-small text-default-500">Manage your connections</p>
       </CardHeader>
       <CardBody className="space-y-2">
         {/* Patreon */}
