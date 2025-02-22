@@ -35,8 +35,8 @@ class SyncSubscribestarTierProcessor implements ProcessorInterface
     {
         $user = $this->security->getUser();
         assert($user instanceof User);
-        $subscribestarUser = $this->patreonUserRepository->findBySubscribestarId($user->getSubscribestarId(),true);
-        if (!$subscribestarUser) {
+        $subscribestarUser = $this->patreonUserRepository->findBySubscribestarId($user->getSubscribestarId());
+        if (!$subscribestarUser || !$subscribestarUser->isCreator()) {
             throw new AccessDeniedHttpException('You are not a subscribestar creator');
         }
 

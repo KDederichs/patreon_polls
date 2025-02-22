@@ -16,11 +16,10 @@ class PatreonUserRepository extends AbstractBaseRepository implements ResourceOw
         parent::__construct($registry, PatreonUser::class);
     }
 
-    public function findByPatreonId(string $patreonId, bool $creator = false): ?PatreonUser
+    public function findByPatreonId(string $patreonId): ?PatreonUser
     {
         return $this->findOneBy([
-            'resourceId' => $patreonId,
-            'creator' => $creator
+            'resourceId' => $patreonId
         ]);
     }
 
@@ -55,8 +54,8 @@ class PatreonUserRepository extends AbstractBaseRepository implements ResourceOw
             ->getResult();
     }
 
-    public function getOAuthResource(string $resourceId, bool $creator): ?OauthResource
+    public function getOAuthResource(string $resourceId): ?OauthResource
     {
-        return $this->findByPatreonId($resourceId, $creator);
+        return $this->findByPatreonId($resourceId);
     }
 }

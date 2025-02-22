@@ -74,7 +74,7 @@ class PollVoter extends Voter
 
     private function canCreate(User $user): bool
     {
-        $patreonUser = $this->patreonUserRepository->findByPatreonId($user->getPatreonId() ?? '', true);
-        return $patreonUser !== null;
+        $patreonUser = $this->patreonUserRepository->findByPatreonId($user->getPatreonId() ?? '');
+        return $patreonUser !== null && $patreonUser->isCreator();
     }
 }

@@ -34,8 +34,8 @@ class SyncPatreonCampaignsProcessor implements ProcessorInterface
     {
         $user = $this->security->getUser();
         assert($user instanceof User);
-        $patreonUser = $this->patreonUserRepository->findByPatreonId($user->getPatreonId(),true);
-        if (!$patreonUser) {
+        $patreonUser = $this->patreonUserRepository->findByPatreonId($user->getPatreonId());
+        if (!$patreonUser || !$patreonUser->isCreator()) {
             throw new AccessDeniedHttpException('You are not a patreon creator');
         }
 

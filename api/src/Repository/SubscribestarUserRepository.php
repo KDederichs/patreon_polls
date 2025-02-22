@@ -17,11 +17,10 @@ class SubscribestarUserRepository extends AbstractBaseRepository implements Reso
         parent::__construct($registry, SubscribestarUser::class);
     }
 
-    public function findBySubscribestarId(string $patreonId, bool $creator = false): ?SubscribestarUser
+    public function findBySubscribestarId(string $subscribestarId): ?SubscribestarUser
     {
         return $this->findOneBy([
-            'resourceId' => $patreonId,
-            'creator' => $creator
+            'resourceId' => $subscribestarId,
         ]);
     }
 
@@ -56,8 +55,8 @@ class SubscribestarUserRepository extends AbstractBaseRepository implements Reso
             ->getSingleScalarResult() > 0;
     }
 
-    public function getOAuthResource(string $resourceId, bool $creator): ?OauthResource
+    public function getOAuthResource(string $resourceId): ?OauthResource
     {
-        return $this->findBySubscribestarId($resourceId, $creator);
+        return $this->findBySubscribestarId($resourceId);
     }
 }

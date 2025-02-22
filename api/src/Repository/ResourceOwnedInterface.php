@@ -6,5 +6,5 @@ use App\Entity\OauthResource;
 
 interface ResourceOwnedInterface
 {
-    public function getOAuthResource(string $resourceId, bool $creator): ?OauthResource;
+    public function getOAuthResource(string $resourceId): ?OauthResource;
 }

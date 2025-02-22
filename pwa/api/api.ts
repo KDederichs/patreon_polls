@@ -62,6 +62,12 @@ export const syncSubscribestar = async (): Promise<void> => {
     .then((response) => response.data)
 }
 
+export const syncSubscribestarSubscriptions = async (): Promise<void> => {
+  return privateAxiosInstance
+    .post<void>(`/subscribestar/refresh`)
+    .then((response) => response.data)
+}
+
 export const getEntityByIri = async <T>(iri: string): Promise<T> => {
   return privateAxiosInstance.get<T>(iri).then((response) => response.data)
 }

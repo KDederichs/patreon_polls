@@ -100,7 +100,7 @@ class OAuthController extends AbstractController implements ServiceSubscriberInt
             $user->{'set'.ucfirst($resourceOwnerName).'Id'}($identity->getId());
         }
 
-        $oauthResource = $resourceRepository->getOAuthResource($identity->getId(), $oAuthState->getAuthType() === OAuthAuthType::ConnectAsCreator);
+        $oauthResource = $resourceRepository->getOAuthResource($identity->getId());
         if (!$oauthResource) {
             $clazz = 'App\\Entity\\'.ucfirst($resourceOwnerName).'User';
             /** @var OauthResource $oauthResource */

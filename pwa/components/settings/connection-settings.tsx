@@ -12,6 +12,7 @@ import { useListPatreonUsers } from '@/hooks/query/PatreonUser/useListPatreonUse
 import { useListSubscribestarUser } from '@/hooks/query/SubscribestarUser/useListSubscribestarUser'
 import { useConnectResource } from '@/hooks/mutation/Oauth/useConnectResource'
 import { useRouter } from 'next/navigation'
+import { useSyncSubscribestarSubscriptions } from '@/hooks/mutation/SubscribestarSubscriptions/useSyncSubscribestarSubscriptions'
 
 export default function ConnectionSettings(props: CardProps) {
   const {
@@ -55,6 +56,8 @@ export default function ConnectionSettings(props: CardProps) {
     },
     onError: (error) => toast.error(error.message),
   })
+
+  const subscribeStarSubscriptionSync = useSyncSubscribestarSubscriptions()
 
   return (
     <Card
@@ -129,18 +132,37 @@ export default function ConnectionSettings(props: CardProps) {
               The Subscribestar account linked to your account.
             </p>
           </div>
-          <div className="flex w-full flex-wrap items-center justify-around gap-6 sm:w-auto sm:flex-nowrap">
-            <div className="flex flex-col items-end">
-              {isSubscribestarConnected ? (
-                <>
-                  <p>{subscribeStarUsername}</p>
-                  <p className="text-small text-success">
-                    {isSubscribestarCreator ? 'Creator' : 'User'}
-                  </p>
-                </>
-              ) : (
-                <p>Not connected</p>
+          <div className="flex flex-wrap items-center justify-around gap-6 sm:w-auto sm:flex-nowrap">
+            <div className="flex flex-row justify-between">
+              {isSubscribestarConnected && (
+                <Button
+                  color={'primary'}
+                  isLoading={
+                    subscribestarUserLoading ||
+                    subscribeStarSubscriptionSync.isPending
+                  }
+                  onPress={() => {
+                    subscribeStarSubscriptionSync.mutate()
+                  }}
+                  radius="full"
+                  variant="bordered"
+                  className="mr-5"
+                >
+                  Sync Subscriptions
+                </Button>
               )}
+              <div className="flex flex-col items-end">
+                {isSubscribestarConnected ? (
+                  <>
+                    <p>{subscribeStarUsername}</p>
+                    <p className="text-small text-success">
+                      {isSubscribestarCreator ? 'Creator' : 'User'}
+                    </p>
+                  </>
+                ) : (
+                  <p>Not connected</p>
+                )}
+              </div>
             </div>
             {!isSubscribestarConnected ? (
               <Button
