@@ -4,25 +4,21 @@ security:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        patron_provider: 
-            id: App\Security\Oauth\PatreonUserProvider
+        users: 
+            entity:
+                class: App\Entity\User
+                property: 'id'
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        admin:
+            pattern: ^/admin
         main:
             lazy: true
-            oauth:
-                resource_owners:
-                    patreon: "/login/check-patreon"
-                    patreon_creator: "/login/check-patreon-creator"
-                login_path: /
-                use_forward: false
-                failure_path: /
-                oauth_user_provider:
-                    service: App\Security\Oauth\PatreonUserProvider
-            logout:
-                path: logout
+            access_token:
+                token_handler: App\Security\ApiTokenHandler
+            stateless: true
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -32,14 +28,17 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        - { path: ^/_profiler, roles: PUBLIC_ACCESS }
+        - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/connect, roles: PUBLIC_ACCESS }
-        - { path: ^/poll, roles: ROLE_USER } // force login
-        - { path: ^/ajax, roles: ROLE_USER } // force login
-        - { path: ^/patreon, roles: ROLE_USER } // force login
-        - { path: ^/logout, roles: ROLE_USER } // force login
-        - { path: ^/admin, roles: ROLE_ADMIN } // force login
-        - { path: ^/, roles: PUBLIC_ACCESS } // force login
+        - { path: ^/oauth/connect, roles: PUBLIC_ACCESS }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/webhook, roles: PUBLIC_ACCESS }
+        - { path: ^/poll/.*/download-marbles, roles: PUBLIC_ACCESS }
+        - { path: ^/api/polls/, roles: PUBLIC_ACCESS, methods: ['GET'] }
+        - { path: ^/api/poll_options/, roles: PUBLIC_ACCESS, methods: ['GET'] }
+        - { path: ^/api/media-object/, roles: PUBLIC_ACCESS, methods: ['GET'] }
+        - { path: ^/, roles: ROLE_USER }
 
 
 when@test:

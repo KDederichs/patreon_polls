@@ -12,7 +12,12 @@ framework:
         routing:
             # Route your messages to the transports
              'App\Message\AsyncMessageInterface': async
-
+             
+when@dev:
+    framework:
+        messenger:
+            transports:
+                async: 'sync://'
 # when@test:
 #    framework:
 #        messenger:

@@ -5,6 +5,7 @@ services:
       - database
     restart: unless-stopped
     environment:
+      PWA_UPSTREAM: pwa:3000
       SERVER_NAME: ${SERVER_NAME:-http://localhost}, http://php:80
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-qgZzLrxhway579uW3MQGnbRfN6DSpm8J}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-qgZzLrxhway579uW3MQGnbRfN6DSpm8J}
@@ -17,6 +18,12 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+      - media_storage:/app/var/storage
+
+  pwa:
+    image: ${IMAGES_PREFIX:-}patreon-polls-pwa
+    environment:
+      NEXT_PUBLIC_ENTRYPOINT: http://php
 
 
 ###> doctrine/doctrine-bundle ###
@@ -41,6 +48,7 @@ volumes:
   caddy_data:
   caddy_config:
   session_data:
+  media_storage:
 ###> doctrine/doctrine-bundle ###
   db_data:
 ###< doctrine/doctrine-bundle ###

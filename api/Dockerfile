@@ -4,7 +4,7 @@
 
 
 # Versions
-FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
+FROM dunglas/frankenphp:1-php8.4 AS frankenphp_upstream
 
 
 # The different stages of this Dockerfile are meant to be built into separate images
@@ -52,6 +52,7 @@ COPY --link frankenphp/conf.d/app.ini $PHP_INI_DIR/conf.d/
 COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile
 COPY --link frankenphp/messanger/messanger-worker.conf /etc/supervisor/conf.d/messanger-worker.conf
+COPY --link frankenphp/messanger/scheduler-worker.conf /etc/supervisor/conf.d/scheduler-worker.conf
 
 ENTRYPOINT ["docker-entrypoint"]
 
@@ -102,5 +103,4 @@ RUN set -eux; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
 
-RUN bin/console tailwind:build
 RUN bin/console asset-map:compile

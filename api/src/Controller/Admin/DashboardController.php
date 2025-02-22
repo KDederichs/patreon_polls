@@ -7,10 +7,10 @@ use App\Entity\PatreonCampaign;
 use App\Entity\PatreonCampaignMember;
 use App\Entity\PatreonCampaignTier;
 use App\Entity\PatreonCampaignWebhook;
-use App\Entity\PatreonPoll;
-use App\Entity\PatreonPollOption;
-use App\Entity\PatreonPollTierVoteConfig;
-use App\Entity\PatreonPollVote;
+use App\Entity\Poll;
+use App\Entity\PollOption;
+use App\Entity\PatreonPollVoteConfig;
+use App\Entity\PollVote;
 use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -43,10 +43,10 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Member Entitlements', 'fa fa-lock-open', MemberEntitledTier::class);
         yield MenuItem::linkToCrud('Webhooks', 'fa fa-blog', PatreonCampaignWebhook::class);
         yield MenuItem::section('Polls');
-        yield MenuItem::linkToCrud('Polls', 'fa fa-square-poll-vertical', PatreonPoll::class);
-        yield MenuItem::linkToCrud('Option', 'fa fa-filter', PatreonPollOption::class);
-        yield MenuItem::linkToCrud('Votes', 'fa fa-check-to-slot', PatreonPollVote::class);
-        yield MenuItem::linkToCrud('Vote Config', 'fa fa-flask', PatreonPollTierVoteConfig::class);
+        yield MenuItem::linkToCrud('Polls', 'fa fa-square-poll-vertical', Poll::class);
+        yield MenuItem::linkToCrud('Option', 'fa fa-filter', PollOption::class);
+        yield MenuItem::linkToCrud('Votes', 'fa fa-check-to-slot', PollVote::class);
+        yield MenuItem::linkToCrud('Vote Config', 'fa fa-flask', PatreonPollVoteConfig::class);
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
     }
 }

@@ -2,19 +2,31 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Symfony\Action\NotFoundAction;
 use App\Repository\UserRepository;
 use Carbon\CarbonImmutable;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\Table;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
 
 #[Table(name: 'users')]
 #[Entity(repositoryClass: UserRepository::class)]
-class User implements UserInterface
+#[ApiResource]
+#[Get(
+    security: "object.getId().equals(user.getId())"
+)]
+#[GetCollection(controller: NotFoundAction::class, openapi: false)]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
     #[Id, Column(type: UuidType::NAME)]
@@ -23,22 +35,14 @@ class User implements UserInterface
     private CarbonImmutable $createdAt;
     #[Column(type: 'string', length: 64, unique: true, nullable: true)]
     private ?string $patreonId = null;
-    #[Column(type: 'string', length: 64, nullable: true)]
-    private ?string $patreonAccessToken = null;
-    #[Column(type: 'string', length: 64, nullable: true)]
-    private ?string $patreonRefreshToken = null;
+    #[Column(type: 'string', length: 64, unique: true, nullable: true)]
+    private ?string $subscribestarId = null;
     #[Column(type: 'text', nullable: true)]
-    private ?string $patreonScope = null;
-    #[Column(type: 'text', nullable: true)]
-    private ?string $patreonTokenType = null;
-    #[Column(type: 'text')]
-    private string $username;
-    #[Column(type: 'datetime_immutable', nullable: true)]
-    private ?CarbonImmutable $patreonTokenExpiresAt = null;
-    #[Column(type: 'boolean', options: ['default' => false])]
-    private bool $creator = false;
+    private ?string $username = null;
     #[Column(type: 'boolean', options: ['default' => false])]
     private bool $admin = false;
+    #[OneToMany(targetEntity: ApiToken::class, mappedBy: 'ownedBy', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $apiTokens;
 
     public function __construct()
     {
@@ -82,67 +86,12 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getPatreonAccessToken(): ?string
-    {
-        return $this->patreonAccessToken;
-    }
-
-    public function setPatreonAccessToken(?string $patreonAccessToken): User
-    {
-        $this->patreonAccessToken = $patreonAccessToken;
-        return $this;
-    }
-
-    public function getPatreonRefreshToken(): ?string
-    {
-        return $this->patreonRefreshToken;
-    }
-
-    public function setPatreonRefreshToken(?string $patreonRefreshToken): User
-    {
-        $this->patreonRefreshToken = $patreonRefreshToken;
-        return $this;
-    }
-
-    public function getPatreonScope(): ?string
-    {
-        return $this->patreonScope;
-    }
-
-    public function setPatreonScope(?string $patreonScope): User
-    {
-        $this->patreonScope = $patreonScope;
-        return $this;
-    }
-
-    public function getPatreonTokenType(): ?string
-    {
-        return $this->patreonTokenType;
-    }
-
-    public function setPatreonTokenType(?string $patreonTokenType): User
-    {
-        $this->patreonTokenType = $patreonTokenType;
-        return $this;
-    }
-
-    public function getPatreonTokenExpiresAt(): ?CarbonImmutable
-    {
-        return $this->patreonTokenExpiresAt;
-    }
-
-    public function setPatreonTokenExpiresAt(?CarbonImmutable $patreonTokenExpiresAt): User
-    {
-        $this->patreonTokenExpiresAt = $patreonTokenExpiresAt;
-        return $this;
-    }
-
-    public function getUsername(): string
+    public function getUsername(): ?string
     {
         return $this->username;
     }
 
-    public function setUsername(string $username): User
+    public function setUsername(?string $username): User
     {
         $this->username = $username;
         return $this;
@@ -150,18 +99,7 @@ class User implements UserInterface
 
     public function __toString(): string
     {
-        return $this->username;
-    }
-
-    public function isCreator(): bool
-    {
-        return $this->creator;
-    }
-
-    public function setCreator(bool $creator): User
-    {
-        $this->creator = $creator;
-        return $this;
+        return $this->username ?? $this->id->toRfc4122();
     }
 
     public function isAdmin(): bool
@@ -175,4 +113,31 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getApiTokens(): Collection
+    {
+        return $this->apiTokens;
+    }
+
+    public function setApiTokens(Collection $apiTokens): User
+    {
+        $this->apiTokens = $apiTokens;
+        return $this;
+    }
+
+    public function getSubscribestarId(): ?string
+    {
+        return $this->subscribestarId;
+    }
+
+    public function setSubscribestarId(?string $subscribestarId): User
+    {
+        $this->subscribestarId = $subscribestarId;
+        return $this;
+    }
+
+    public function getPassword(): ?string
+    {
+        // I only need the interface
+        return null;
+    }
 }

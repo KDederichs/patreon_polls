@@ -2,59 +2,43 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Symfony\Action\NotFoundAction;
 use App\Repository\PatreonCampaignTierRepository;
-use Carbon\CarbonImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Symfony\Bridge\Doctrine\Types\UuidType;
-use Symfony\Component\Uid\Uuid;
-
 #[Entity(repositoryClass: PatreonCampaignTierRepository::class)]
-class PatreonCampaignTier
+#[Get(controller: NotFoundAction::class, openapi: false)]
+#[ApiResource(
+    uriTemplate: '/patreon_campaigns/{id}/tiers',
+    operations: [new GetCollection(
+        paginationEnabled: false,
+        normalizationContext: [
+            'groups' => [
+                'campaign_tier:read'
+            ]
+        ]
+    )],
+    uriVariables: [
+        'id' => new Link(
+            toProperty: 'campaign',
+            fromClass: PatreonCampaign::class,
+            security: "campaign.getCampaignOwner() == user"
+        )
+    ]
+)]
+class PatreonCampaignTier extends AbstractCampaignTier
 {
-    #[Id, Column(type: UuidType::NAME)]
-    private Uuid $id;
-    #[Column(type: 'datetime_immutable')]
-    private CarbonImmutable $createdAt;
-    #[Column(type: 'text')]
-    private string $tierName;
-    #[ManyToOne(targetEntity: PatreonCampaign::class)]
+    #[ManyToOne(targetEntity: PatreonCampaign::class, fetch: 'EAGER', inversedBy: 'campaignTiers')]
     #[JoinColumn(nullable: false)]
     private PatreonCampaign $campaign;
     #[Column(type: 'string', length: 64, unique: true)]
     private string $patreonTierId;
-    #[Column(options: ['default' => 0])]
-    private int $amountInCents = 0;
-
-    public function __construct()
-    {
-        $this->id = Uuid::v7();
-        $this->createdAt = CarbonImmutable::now();
-    }
-
-    public function getId(): Uuid
-    {
-        return $this->id;
-    }
-
-    public function getCreatedAt(): CarbonImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function getTierName(): string
-    {
-        return $this->tierName;
-    }
-
-    public function setTierName(string $tierName): PatreonCampaignTier
-    {
-        $this->tierName = $tierName;
-        return $this;
-    }
 
     public function getCampaign(): PatreonCampaign
     {
@@ -78,19 +62,13 @@ class PatreonCampaignTier
         return $this;
     }
 
-    public function getAmountInCents(): int
+    function getOwner(): User
     {
-        return $this->amountInCents;
+        return $this->campaign->getUser();
     }
 
-    public function setAmountInCents(int $amountInCents): PatreonCampaignTier
+    function getVoteConfigClass(): string
     {
-        $this->amountInCents = $amountInCents;
-        return $this;
-    }
-
-    public function __toString(): string
-    {
-        return $this->tierName;
+        return PatreonPollVoteConfig::class;
     }
 }

@@ -10,6 +10,9 @@ services:
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       PATREON_ID: ${PATREON_ID}
       PATREON_SECRET: ${PATREON_SECRET}
+      SUBSCRIBESTAR_ID: ${SUBSCRIBESTAR_ID}
+      SUBSCRIBESTAR_SECRET: ${SUBSCRIBESTAR_SECRET}
+      SUBSCRIBESTAR_SECRET_WEBHOOK: ${SUBSCRIBESTAR_SECRET_WEBHOOK}
     ports:
       # HTTP
       - target: 80
@@ -25,6 +28,10 @@ services:
         protocol: udp
     volumes:
       - session_data:/app/var/sessions
+  pwa:
+    build:
+      context: ./pwa
+      target: prod
   database:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

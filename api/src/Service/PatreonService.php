@@ -5,16 +5,16 @@ namespace App\Service;
 use App\Entity\PatreonCampaign;
 use App\Entity\PatreonCampaignTier;
 use App\Entity\PatreonCampaignWebhook;
-use App\Entity\User;
+use App\Entity\PatreonUser;
 use App\Message\FetchCampaignMembersMessage;
 use App\Repository\PatreonCampaignRepository;
 use App\Repository\PatreonCampaignTierRepository;
 use App\Repository\PatreonCampaignWebhookRepository;
-use App\Repository\UserRepository;
+use App\Repository\PatreonUserRepository;
+use App\Service\Oauth\PatreonOAuthService;
 use Carbon\CarbonImmutable;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -25,48 +25,33 @@ class PatreonService implements LoggerAwareInterface
     private ?LoggerInterface $logger = null;
 
     public function __construct(
-        private readonly HttpClientInterface $client,
-        #[Autowire(env: 'PATREON_ID')] private readonly string $patreonClientId,
-        #[Autowire(env: 'PATREON_SECRET')] private readonly string $patreonClientSecret,
-        private readonly UserRepository $userRepository,
-        private readonly PatreonCampaignRepository $campaignRepository,
-        private readonly PatreonCampaignTierRepository $campaignTierRepository,
+        private readonly HttpClientInterface              $client,
+        private readonly PatreonCampaignRepository        $campaignRepository,
+        private readonly PatreonCampaignTierRepository    $campaignTierRepository,
         private readonly PatreonCampaignWebhookRepository $campaignWebhookRepository,
-        private readonly RouterInterface $router,
-        private readonly MessageBusInterface $bus,
+        private readonly RouterInterface                  $router,
+        private readonly MessageBusInterface              $bus,
+        private readonly PatreonUserRepository            $patreonUserRepository,
+        private readonly PatreonOAuthService              $patreonOAuth,
     ) {
     }
 
-    public function refreshAccessToken(User $user): void
+    public function refreshAccessToken(PatreonUser $patreonUser): void
     {
-        if ($user->getPatreonTokenExpiresAt()?->isPast()) {
-            $refreshToken = $user->getPatreonRefreshToken();
-            $clientId = $this->patreonClientId;
-            $clientSecret = $this->patreonClientSecret;
-            $response = $this->client->request(
-                'POST',
-                "www.patreon.com/api/oauth2/token?grant_type=refresh_token&refresh_token=$refreshToken=&client_id=$clientId&client_secret=$clientSecret",
-                [
-                    'headers' => [
-                        'Content-Type' => 'application/x-www-form-urlencoded',
-                    ]
-                ]
-            );
-            $content = $response->getContent();
-            $payload = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-            $user
-                ->setPatreonScope($payload['scope'])
-                ->setPatreonRefreshToken($payload['refresh_token'])
-                ->setPatreonTokenExpiresAt(CarbonImmutable::now()->addSeconds($payload['expires_in']))
-                ->setPatreonAccessToken($payload['access_token'])
-                ->setPatreonTokenType($payload['token_type']);
-            $this->userRepository->save();
+        if ($patreonUser->getAccessTokenExpiresAt()?->subDays(2)->isPast()) {
+            $oauthToken = $this->patreonOAuth->refreshAccessToken($patreonUser->getRefreshToken());
+            $patreonUser
+                ->setScope($oauthToken?->getScope())
+                ->setRefreshToken($oauthToken?->getRefreshToken())
+                ->setAccessTokenExpiresAt($oauthToken ? CarbonImmutable::now()->addSeconds($oauthToken->getExpiresIn()) : null)
+                ->setAccessToken($oauthToken?->getAccessToken())
+                ->setTokenType($oauthToken?->getTokenType());
+            $this->patreonUserRepository->save();
         }
     }
 
-    public function refreshCampaigns(User $user): array
+    public function refreshCampaigns(PatreonUser $patreonUser): array
     {
-        $this->refreshAccessToken($user);
         $payload = [
             'include' => 'tiers',
             'fields[campaign]' => 'creation_name',
@@ -78,7 +63,7 @@ class PatreonService implements LoggerAwareInterface
             [
                 'headers' => [
                     'Accept' => 'application/json',
-                    'Authorization' => $user->getPatreonTokenType().' ' . $user->getPatreonAccessToken(),
+                    'Authorization' => $patreonUser->getTokenType().' ' . $patreonUser->getAccessToken(),
                 ]
             ]
         );
@@ -90,7 +75,8 @@ class PatreonService implements LoggerAwareInterface
             if (!$campaign) {
                 $campaign = new PatreonCampaign();
                 $campaign
-                    ->setCampaignOwner($user)
+                    ->setCampaignOwner($patreonUser->getUser())
+                    ->setOwner($patreonUser)
                     ->setPatreonCampaignId($campaignData['id']);
                 $this->campaignRepository->persist($campaign);
 
@@ -134,9 +120,9 @@ class PatreonService implements LoggerAwareInterface
         $this->bus->dispatch(new FetchCampaignMembersMessage($campaign->getId()));
     }
 
-    public function doFetchMembersRequest(PatreonCampaign $campaign, string $cursor = null): array
+    public function doFetchMembersRequest(PatreonCampaign $campaign, ?string $cursor = null): array
     {
-        $user = $campaign->getCampaignOwner();
+        $user = $campaign->getOwner();
         $this->refreshAccessToken($user);
 
         $queryParams = [
@@ -153,7 +139,7 @@ class PatreonService implements LoggerAwareInterface
             [
                 'headers' => [
                     'Accept' => 'application/json',
-                    'Authorization' => $user->getPatreonTokenType().' ' . $user->getPatreonAccessToken(),
+                    'Authorization' => $user->getTokenType().' ' . $user->getAccessToken(),
                 ]
             ]
         );
@@ -169,7 +155,7 @@ class PatreonService implements LoggerAwareInterface
         if ($webhook) {
             return;
         }
-        $user = $dbCampaign->getCampaignOwner();
+        $user = $dbCampaign->getOwner();
         $this->refreshAccessToken($user);
         $uri = $this->router->generate('patreon_webhooks',[], UrlGeneratorInterface::ABSOLUTE_URL);
         $uri = str_replace('http://','https://', $uri);
@@ -204,7 +190,7 @@ class PatreonService implements LoggerAwareInterface
                 'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
-                    'Authorization' => $user->getPatreonTokenType().' ' . $user->getPatreonAccessToken(),
+                    'Authorization' => $user->getTokenType().' ' . $user->getAccessToken(),
                 ],
                 'json' => $payload
             ]
@@ -229,7 +215,7 @@ class PatreonService implements LoggerAwareInterface
         $this->campaignRepository->save();
     }
 
-    public function syncPatreon(User $user): void
+    public function syncPatreon(PatreonUser $user): void
     {
         /** @var PatreonCampaign[] $campaigns */
         $campaigns = $this->refreshCampaigns($user);
@@ -238,22 +224,6 @@ class PatreonService implements LoggerAwareInterface
             $this->fetchCampaignMembers($campaign);
             $this->enableMemberUpdateWebhook($campaign);
         }
-    }
-
-    public function convertToCreatorAccount(User $user): void
-    {
-        /** @var PatreonCampaign[] $campaigns */
-        $campaigns = $this->refreshCampaigns($user);
-
-        foreach ($campaigns as $campaign) {
-            $this->fetchCampaignMembers($campaign);
-            $this->enableMemberUpdateWebhook($campaign);
-        }
-        $dbUser = $this->userRepository->find($user->getId());
-        $this->userRepository->getEntityManager()->refresh($dbUser);
-        $dbUser->setCreator(true);
-
-        $this->userRepository->save();
     }
 
     public function setLogger(LoggerInterface $logger): void
