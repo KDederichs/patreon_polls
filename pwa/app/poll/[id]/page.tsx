@@ -201,7 +201,7 @@ const PollOptionCard = ({
 export default function PollVotePage({
   params,
 }: {
-  params: Usable<{ id: string }>
+  params: Promise<{ id: string }>
 }) {
   const [image, setImage] = useState<File | null>(null)
 
