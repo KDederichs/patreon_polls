@@ -6,6 +6,7 @@ export interface Poll extends GenericHydraItem {
   pollName: string
   endsAt?: string
   allowPictures: boolean
+  myPoll: boolean
   config?: {
     numberOfOptions?: number
     numberOfVotes?: number

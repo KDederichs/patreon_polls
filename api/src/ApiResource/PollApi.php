@@ -57,6 +57,8 @@ class PollApi
     #[SerializedName('config')]
     #[ApiProperty(readable: true, writable: false)]
     private ?PollVoteConfigDto $voteConfigDto = null;
+    #[ApiProperty(readable: true, writable: false)]
+    private bool $myPoll = false;
 
     public function getId(): ?Uuid
     {
@@ -132,6 +134,17 @@ class PollApi
     public function setVoteConfigDto(?PollVoteConfigDto $voteConfigDto): PollApi
     {
         $this->voteConfigDto = $voteConfigDto;
+        return $this;
+    }
+
+    public function isMyPoll(): bool
+    {
+        return $this->myPoll;
+    }
+
+    public function setMyPoll(bool $myPoll): PollApi
+    {
+        $this->myPoll = $myPoll;
         return $this;
     }
 }

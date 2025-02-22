@@ -27,12 +27,8 @@ class PollController extends AbstractController
     }
 
     #[Route('/poll/{poll}/download-marbles', name: 'poll_marbles_download')]
-    public function downloadMarblesCsv(Poll $poll, #[CurrentUser] User $user): Response
+    public function downloadMarblesCsv(Poll $poll): Response
     {
-        if (!$poll->getCreatedBy()?->getId()->equals($user->getId())) {
-            throw new AccessDeniedHttpException();
-        }
-
         $options = $this->patreonPollOptionRepository->getOptionsForPoll($poll);
         $csvVotes = [];
         /** @var PollOption $option */

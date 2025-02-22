@@ -9,12 +9,12 @@ import {
   CardBody,
   Checkbox,
   Skeleton,
-} from "@heroui/react"
-import { Progress } from "@heroui/progress"
+} from '@heroui/react'
+import { Progress } from '@heroui/progress'
 import clsx from 'clsx'
 import { useDropzone } from 'react-dropzone'
-import { Input } from "@heroui/input"
-import { Button } from "@heroui/button"
+import { Input } from '@heroui/input'
+import { Button } from '@heroui/button'
 import { Icon } from '@iconify/react'
 import { useGetPollInfo } from '@/hooks/query/Poll/useGetPollInfo'
 import { useDateFormatter } from '@react-aria/i18n'
@@ -37,6 +37,7 @@ import { PollVote } from '@/types/entity/PollVote'
 import { useCreatePollVote } from '@/hooks/mutation/PollVote/useCreatePollVote'
 import { useDeletePollVote } from '@/hooks/mutation/PollVote/useDeletePollVote'
 import { motion } from 'framer-motion'
+import { Link } from '@heroui/link'
 
 interface PollOptionCardProps {
   pollOption: PollOption
@@ -435,6 +436,20 @@ export default function PollVotePage({
           </Card>
         ) : null}
       </div>
+      {pollData?.myPoll && (
+        <>
+          <Spacer y={4} />
+          <Button
+            as={Link}
+            href={`/poll/${pollData.id}/download-marbles`}
+            target="_blank"
+            variant="ghost"
+            color={'secondary'}
+          >
+            Download Marbles
+          </Button>
+        </>
+      )}
     </section>
   )
 }

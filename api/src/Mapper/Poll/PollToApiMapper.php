@@ -61,6 +61,7 @@ final class PollToApiMapper extends AbstractObjectToApiMapper
         if ($user = $this->security->getUser()) {
             assert($user instanceof User);
             if ($entity->getCreatedBy()?->getId()->equals($user->getId())) {
+                $dto->setMyPoll(true);
                 $pollConfig = new PollVoteConfigDto();
                 $pollConfig
                     ->setVotingPower(1)
