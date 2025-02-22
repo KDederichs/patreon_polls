@@ -41,11 +41,11 @@ class PatreonService implements LoggerAwareInterface
         if ($patreonUser->getAccessTokenExpiresAt()?->subDays(2)->isPast()) {
             $oauthToken = $this->patreonOAuth->refreshAccessToken($patreonUser->getRefreshToken());
             $patreonUser
-                ->setScope($oauthToken->getScope())
-                ->setRefreshToken($oauthToken->getRefreshToken())
-                ->setAccessTokenExpiresAt(CarbonImmutable::now()->addSeconds($oauthToken->getExpiresIn()))
-                ->setAccessToken($oauthToken->getAccessToken())
-                ->setTokenType($oauthToken->getTokenType());
+                ->setScope($oauthToken?->getScope())
+                ->setRefreshToken($oauthToken?->getRefreshToken())
+                ->setAccessTokenExpiresAt($oauthToken ? CarbonImmutable::now()->addSeconds($oauthToken->getExpiresIn()) : null)
+                ->setAccessToken($oauthToken?->getAccessToken())
+                ->setTokenType($oauthToken?->getTokenType());
             $this->patreonUserRepository->save();
         }
     }
