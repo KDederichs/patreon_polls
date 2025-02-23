@@ -18,6 +18,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use ApiPlatform\OpenApi\Model;
@@ -69,24 +70,38 @@ class MediaObject
        // dimensions: 'dimensions'
     )]
     #[NotNull]
+    #[Assert\File(
+        maxSize: '3M',
+        mimeTypes: [
+            'image/jpeg',
+            'image/png',
+        ],
+    )]
     private ?File $file = null;
     #[Column(nullable: true)]
+    #[ApiProperty(writable: false)]
     private ?string $fileName = null;
     #[Column(nullable: true)]
+    #[ApiProperty(writable: false)]
     private ?int $fileSize = null;
     #[Column(nullable: true)]
+    #[ApiProperty(writable: false)]
     private ?string $mimeType = null;
     #[Column(type: 'json')]
+    #[ApiProperty(writable: false)]
     private array $dimensions = [];
     #[Column(nullable: true)]
+    #[ApiProperty(writable: false)]
     private ?string $originalName = null;
     #[Column(nullable: true)]
+    #[ApiProperty(writable: false)]
     private ?\DateTimeImmutable $updatedAt = null;
     #[ApiProperty(types: ['https://schema.org/contentUrl'], writable: false)]
     #[Groups(['media_object:read'])]
     public ?string $contentUrl = null;
     #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(nullable: false)]
+    #[ApiProperty(writable: false)]
     private ?User $uploadedBy = null;
 
     public function __construct()
