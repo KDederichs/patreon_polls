@@ -114,15 +114,40 @@ class OAuthController extends AbstractController implements ServiceSubscriberInt
             $user->setUsername($identity->getUsername());
         }
 
-
-        $oauthResource
-            ->setAccessToken($oauthToken->getAccessToken())
-            ->setRefreshToken($oauthToken->getRefreshToken())
-            ->setTokenType($oauthToken->getTokenType())
-            ->setScope($oauthToken->getScope())
-            ->setAccessTokenExpiresAt(CarbonImmutable::now()->addSeconds($oauthToken->getExpiresIn()))
-            ->setUsername($identity->getUsername())
-            ->setCreator($oAuthState->getAuthType() === OAuthAuthType::ConnectAsCreator);
+        if (OAuthAuthType::Login === $oAuthState->getAuthType()) {
+            //If it's a new user, always set the token and info
+            if (null === $oauthResource->getAccessTokenExpiresAt()) {
+                $oauthResource
+                    ->setAccessToken($oauthToken->getAccessToken())
+                    ->setRefreshToken($oauthToken->getRefreshToken())
+                    ->setTokenType($oauthToken->getTokenType())
+                    ->setScope($oauthToken->getScope())
+                    ->setAccessTokenExpiresAt(CarbonImmutable::now()->addSeconds($oauthToken->getExpiresIn()))
+                    ->setUsername($identity->getUsername())
+                    ->setCreator(false);
+            } else {
+                //If it's not a new user but the token expired, reset the creator status and set a new token
+                if ($oauthResource->getAccessTokenExpiresAt()->isPast()) {
+                    $oauthResource
+                        ->setAccessToken($oauthToken->getAccessToken())
+                        ->setRefreshToken($oauthToken->getRefreshToken())
+                        ->setTokenType($oauthToken->getTokenType())
+                        ->setScope($oauthToken->getScope())
+                        ->setAccessTokenExpiresAt(CarbonImmutable::now()->addSeconds($oauthToken->getExpiresIn()))
+                        ->setUsername($identity->getUsername())
+                        ->setCreator(false);
+                }
+            }
+        } else {
+            $oauthResource
+                ->setAccessToken($oauthToken->getAccessToken())
+                ->setRefreshToken($oauthToken->getRefreshToken())
+                ->setTokenType($oauthToken->getTokenType())
+                ->setScope($oauthToken->getScope())
+                ->setAccessTokenExpiresAt(CarbonImmutable::now()->addSeconds($oauthToken->getExpiresIn()))
+                ->setUsername($identity->getUsername())
+                ->setCreator($oAuthState->getAuthType() === OAuthAuthType::ConnectAsCreator);
+        }
 
         $this->dispatcher->dispatch(new PreOauthResourceConnectedEvent($oauthResource));
 
