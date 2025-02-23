@@ -41,7 +41,7 @@ class SubscribestarOAuthController extends AbstractController
         $this->authStateRepository->save();
 
 
-        return new RedirectResponse($this->authService->getOauthUrl($authState));
+        return new RedirectResponse(str_replace('%2B','+', $this->authService->getOauthUrl($authState)));
     }
 
     #[Route('/connect/subscribestar', methods: ['POST'])]
