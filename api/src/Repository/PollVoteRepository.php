@@ -24,6 +24,14 @@ class PollVoteRepository extends AbstractBaseRepository
         ]);
     }
 
+    public function hasVotedForOption(User $user, PollOption $option): bool
+    {
+        return $this->findOneBy([
+            'option' => $option,
+            'votedBy' => $user,
+        ]) !== null;
+    }
+
     public function getNumberOfVotesForPoll(User $user, Poll $poll): int
     {
         $qb = $this->createQueryBuilder('pv');

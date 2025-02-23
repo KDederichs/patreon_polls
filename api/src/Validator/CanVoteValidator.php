@@ -6,6 +6,7 @@ use App\ApiResource\PollOptionApi;
 use App\ApiResource\PollVoteApi;
 use App\Entity\AbstractVoteConfig;
 use App\Entity\Poll;
+use App\Entity\PollOption;
 use App\Entity\User;
 use App\Mapper\AbstractApiToObjectMapper;
 use App\Repository\PollOptionRepository;
@@ -48,11 +49,22 @@ class CanVoteValidator extends ConstraintValidator
             'mode' => AbstractApiToObjectMapper::POPULATION_MODE_PASSTHROUGH,
         ]);
 
+        /** @var PollOption $pollOption */
+        $pollOption = $this->microMapper->map($value->getPollOption(), PollOption::class, [
+            'mode' => AbstractApiToObjectMapper::POPULATION_MODE_PASSTHROUGH,
+        ]);
+
         if ($endsAt = $poll->getEndsAt()) {
             if ($endsAt->isPast()) {
                 $this->context->addViolation('The poll has ended.');
             }
         }
+
+        if ($this->voteRepository->hasVotedForOption($user, $pollOption)) {
+            $this->context->addViolation('You have already voted for this option.');
+            return;
+        }
+
 
         if ($poll->getCreatedBy()->getId()->equals($user->getId())) {
             return;
