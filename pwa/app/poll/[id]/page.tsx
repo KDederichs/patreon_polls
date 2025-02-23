@@ -127,18 +127,19 @@ const PollOptionCard = ({
     }
   }
 
+  const isDisabled =
+    !isAuthenticated ||
+    pollVoter.isPending ||
+    pollVoteDeleter.isPending ||
+    disabled
+
   return (
     <Card
       radius="lg"
       isFooterBlurred
       className="border-none"
-      isPressable
-      isDisabled={
-        !isAuthenticated ||
-        pollVoter.isPending ||
-        pollVoteDeleter.isPending ||
-        disabled
-      }
+      isPressable={!isDisabled}
+      isDisabled={isDisabled}
       onPress={onPress}
     >
       {pollOption.imageUri ? (
