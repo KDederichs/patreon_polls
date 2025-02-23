@@ -171,15 +171,18 @@ const PollOptionCard = ({
 
       <CardFooter
         className={clsx(
-          'absolute bottom-1 z-10 ml-1 w-[calc(100%_-_8px)] justify-evenly overflow-hidden rounded-large border-1 border-white/20 py-1 shadow-small before:rounded-xl before:bg-white/10',
-          isSelected ? 'border-green-500 bg-green-500/50' : '',
+          'absolute bottom-1 z-10 ml-1 w-[calc(100%_-_8px)] justify-evenly overflow-hidden rounded-large border-1 border-white/20 bg-black/50 py-1 shadow-small before:rounded-xl before:bg-white/10',
+          isSelected ? 'border-green-500 bg-green-600/80' : '',
         )}
       >
         <Checkbox
           color={'success'}
           isSelected={isSelected}
           onValueChange={onPress}
-          disabled={isDisabled}
+          isDisabled={isDisabled}
+          classNames={{
+            label: 'text-[#ffffff]',
+          }}
           size="sm"
         >
           {pollOption.optionName}
@@ -191,7 +194,11 @@ const PollOptionCard = ({
           value={pollOption.numberOfVotes}
           maxValue={totalVoteCount}
           color={'success'}
-          label={`${pollOption.numberOfVotes}/${totalVoteCount}`}
+          classNames={{
+            label: 'text-[#ffffff]',
+            track: 'bg-gray-700',
+          }}
+          label={`${pollOption.numberOfVotes} out of ${totalVoteCount} votes`}
         />
       </CardFooter>
     </Card>
