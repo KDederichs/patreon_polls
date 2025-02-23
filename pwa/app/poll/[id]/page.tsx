@@ -257,6 +257,9 @@ export default function PollVotePage({
         },
       )
       queryClient.setQueryData([pollOption['@id']], pollOption)
+      queryClient.refetchQueries({
+        queryKey: ['list', `/api/polls/${paramsResolved.id}/my-votes`],
+      })
       setOptionName('')
       setMediaIri(null)
       setImage(null)
