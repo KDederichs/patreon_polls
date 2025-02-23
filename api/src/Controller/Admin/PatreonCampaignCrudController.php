@@ -59,7 +59,8 @@ class PatreonCampaignCrudController extends AbstractCrudController
     {
         return [
             TextField::new('campaignName'),
-            AssociationField::new('campaignOwner'),
+            AssociationField::new('campaignOwner', 'Owner (User)'),
+            AssociationField::new('owner', 'Owner (Patreon User)'),
             TextField::new('patreonCampaignId'),
         ];
     }
