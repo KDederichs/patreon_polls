@@ -296,7 +296,7 @@ export default function PollVotePage({
     (pollData?.config?.hasLimitedVotes ?? false)
   const pollEndTime = pollData?.endsAt
     ? parseAbsoluteToLocal(pollData.endsAt)
-    : now(getLocalTimeZone())
+    : null
 
   return (
     <section className="flex flex-col items-center py-24">
@@ -305,10 +305,14 @@ export default function PollVotePage({
           <h1 className="text-4xl font-medium tracking-tight">
             {pollData?.pollName}
           </h1>
-          <Spacer y={4} />
-          <h2 className="text-large text-default-500">
-            {formatter.format(pollEndTime.toDate())}
-          </h2>
+          {pollEndTime !== null && (
+            <>
+              <Spacer y={4} />
+              <h2 className="text-large text-default-500">
+                Ends at: {formatter.format(pollEndTime.toDate())}
+              </h2>
+            </>
+          )}
         </Skeleton>
         <Spacer y={4} />
       </div>

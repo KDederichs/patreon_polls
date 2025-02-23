@@ -1,8 +1,8 @@
 'use client'
 
 import { ListPoll } from '@/types/ListPoll'
-import { Card, CardBody, Chip } from "@heroui/react"
-import { Button } from "@heroui/button"
+import { Card, CardBody, Chip } from '@heroui/react'
+import { Button } from '@heroui/button'
 import moment from 'moment-timezone'
 import { useListPolls } from '@/hooks/query/Poll/useListPolls'
 import {
@@ -24,9 +24,9 @@ export default function PollList() {
       {data?.map((poll) => {
         const pollEndTime = poll?.endsAt
           ? parseAbsoluteToLocal(poll.endsAt)
-          : now(getLocalTimeZone())
+          : null
 
-        const closed = pollEndTime.toDate() < new Date()
+        const closed = pollEndTime ? pollEndTime.toDate() < new Date() : false
 
         return (
           <Card
@@ -46,7 +46,7 @@ export default function PollList() {
                   >
                     {closed
                       ? 'Closed'
-                      : `Open till: ${formatter.format(pollEndTime.toDate())}`}
+                      : `Open till: ${pollEndTime !== null ? formatter.format(pollEndTime.toDate()) : 'Open forever'}`}
                   </Chip>
                 </p>
                 <Button
