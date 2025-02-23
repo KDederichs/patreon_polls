@@ -47,14 +47,12 @@ class PatreonCampaignCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-
-
-        $markAsSpamAction = Action::new('sync', 'Sync Members')
+        $syncAction = Action::new('sync', 'Sync Members')
             ->linkToCrudAction('syncMembers');
 
         return $actions
-            ->disable(Action::NEW, Action::EDIT, Action::DELETE)
-            ->add(Crud::PAGE_INDEX, $markAsSpamAction);
+            ->disable(Action::NEW, Action::DELETE)
+            ->add(Crud::PAGE_INDEX, $syncAction);
     }
 
     public function configureFields(string $pageName): iterable

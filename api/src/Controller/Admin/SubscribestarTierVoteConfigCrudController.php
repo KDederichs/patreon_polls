@@ -2,27 +2,24 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Poll;
+use App\Entity\PatreonPollVoteConfig;
+use App\Entity\SubscribestarPollVoteConfig;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
-class PatreonPollCrudController extends AbstractCrudController
+class SubscribestarTierVoteConfigCrudController extends AbstractVoteConfigCrudController
 {
     public static function getEntityFqcn(): string
     {
-        return Poll::class;
+        return SubscribestarPollVoteConfig::class;
     }
 
-
-    public function configureFields(string $pageName): iterable
+    protected function getTierAssociation(): string
     {
-        return [
-            TextField::new('pollName'),
-            AssociationField::new('campaign'),
-        ];
+        return 'campaignTier';
     }
-
 }

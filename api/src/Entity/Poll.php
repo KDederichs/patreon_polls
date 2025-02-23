@@ -59,9 +59,9 @@ class Poll
         return $this->endsAt;
     }
 
-    public function setEndsAt(?CarbonImmutable $endsAt): Poll
+    public function setEndsAt(?\DateTimeInterface $endsAt): Poll
     {
-        $this->endsAt = $endsAt;
+        $this->endsAt = null !== $endsAt ? CarbonImmutable::instance($endsAt) : null;
         return $this;
     }
 

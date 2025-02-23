@@ -2,18 +2,21 @@
 
 namespace App\Command;
 
+use App\Entity\AdminUser;
 use App\Repository\UserRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-#[AsCommand('app:user:promote-admin')]
+#[AsCommand('app:make:admin')]
 class MakeAdminCommand extends Command
 {
     public function __construct(
         private readonly UserRepository $userRepository,
+        private readonly UserPasswordHasherInterface $passwordHasher,
         ?string $name = null
     )
     {
@@ -24,24 +27,25 @@ class MakeAdminCommand extends Command
     {
         $helper = $this->getHelper('question');
 
-        $questionId = new Question('Patreon ID: ', null);
-        $patreonId = $helper->ask($input, $output, $questionId);
+        $userNameQuestion = new Question('Username: ', null);
+        $username = $helper->ask($input, $output, $userNameQuestion);
 
-        if (!$patreonId) {
-            $output->writeln('Not a valid ID');
+        if (!$username) {
+            $output->writeln('Not a valid username');
             return self::FAILURE;
         }
 
-        $user = $this->userRepository->findByResourceOwnerId($patreonId);
-        if (!$user) {
-            $output->writeln('User not found');
-            return self::FAILURE;
-        }
+        $passwordQuestion = new Question('Password: ', null);
+        $password = $helper->ask($input, $output, $passwordQuestion);
 
-        $user->setAdmin(true);
+        $adminUser = new AdminUser();
+        $adminUser
+            ->setEmail($username)
+            ->setPassword($this->passwordHasher->hashPassword($adminUser, $password));
+
+        $this->userRepository->persist($adminUser);
+
         $this->userRepository->save();
-
-        $output->writeln(sprintf('%s has been promoted to admin!', $user->getUsername()));
 
         return self::SUCCESS;
     }

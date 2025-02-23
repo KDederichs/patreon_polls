@@ -1,0 +1,5 @@
+{% if field.value is not null %}
+<img alt="" src="{{ path('get_media_object', {'mediaObject': field.value.id}) }}" width="300" height="300">
+{% else %}
+    - No Picture -
+{% endif %}

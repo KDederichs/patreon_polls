@@ -15,4 +15,9 @@ class UserRepository  extends AbstractBaseRepository
     {
         return $this->findOneBy([lcfirst($resourceOwner).'Id' => $id]);
     }
+
+    public function findByUsername(string $username): ?User
+    {
+        return $this->findOneBy(['username' => $username]);
+    }
 }

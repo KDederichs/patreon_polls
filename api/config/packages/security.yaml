@@ -8,17 +8,32 @@ security:
             entity:
                 class: App\Entity\User
                 property: 'id'
+        admins:
+            entity:
+                class: App\Entity\AdminUser
+                property: 'email'
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         admin:
+            stateless: false
             pattern: ^/admin
+            login_throttling: true
+            #                limiter: limiter.admin_login_limiter
+            form_login:
+                login_path: admin_login
+                check_path: admin_login
+            provider: admins
+            logout:
+                path: admin_logout
         main:
             lazy: true
             access_token:
                 token_handler: App\Security\ApiTokenHandler
             stateless: true
+            provider: users
+
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -32,6 +47,7 @@ security:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/oauth/connect, roles: PUBLIC_ACCESS }
+        - { path: ^/admin/login, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/webhook, roles: PUBLIC_ACCESS }
         - { path: ^/poll/.*/download-marbles, roles: PUBLIC_ACCESS }

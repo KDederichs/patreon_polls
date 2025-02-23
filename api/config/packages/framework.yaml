@@ -11,7 +11,7 @@ framework:
     # See https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#headers
     trusted_headers: [ 'x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port', 'x-forwarded-prefix']
 
-    session: false
+    session: true
 
     #esi: true
     #fragments: true

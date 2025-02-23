@@ -10,23 +10,15 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
-class PatreonPollTierVoteConfigCrudController extends AbstractCrudController
+class PatreonTierVoteConfigCrudController extends AbstractVoteConfigCrudController
 {
     public static function getEntityFqcn(): string
     {
         return PatreonPollVoteConfig::class;
     }
 
-
-    public function configureFields(string $pageName): iterable
+    protected function getTierAssociation(): string
     {
-        return [
-            AssociationField::new('patreonPoll'),
-            AssociationField::new('campaignTier'),
-            IntegerField::new('numberOfVotes'),
-            IntegerField::new('votingPower'),
-            IntegerField::new('maxOptionAdd'),
-        ];
+        return 'campaignTier';
     }
-
 }

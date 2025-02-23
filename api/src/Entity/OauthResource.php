@@ -168,4 +168,9 @@ abstract class OauthResource implements UserOwnedInterface
     {
         return 'user';
     }
+
+    public function __toString(): string
+    {
+        return $this->username ?? $this->id->toRfc4122();
+    }
 }
