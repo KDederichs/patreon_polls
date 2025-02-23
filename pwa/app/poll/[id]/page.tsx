@@ -112,7 +112,17 @@ const PollOptionCard = ({
     onError: (error) => toast.error(error.message),
   })
 
+  const isDisabled =
+    !isAuthenticated ||
+    pollVoter.isPending ||
+    pollVoteDeleter.isPending ||
+    disabled
+
   const onPress = () => {
+    if (isDisabled) {
+      return
+    }
+
     if (isSelected) {
       if (!pollVoteDeleter.isPending) {
         pollVoteDeleter.mutate(vote['@id'])
@@ -126,12 +136,6 @@ const PollOptionCard = ({
       }
     }
   }
-
-  const isDisabled =
-    !isAuthenticated ||
-    pollVoter.isPending ||
-    pollVoteDeleter.isPending ||
-    disabled
 
   return (
     <Card
@@ -175,12 +179,7 @@ const PollOptionCard = ({
           color={'success'}
           isSelected={isSelected}
           onValueChange={onPress}
-          disabled={
-            pollVoter.isPending ||
-            pollVoteDeleter.isPending ||
-            !isAuthenticated ||
-            disabled
-          }
+          disabled={isDisabled}
           size="sm"
         >
           {pollOption.optionName}
