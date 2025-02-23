@@ -11,10 +11,10 @@ import {
   DatePicker,
   Select,
   SelectItem,
-} from "@heroui/react"
-import { Input } from "@heroui/input"
+} from '@heroui/react'
+import { Input } from '@heroui/input'
 import { getLocalTimeZone, now, ZonedDateTime } from '@internationalized/date'
-import { Button } from "@heroui/button"
+import { Button } from '@heroui/button'
 import { useListPatreonUsers } from '@/hooks/query/PatreonUser/useListPatreonUsers'
 import { useListPatreonCampaigns } from '@/hooks/query/PatreonCampaign/useListPatreonCampaigns'
 import { useListPatreonCampaignTiers } from '@/hooks/query/PatreonCampaignTier/useListPatreonCampaignTiers'
@@ -263,7 +263,7 @@ export default function PollCreatePage() {
         onPress={() =>
           pollCreator.mutate({
             pollName,
-            endDate: pollEndsDate!.toDate(),
+            endsAt: pollEndsDate!.toDate(),
             allowPictures: canUploadPictures,
             voteConfig,
           })
