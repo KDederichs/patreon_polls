@@ -154,7 +154,7 @@ const PollOptionCard = ({
             radius="lg"
             width="100%"
             alt={pollOption.optionName}
-            className="h-[280px] w-full min-w-[380px] object-cover"
+            className="h-[480px] w-full min-w-[380px] object-cover"
             src={pollOption.imageUri}
           />
         </CardBody>
@@ -162,7 +162,7 @@ const PollOptionCard = ({
         <CardBody className="overflow-visible p-0">
           <div
             className={
-              'flex h-[280px] min-w-[380px] items-center justify-center'
+              'flex h-[480px] min-w-[380px] items-center justify-center'
             }
           >
             <h1>{pollOption.optionName} (No picture)</h1>
