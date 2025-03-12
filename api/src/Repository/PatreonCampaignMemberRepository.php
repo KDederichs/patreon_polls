@@ -46,7 +46,7 @@ class PatreonCampaignMemberRepository   extends AbstractBaseRepository
             ->getResult();
     }
 
-    public function getExistingIds(array $existingIdsToCheck): array
+    public function getExistingIds(PatreonCampaign $campaign, array $existingIdsToCheck): array
     {
         if (empty($existingIdsToCheck)) {
             return [];
@@ -62,7 +62,9 @@ class PatreonCampaignMemberRepository   extends AbstractBaseRepository
                         'pcm.patreonUserId', ':ids'
                     )
                 )
+                ->andWhere('pcm.campaign = :campaign')
                 ->setParameter('ids', $existingIdsToCheck)
+                ->setParameter('campaign', $campaign)
                 ->getQuery()
                 ->getArrayResult()
         );

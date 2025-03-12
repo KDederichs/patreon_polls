@@ -56,7 +56,7 @@ class FetchCampaignMembersHandler implements LoggerAwareInterface
                 $batchIds[] = $memberData['relationships']['user']['data']['id'];
             }
 
-            $exisingIds = $this->campaignMemberRepository->getExistingIds($batchIds);
+            $exisingIds = $this->campaignMemberRepository->getExistingIds($dbCampaign, $batchIds);
             $newMemberIds = array_diff($batchIds, $exisingIds);
 
             foreach ($payload['data'] as $memberData) {
