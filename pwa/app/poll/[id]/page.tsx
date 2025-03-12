@@ -154,7 +154,7 @@ const PollOptionCard = ({
             radius="lg"
             width="100%"
             alt={pollOption.optionName}
-            className="h-[280px] w-full object-cover"
+            className="h-[280px] w-full min-w-[380px] object-cover"
             src={pollOption.imageUri}
           />
         </CardBody>
