@@ -38,6 +38,7 @@ import { useCreatePollVote } from '@/hooks/mutation/PollVote/useCreatePollVote'
 import { useDeletePollVote } from '@/hooks/mutation/PollVote/useDeletePollVote'
 import { motion } from 'framer-motion'
 import { Link } from '@heroui/link'
+import { showApiError } from '@/util'
 
 interface PollOptionCardProps {
   pollOption: PollOption
@@ -89,7 +90,7 @@ const PollOptionCard = ({
         queryKey: ['list', `/api/polls/${pollId}/options`],
       })
     },
-    onError: (error) => toast.error(error.message),
+    onError: (error) => showApiError(error),
   })
 
   const pollVoteDeleter = useDeletePollVote({
@@ -109,7 +110,7 @@ const PollOptionCard = ({
         queryKey: ['list', `/api/polls/${pollId}/options`],
       })
     },
-    onError: (error) => toast.error(error.message),
+    onError: (error) => showApiError(error),
   })
 
   const isDisabled =
@@ -249,7 +250,7 @@ export default function PollVotePage({
     onSuccess: () => {
       setMediaIri(null)
     },
-    onError: (error) => toast.error(error.message),
+    onError: (error) => showApiError(error),
   })
 
   const optionCreator = useCreatePollOption({
@@ -272,7 +273,7 @@ export default function PollVotePage({
       setImage(null)
     },
     onError: (error) => {
-      toast.error(error.message)
+      showApiError(error)
       if (mediaIri) {
         imageDeleter.mutate(mediaIri)
       }
@@ -289,7 +290,7 @@ export default function PollVotePage({
         image: media['@id'],
       })
     },
-    onError: (error) => toast.error(error.message),
+    onError: (error) => showApiError(error),
   })
 
   const myOptionsCounter = pollOptions?.reduce((carry, option) => {

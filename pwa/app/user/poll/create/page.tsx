@@ -27,6 +27,7 @@ import { useRouter } from 'next/navigation'
 import { useListSubscribestarUser } from '@/hooks/query/SubscribestarUser/useListSubscribestarUser'
 import { useListSubscribestarTiers } from '@/hooks/query/SubscribestarTier/useListSubscribestarTiers'
 import { useSyncSubscribestarTiers } from '@/hooks/mutation/SubscribestarTier/useSyncSubscribestarTiers'
+import { showApiError } from '@/util'
 
 export default function PollCreatePage() {
   const { data: patreonData } = useListPatreonUsers()
@@ -74,7 +75,7 @@ export default function PollCreatePage() {
       router.push(`/poll/${poll.id}`)
     },
     onError: (error) => {
-      console.log(error)
+      showApiError(error)
     },
   })
 
