@@ -67,7 +67,7 @@ class MediaObject
         size: 'fileSize',
         mimeType: 'mimeType',
         originalName: 'originalName',
-       // dimensions: 'dimensions'
+       dimensions: 'dimensions'
     )]
     #[NotNull]
     #[Assert\File(
@@ -75,6 +75,7 @@ class MediaObject
         mimeTypes: [
             'image/jpeg',
             'image/png',
+            'image/webp',
         ],
     )]
     private ?File $file = null;
@@ -233,5 +234,35 @@ class MediaObject
     {
         $this->uploadedBy = $uploadedBy;
         return $this;
+    }
+
+    public function getWidth(): ?int
+    {
+        return $this->dimensions[0] ?? null;
+    }
+
+    public function getHeight(): ?int
+    {
+        return $this->dimensions[1] ?? null;
+    }
+
+    #[Groups(['media_object:read'])]
+    public function getImageOrientation(): string
+    {
+        $width = $this->getWidth();
+        $height = $this->getHeight();
+
+        if (null === $width || null === $height) {
+            return 'portrait';
+        }
+
+        if ($width === $height) {
+            return 'square';
+        }
+
+        if ($width > $height) {
+            return 'landscape';
+        }
+        return 'portrait';
     }
 }

@@ -57,6 +57,8 @@ class PollOptionApi
     public ?MediaObject $image = null;
     private ?string $imageUri = null;
     private bool $myOption = false;
+    #[ApiProperty(writable: false)]
+    private string $imageOrientation = 'unknown';
 
     public function getId(): ?Uuid
     {
@@ -143,6 +145,17 @@ class PollOptionApi
     public function setMyOption(bool $myOption): PollOptionApi
     {
         $this->myOption = $myOption;
+        return $this;
+    }
+
+    public function getImageOrientation(): string
+    {
+        return $this->imageOrientation;
+    }
+
+    public function setImageOrientation(string $imageOrientation): PollOptionApi
+    {
+        $this->imageOrientation = $imageOrientation;
         return $this;
     }
 }

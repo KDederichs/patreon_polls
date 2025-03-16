@@ -58,6 +58,7 @@ final class PollOptionToApiMapper extends AbstractObjectToApiMapper
             ->setOptionName($entity->getOptionName())
             ->setId($entity->getId())
             ->setCreatedAt($entity->getCreatedAt())
+            ->setImageOrientation($entity->getMediaObject()?->getImageOrientation() ?? 'portrait')
             ->setNumberOfVotes($entity->getVoteCount());
     }
 
