@@ -7,4 +7,5 @@ export interface PollOption extends GenericHydraItem {
   numberOfVotes: number
   imageUri?: string
   myOption: boolean
+  imageOrientation: 'landscape' | 'portrait' | 'square'
 }

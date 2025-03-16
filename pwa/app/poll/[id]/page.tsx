@@ -1,5 +1,5 @@
 'use client'
-import React, { Usable, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   Card,
@@ -18,11 +18,7 @@ import { Button } from '@heroui/button'
 import { Icon } from '@iconify/react'
 import { useGetPollInfo } from '@/hooks/query/Poll/useGetPollInfo'
 import { useDateFormatter } from '@react-aria/i18n'
-import {
-  getLocalTimeZone,
-  now,
-  parseAbsoluteToLocal,
-} from '@internationalized/date'
+import { parseAbsoluteToLocal } from '@internationalized/date'
 import { useAuthStore } from '@/state/authState'
 import { useGetPollOptions } from '@/hooks/query/PollOption/useGetPollOptions'
 import { PollOption } from '@/types/entity/PollOption'
@@ -30,7 +26,6 @@ import { useUploadImage } from '@/hooks/mutation/PollOption/useUploadImage'
 import { useCreatePollOption } from '@/hooks/mutation/PollOption/useCreatePollOption'
 import { useQueryClient } from '@tanstack/react-query'
 import { GenericHydraItem } from '@/types/GenericHydraItem'
-import { toast } from 'react-toastify'
 import { useDeleteImage } from '@/hooks/mutation/PollOption/useDeleteImage'
 import { useGetMyVotes } from '@/hooks/query/PollVote/useGetMyVotes'
 import { PollVote } from '@/types/entity/PollVote'
@@ -138,6 +133,19 @@ const PollOptionCard = ({
     }
   }
 
+  let imageCardWidth = 380
+  let imageCardHeight = 480
+
+  if (pollOption.imageOrientation === 'landscape') {
+    imageCardWidth = 480
+    imageCardHeight = 380
+  }
+
+  if (pollOption.imageOrientation === 'square') {
+    imageCardWidth = 480
+    imageCardHeight = 480
+  }
+
   return (
     <Card
       radius="lg"
@@ -154,7 +162,7 @@ const PollOptionCard = ({
             radius="lg"
             width="100%"
             alt={pollOption.optionName}
-            className="h-[480px] w-full min-w-[380px] object-cover"
+            className={`h-[${imageCardHeight}px] w-full min-w-[${imageCardWidth}px] object-cover`}
             src={pollOption.imageUri}
           />
         </CardBody>
