@@ -174,11 +174,13 @@ class SubscribestarService implements LoggerAwareInterface
                 }
 
                 if (!$subscription->getSubscribestarTier()) {
-                    $tier =                         $this->subscribestarTierRepository->findBySubscribestarTierId($subscriptionData['tier_id']);
+                    $tier = $this->subscribestarTierRepository->findBySubscribestarTierId($subscriptionData['tier_id']);
                     $subscription
                         ->setSubscribedTo($tier?->getSubscribestarUser())
                         ->setSubscribestarTier($tier);
                 }
+
+                $subscription->setActive($subscriptionData['active']);
             }
             $this->subscribestarSubscriptionRepository->save();
         } catch (TransportExceptionInterface|\JsonException $e) {
