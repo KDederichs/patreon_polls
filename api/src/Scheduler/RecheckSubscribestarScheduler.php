@@ -22,7 +22,6 @@ class RecheckSubscribestarScheduler
     {
         foreach ($this->subscribestarUserRepository->findAll() as $user) {
             $this->subscribestarService->getSubscriptions($user);
-            $this->subscribestarUserRepository->getEntityManager()->detach($user);
         }
     }
 }

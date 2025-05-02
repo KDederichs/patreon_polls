@@ -49,6 +49,7 @@ class PatreonUserRepository extends AbstractBaseRepository implements ResourceOw
         return $qb
             ->select('pu')
             ->where(':date >= pu.accessTokenExpiresAt')
+            ->andWhere('pu.refreshToken IS NOT NULL')
             ->setParameter('date',CarbonImmutable::now()->addDays(2)->toDateTimeImmutable())
             ->getQuery()
             ->getResult();
