@@ -59,6 +59,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Option', 'fa fa-filter', PollOption::class);
         yield MenuItem::linkToCrud('Votes', 'fa fa-check-to-slot', PollVote::class);
         yield MenuItem::linkToCrud('Patreon Vote Config', 'fa fa-flask', PatreonPollVoteConfig::class);
+        yield MenuItem::linkToRoute('Messanger Dashboard', 'fa fa-sheet', 'zenstruck_messenger_monitor_dashboard');
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
     }
 }

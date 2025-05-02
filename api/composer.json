@@ -5,13 +5,16 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "composer": "*",
         "api-platform/core": "^4",
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^3",
         "dragonmantank/cron-expression": "^3.4",
         "easycorp/easyadmin-bundle": "^4.10",
+        "knplabs/knp-time-bundle": "^2.4",
         "league/flysystem-bundle": "^3.3",
+        "lorisleiva/cron-translator": "^0.4.5",
         "nelmio/cors-bundle": "^2.2",
         "nesbot/carbon": "^3.3",
         "phpdocumentor/reflection-docblock": "^5.6",
@@ -47,7 +50,8 @@
         "symfonycasts/micro-mapper": "^0.2",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/twig": "^2.12|^3.0",
-        "vich/uploader-bundle": "^2.5"
+        "vich/uploader-bundle": "^2.5",
+        "zenstruck/messenger-monitor-bundle": "^0.5.1"
     },
     "require-dev": {
         "dama/doctrine-test-bundle": "^8.0",
